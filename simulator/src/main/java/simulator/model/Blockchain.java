@@ -3,20 +3,20 @@ package simulator.model;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
-import java.util.TreeSet;
+import java.util.PriorityQueue;
 
 public final class Blockchain {
 
-	private final TreeSet<Block> forks;
+	private final PriorityQueue<Block> forks;
 
 	public Blockchain(Block genesis) {
-		this.forks = new TreeSet<>();
+		this.forks = new PriorityQueue<>();
 		this.forks.add(genesis);
 	}
 
 	@NotNull
 	public Block longestChain() {
-		return forks.first();
+		return forks.peek();
 	}
 
 	public long forks() {

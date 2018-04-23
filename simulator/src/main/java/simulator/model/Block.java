@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 
+// TODO: replace with normal class for greater efficiency?
 @AutoValue
 public abstract class Block implements Comparable<Block> {
 
@@ -40,11 +41,24 @@ public abstract class Block implements Comparable<Block> {
 
 	@Override
 	public int compareTo(@NotNull Block o) {
-		return depth() - o.depth();
+		return -(depth() - o.depth());
+	}
+
+	@Override
+	public int hashCode() {
+		return id();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		assert o instanceof Block;
+		return (id() == ((Block) o).id());
 	}
 
 	@Override
 	public String toString() {
-		return String.format("Block{id=%s, previous=%s, depth=%s}", id(), previous().id(), depth());
+		final Block previous = previous();
+		final Integer previousID = previous != null ? previous.id() : null;
+		return String.format("Block{id=%s, previous=%s, depth=%s}", id(), previousID, depth());
 	}
 }
