@@ -38,9 +38,9 @@ control.forks					simulator.observers.ForksObserver
 control.forks.protocol			bitcoin
 control.forks.step				LOG_STEP
 
-control.cpu						simulator.observers.CPUObserver
-control.cpu.protocol			bitcoin
-control.cpu.step				LOG_STEP
+# control.cpu						simulator.observers.CPUObserver
+# control.cpu.protocol			bitcoin
+# control.cpu.step				LOG_STEP
 
 
 protocol.bitcoin				simulator.protocols.BitcoinProtocol

@@ -30,7 +30,7 @@ public final class CPUObserver implements Control {
 		final IncrementalStats stats = new IncrementalStats();
 		for (int i = 0; i < Network.size(); i++) {
 			final CPUMetric protocol = (CPUMetric) Network.get(i).getProtocol(pid);
-			stats.add(protocol.cpuTime());
+			stats.add(protocol.cpuTime(i));
 		}
 
 		// print them out, following Peersim conventions

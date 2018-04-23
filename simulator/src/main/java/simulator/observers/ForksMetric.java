@@ -7,7 +7,8 @@ package simulator.observers;
 public interface ForksMetric {
 
 	/**
+	 * @param nodeIndex Index of the node.
 	 * @return Number of forks in the blockchain.
 	 */
-	long forks();
+	long forks(int nodeIndex);
 }

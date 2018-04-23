@@ -30,11 +30,11 @@ public final class ForksObserver implements Control {
 		final IncrementalStats stats = new IncrementalStats();
 		for (int i = 0; i < Network.size(); i++) {
 			final ForksMetric protocol = (ForksMetric) Network.get(i).getProtocol(pid);
-			stats.add(protocol.forks());
+			stats.add(protocol.forks(i));
 		}
 
 		// print them out, following Peersim conventions
-		System.out.println(name + ": [" + CommonState.getTime() + "] " + stats);
+		System.out.println(name + ": " + CommonState.getTime() + " " + stats);
 
 		// false == do NOT stop the simulation
 		return false;

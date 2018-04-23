@@ -4,6 +4,7 @@ import peersim.config.Configuration;
 import peersim.config.FastConfig;
 import peersim.core.CommonState;
 import peersim.core.Linkable;
+import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.edsim.EDSimulator;
@@ -11,23 +12,21 @@ import peersim.transport.Transport;
 import simulator.events.BlockFoundEvent;
 import simulator.events.StartEvent;
 import simulator.model.Block;
-import simulator.model.Blockchain;
 import simulator.model.Transaction;
-import simulator.observers.CPUMetric;
 import simulator.observers.ForksMetric;
 import simulator.utilities.GlobalState;
 
-import java.util.BitSet;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Simplified version of BitCoin:
- * - simulated Proof-of-Work and measure the needed CPU time
+ * Simplified version of Bitcoin:
+ * - tracks the blockchain view of each node
+ * - simulated Proof-of-Work
  * - assumes transactions are immediately available to the entire network
  * - assumes all blocks are VALID (TODO: handle attacks?)
  */
-public final class BitcoinProtocol implements CPUMetric, ForksMetric, EDProtocol {
+public final class BitcoinProtocol implements ForksMetric, EDProtocol {
 
 	// parameters
 	private static final String PARAMETER_MEAN = "mean";
@@ -37,43 +36,24 @@ public final class BitcoinProtocol implements CPUMetric, ForksMetric, EDProtocol
 	private final int mean;
 	private final int maxBlockSize;
 
-	// status
-	private final Blockchain blockchain;
-	private final BitSet transactionsToProcess;
-	private final BitSet processedTransactions;
-
-	// TODO: optimization: keep track of the first transaction to process
-	private int lastProcessedTransactionIndex;
-
-	private Block miningFromBlock;
-	private BlockFoundEvent lastBlockFoundEvent = null;
-
-	// metrics
-	private int cpuTime;
+	// status of the nodes
+	private final BitcoinStatus[] statuses;
 
 	@SuppressWarnings("unused")
 	public BitcoinProtocol(String prefix) {
 		this.mean = Configuration.getInt(prefix + "." + PARAMETER_MEAN);
 		this.maxBlockSize = Configuration.getInt(prefix + "." + PARAMETER_BLOCK_SIZE);
 
-		this.blockchain = new Blockchain(Block.GENESIS);
-		this.transactionsToProcess = new BitSet();
-		this.processedTransactions = new BitSet();
-		this.lastProcessedTransactionIndex = -1;
-
-		this.miningFromBlock = Block.GENESIS;
-
-		this.cpuTime = 0;
+		final int size = Network.size();
+		this.statuses = new BitcoinStatus[size];
+		for (int i = 0; i < size; i++) {
+			statuses[i] = new BitcoinStatus();
+		}
 	}
 
 	@Override
-	public long cpuTime() {
-		return cpuTime;
-	}
-
-	@Override
-	public long forks() {
-		return blockchain.forks();
+	public long forks(int nodeIndex) {
+		return statuses[nodeIndex].blockchain.forks();
 	}
 
 	// TODO: read Java docs...
@@ -89,46 +69,46 @@ public final class BitcoinProtocol implements CPUMetric, ForksMetric, EDProtocol
 	@Override
 	public void processEvent(Node node, int pid, Object event) {
 
+		// extract the status of the given node
+		final BitcoinStatus status = status(node);
+
 		// start the protocol
 		if (event instanceof StartEvent) {
-			scheduleNextBlock(node, pid);
+			scheduleNextBlock(status, node, pid);
 		}
 
 		// got a transaction... add to the list of known transactions
 		else if (event instanceof Transaction) {
-			addTransaction((Transaction) event);
+			addTransaction(status, (Transaction) event);
 		}
 
 		// new block... add to the blockchain and stop mining if needed
 		else if (event instanceof Block) {
 			final Block block = (Block) event;
-			addBlockToChain(block);
-			restartMiningIfNeeded(node, pid);
+			addBlockToChain(status, block);
+			restartMiningIfNeeded(status, node, pid);
 		}
 
 		// I managed to mine a block
 		else if (event instanceof BlockFoundEvent) {
-			final BlockFoundEvent blockFoundEvent = (BlockFoundEvent) event;
-			if (blockFoundEvent == lastBlockFoundEvent) {
-				final Block block = blockFoundEvent.block();
-				addBlockToChain(block);
-				publishBlock(node, pid, block);
-				scheduleNextBlock(node, pid);
-			}
-			trackCPUUsage(blockFoundEvent);
+			blockFound(status, node, pid, (BlockFoundEvent) event);
 		}
 	}
 
-	private void addTransaction(Transaction transaction) {
-		transactionsToProcess.set(transaction.id(), true);
+	private BitcoinStatus status(Node node) {
+		return statuses[node.getIndex()];
 	}
 
-	private void addBlockToChain(Block block) {
-		blockchain.add(block);
+	private void addTransaction(BitcoinStatus status, Transaction transaction) {
+		status.transactionsToProcess.set(transaction.id(), true);
+	}
+
+	private void addBlockToChain(BitcoinStatus status, Block block) {
+		status.blockchain.add(block);
 
 		for (Transaction transaction : block.transactions()) {
 			final int id = transaction.id();
-			processedTransactions.set(id, true);
+			status.processedTransactions.set(id, true);
 
 			// TODO: update lastProcessedTransactionIndex
 			//			if (processedTransactions.get(id - 1)) {
@@ -138,39 +118,39 @@ public final class BitcoinProtocol implements CPUMetric, ForksMetric, EDProtocol
 	}
 
 	@SuppressWarnings("StatementWithEmptyBody")
-	private void restartMiningIfNeeded(Node node, int pid) {
-		final Block longestChain = blockchain.longestChain();
-		if (miningFromBlock == longestChain) {
+	private void restartMiningIfNeeded(BitcoinStatus status, Node node, int pid) {
+		final Block longestChain = status.blockchain.longestChain();
+		if (status.miningFromBlock == longestChain) {
 			// no-op: we are already mining the longest chain...
 		} else {
 			// somebody discovered a block before me and changed the longest chain...
 			// BitCoin strategy tells to always mine from the longest chain
-			miningFromBlock = longestChain;
-			scheduleNextBlock(node, pid);
+			status.miningFromBlock = longestChain;
+			scheduleNextBlock(status, node, pid);
 		}
 	}
 
-	private void scheduleNextBlock(Node node, int pid) {
+	private void scheduleNextBlock(BitcoinStatus status, Node node, int pid) {
 		final long delay = CommonState.r.nextPoisson(mean);
-		final Block block = generateBlock(node.getID());
+		final Block block = generateBlock(status, node.getID());
 		final BlockFoundEvent event = BlockFoundEvent.create(CommonState.getTime(), block);
 		EDSimulator.add(delay, event, node, pid);
-		this.lastBlockFoundEvent = event;
+		status.lastBlockFoundEvent = event;
 	}
 
-	private Block generateBlock(long miner) {
+	private Block generateBlock(BitcoinStatus status, long miner) {
 		final List<Transaction> transactions = new LinkedList<>();
 		int count = 0;
-		int i = lastProcessedTransactionIndex + 1;
-		while (count < maxBlockSize && i < transactionsToProcess.length()) {
-			if (!processedTransactions.get(i)) {
+		int i = status.lastProcessedTransactionIndex + 1;
+		while (count < maxBlockSize && i < status.transactionsToProcess.length()) {
+			if (!status.processedTransactions.get(i)) {
 				final Transaction current = GlobalState.getTransaction(i);
 				transactions.add(current);
 				count++;
 			}
 			i++;
 		}
-		return Block.create(blockchain.longestChain(), transactions, miner);
+		return Block.create(status.blockchain.longestChain(), transactions, miner);
 	}
 
 	private void publishBlock(Node node, int pid, Block block) {
@@ -185,8 +165,12 @@ public final class BitcoinProtocol implements CPUMetric, ForksMetric, EDProtocol
 		}
 	}
 
-	// TODO: fix this!!! bug!
-	private void trackCPUUsage(BlockFoundEvent blockFoundEvent) {
-		cpuTime += (CommonState.getTime() - blockFoundEvent.miningStartTime());
+	private void blockFound(BitcoinStatus status, Node node, int pid, BlockFoundEvent event) {
+		if (event == status.lastBlockFoundEvent) {
+			final Block block = event.block();
+			addBlockToChain(status, block);
+			publishBlock(node, pid, block);
+			scheduleNextBlock(status, node, pid);
+		}
 	}
 }

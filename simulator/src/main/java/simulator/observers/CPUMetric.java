@@ -7,7 +7,8 @@ package simulator.observers;
 public interface CPUMetric {
 
 	/**
+	 * @param nodeIndex Index of the node.
 	 * @return Number of time units where the CPU was aggressively used by the protocol.
 	 */
-	long cpuTime();
+	long cpuTime(int nodeIndex);
 }
