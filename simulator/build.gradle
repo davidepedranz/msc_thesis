@@ -9,10 +9,36 @@ repositories {
 	mavenCentral()
 }
 
+project.ext {
+	annotations = '16.0.1'
+	autovalue = '1.6'
+}
+
 dependencies {
 	compile files('libs/jep-2.3.0.jar')
 	compile files('libs/djep-1.0.0.jar')
 	compile files('libs/peersim-1.0.5.jar')
 
+	// useful annotations to avoid NullPointer exceptions
+	compileOnly group: 'org.jetbrains', name: 'annotations', version: project.ext.annotations
+	testCompile group: 'org.jetbrains', name: 'annotations', version: project.ext.annotations
+
+	// AutoValue: auto-generate value classes boiler code
+	compile group: 'com.google.auto.value', name: 'auto-value', version: project.ext.autovalue
+	compileOnly group: 'com.google.auto.value', name: 'auto-value-annotations', version: project.ext.autovalue
+	testCompile group: 'com.google.auto.value', name: 'auto-value-annotations', version: project.ext.autovalue
+
 	testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+/**
+ * Fix configuration for AutoValue & IntelliJ.
+ */
+sourceSets.main.java {
+	srcDir "$projectDir/src/main/generated"
+	exclude '**/AutoValue_*.java', '**/$AutoValue_*.java', '**/$$AutoValue_*.java', '**/AutoValueGson_**'
+}
+sourceSets.test.java {
+	srcDir "$projectDir/src/test/generated_tests"
+	exclude '**/AutoValue_*.java', '**/$AutoValue_*.java', '**/$$AutoValue_*.java', '**/AutoValueGson_**'
 }
