@@ -5,9 +5,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 
-public final class Blockchain {
+public final class Blockchain implements Cloneable {
 
-	private final PriorityQueue<Block> forks;
+	// status
+	private PriorityQueue<Block> forks;
 
 	public Blockchain(Block genesis) {
 		this.forks = new PriorityQueue<>();
@@ -41,5 +42,12 @@ public final class Blockchain {
 		}
 		// if here, we add a block which is a fork
 		forks.add(block);
+	}
+
+	@Override
+	public Blockchain clone() throws CloneNotSupportedException {
+		final Blockchain clone = (Blockchain) super.clone();
+		clone.forks = new PriorityQueue<>(forks);
+		return clone;
 	}
 }

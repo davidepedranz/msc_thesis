@@ -4,6 +4,7 @@ import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
 import simulator.model.Transaction;
+import simulator.utilities.Distributions;
 import simulator.utilities.GlobalState;
 
 import static simulator.utilities.NetworkUtilities.scheduleEventForAllNodes;
@@ -35,7 +36,7 @@ public final class TransactionsInitializer implements Control {
 		// as soon as they will receive the corresponding event
 		long delay = 0;
 		while (delay < CommonState.getEndTime()) {
-			final long delta = CommonState.r.nextPoisson(mean);
+			final long delta = Distributions.roundedNextExponential(mean);
 			delay += delta;
 			scheduleTransaction(delay);
 		}
