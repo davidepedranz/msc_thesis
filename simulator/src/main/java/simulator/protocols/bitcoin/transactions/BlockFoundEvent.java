@@ -1,4 +1,4 @@
-package simulator.events;
+package simulator.protocols.bitcoin.transactions;
 
 import com.google.auto.value.AutoValue;
 import simulator.model.Block;
@@ -8,13 +8,13 @@ import simulator.model.Block;
  * eg. end of the computation for the block hash in Bitcoin.
  */
 @AutoValue
-public abstract class BlockFoundEvent {
+abstract class BlockFoundEvent {
 
-	public static BlockFoundEvent create(long miningStartTime, Block block) {
+	static BlockFoundEvent create(long miningStartTime, Block block) {
 		return new AutoValue_BlockFoundEvent(miningStartTime, block);
 	}
 
-	public abstract long miningStartTime();
+	abstract long miningStartTime();
 
-	public abstract Block block();
+	abstract Block block();
 }

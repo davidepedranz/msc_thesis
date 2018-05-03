@@ -1,13 +1,18 @@
 # ------------------------------------------------------------------------
+# Bitcoin with perfect network and totally connected topology.
+# Transactions and blocks are propagated instantly.
+# ------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------
 #  Variables
 # ------------------------------------------------------------------------
 
 SEED 0
 
 END_TIME 1000
-LOG_STEP END_TIME / 100
+LOG_STEP END_TIME / 20
 
-NETWORK_SIZE 10000
+NETWORK_SIZE 1000
 
 TRANSACTIONS_POISSON_MEAN 5
 BLOCK_POISSON_MEAN 20
@@ -43,7 +48,7 @@ control.forks.step				LOG_STEP
 # control.cpu.step				LOG_STEP
 
 
-protocol.bitcoin				simulator.protocols.BitcoinProtocol
+protocol.bitcoin				simulator.protocols.bitcoin.transactions.BitcoinProtocol
 protocol.bitcoin.linkable		lnk
 protocol.bitcoin.transport		urt
 protocol.bitcoin.mean			BLOCK_POISSON_MEAN

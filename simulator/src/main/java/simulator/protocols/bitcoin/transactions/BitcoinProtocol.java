@@ -8,7 +8,6 @@ import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.edsim.EDSimulator;
 import peersim.transport.Transport;
-import simulator.events.BlockFoundEvent;
 import simulator.events.StartEvent;
 import simulator.model.Block;
 import simulator.model.Blockchain;
@@ -83,13 +82,8 @@ public final class BitcoinProtocol implements ForksMetric, EDProtocol {
 	@Override
 	public void processEvent(Node node, int pid, Object event) {
 
-		// start the protocol
-		if (event instanceof StartEvent) {
-			scheduleNextBlock(node, pid);
-		}
-
 		// got a transaction... add to the list of known transactions
-		else if (event instanceof Transaction) {
+		if (event instanceof Transaction) {
 			addTransaction((Transaction) event);
 		}
 
@@ -103,6 +97,11 @@ public final class BitcoinProtocol implements ForksMetric, EDProtocol {
 		// I managed to mine a block
 		else if (event instanceof BlockFoundEvent) {
 			blockFound(node, pid, (BlockFoundEvent) event);
+		}
+
+		// start the protocol
+		else if (event instanceof StartEvent) {
+			scheduleNextBlock(node, pid);
 		}
 
 		// no other events are possible

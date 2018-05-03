@@ -25,7 +25,7 @@ public final class ProtocolInitializer implements Control {
 	public boolean execute() {
 
 		// schedule the start event immediately == time zero
-		final StartEvent startEvent = new StartEvent();
+		final StartEvent startEvent = StartEvent.INSTANCE;
 		scheduleEventForAllNodes(0, startEvent, pid);
 
 		// false == do NOT stop the simulation

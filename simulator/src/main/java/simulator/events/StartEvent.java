@@ -5,4 +5,5 @@ package simulator.events;
  * eg. {@link simulator.initializers.ProtocolInitializer}.
  */
 public final class StartEvent {
+	public static final StartEvent INSTANCE = new StartEvent();
 }
