@@ -2,7 +2,6 @@ package simulator.utilities;
 
 import org.junit.rules.ExternalResource;
 import peersim.config.Configuration;
-import peersim.core.CommonState;
 
 import java.util.Properties;
 
@@ -13,6 +12,9 @@ public final class PeersimSetup extends ExternalResource {
 
 	@SuppressWarnings("WeakerAccess")
 	public static final long DEFAULT_SEED = 0;
+
+	// make sure peersim is initialized only once for test suite
+	private static boolean initialized = false;
 
 	private final long seed;
 
@@ -27,13 +29,15 @@ public final class PeersimSetup extends ExternalResource {
 
 	@Override
 	protected void before() {
-		final Properties properties = new Properties();
-		properties.setProperty("random.seed", Long.toString(seed));
-		Configuration.setConfig(properties);
+		if (!initialized) {
+			initialized = true;
+			final Properties properties = new Properties();
+			properties.setProperty("random.seed", Long.toString(seed));
+			Configuration.setConfig(properties);
+		}
 	}
 
 	@Override
 	protected void after() {
-		CommonState.r = null;
 	}
 }

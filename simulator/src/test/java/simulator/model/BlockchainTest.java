@@ -52,7 +52,6 @@ public final class BlockchainTest {
 		blockchain.add(b4b);
 		assertEquals("On a non linear chain, the number of forks should be greater than 1", 2, blockchain.forks());
 		assertEquals(b4b, blockchain.longestChain());
-
 	}
 
 	private static List<Transaction> randomTransactions() {
