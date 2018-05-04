@@ -71,7 +71,7 @@ public final class BitcoinTopology extends IdleProtocolWithRemoval implements Co
 	// --------------------------------------------------
 
 	@Override
-	public long controlMessages(int nodeIndex) {
+	public long controlMessages() {
 		return controlMessages;
 	}
 

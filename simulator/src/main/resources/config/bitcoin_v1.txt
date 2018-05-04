@@ -59,7 +59,7 @@ init.start_bitcoin					simulator.initializers.ProtocolInitializer
 init.start_bitcoin.protocol			bitcoin
 
 
-control.forks						simulator.observers.ForksObserver
+control.forks						simulator.observers.BlockchainObserver
 control.forks.protocol				bitcoin
 control.forks.step					LOG_STEP
 
@@ -75,7 +75,7 @@ protocol.t1.maxdelay				NETWORK_MAX_DELAY
 
 protocol.t2							peersim.transport.UnreliableTransport
 protocol.t2.drop					NETWORK_DROP
-protocol.t2.transport				t1
+protocol.t2.transport				t1git
 
 protocol.topology					simulator.protocols.bitcoin.topology.BitcoinTopology
 protocol.topology.transport			t2

@@ -8,8 +8,7 @@ package simulator.observers;
 public interface ControlMessagesMetric {
 
 	/**
-	 * @param nodeIndex Index of the node.
 	 * @return Number of control messages used by the protocol.
 	 */
-	long controlMessages(int nodeIndex);
+	long controlMessages();
 }

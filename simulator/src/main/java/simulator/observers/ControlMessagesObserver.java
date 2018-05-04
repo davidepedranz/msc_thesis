@@ -14,6 +14,6 @@ public final class ControlMessagesObserver extends BaseObserver {
 	@Override
 	double getValue(int index, int pid) {
 		final ControlMessagesMetric protocol = (ControlMessagesMetric) Network.get(index).getProtocol(pid);
-		return protocol.controlMessages(index);
+		return protocol.controlMessages();
 	}
 }

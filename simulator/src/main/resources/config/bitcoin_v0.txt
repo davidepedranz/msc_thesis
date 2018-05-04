@@ -39,7 +39,7 @@ init.start						simulator.initializers.ProtocolInitializer
 init.start.protocol				bitcoin
 
 
-control.forks					simulator.observers.ForksObserver
+control.forks					simulator.observers.BlockchainObserver
 control.forks.protocol			bitcoin
 control.forks.step				LOG_STEP
 

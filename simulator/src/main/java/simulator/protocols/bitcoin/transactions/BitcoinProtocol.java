@@ -12,7 +12,7 @@ import simulator.events.StartEvent;
 import simulator.model.Block;
 import simulator.model.Blockchain;
 import simulator.model.Transaction;
-import simulator.observers.ForksMetric;
+import simulator.observers.BlockchainMetric;
 import simulator.utilities.Distributions;
 import simulator.utilities.GlobalState;
 
@@ -27,7 +27,7 @@ import java.util.List;
  * - assumes transactions are immediately available to the entire network
  * - assumes all blocks are VALID (TODO: handle attacks?)
  */
-public final class BitcoinProtocol implements ForksMetric, EDProtocol {
+public final class BitcoinProtocol implements BlockchainMetric, EDProtocol {
 
 	// parameters
 	private static final String PARAMETER_MEAN = "mean";
@@ -60,8 +60,8 @@ public final class BitcoinProtocol implements ForksMetric, EDProtocol {
 	}
 
 	@Override
-	public long forks(int nodeIndex) {
-		return blockchain.forks();
+	public Blockchain blockchain() {
+		return blockchain;
 	}
 
 	@Override
