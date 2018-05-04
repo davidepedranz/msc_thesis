@@ -5,8 +5,6 @@ import org.junit.Test;
 import simulator.utilities.GlobalState;
 import simulator.utilities.PeersimSetup;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
@@ -54,12 +52,12 @@ public final class BlockchainTest {
 		assertEquals(b4b, blockchain.longestChain());
 	}
 
-	private static List<Transaction> randomTransactions() {
+	private static Transaction[] randomTransactions() {
 		return randomTransactions(20);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static List<Transaction> randomTransactions(int n) {
-		return IntStream.range(0, n).mapToObj(__ -> GlobalState.nextTransaction()).collect(Collectors.toList());
+	private static Transaction[] randomTransactions(int n) {
+		return IntStream.range(0, n).mapToObj(__ -> GlobalState.nextTransaction()).toArray(Transaction[]::new);
 	}
 }

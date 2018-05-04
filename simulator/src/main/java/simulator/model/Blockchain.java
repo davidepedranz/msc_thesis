@@ -29,7 +29,7 @@ public final class Blockchain implements Cloneable {
 
 		// try to find the parent of this node (this is not a new fork)
 		for (int i = 0; i < currentForks; i++) {
-			if (forks[i] == block.previous()) {
+			if (forks[i] == block.previous) {
 
 				// we add a block on top of another one...
 				// ... so we remove the current one and replace it with the new block
@@ -37,7 +37,7 @@ public final class Blockchain implements Cloneable {
 				forks[i] = block;
 
 				// keep track of the longest chain
-				if (block.depth() > longestChain().depth()) {
+				if (block.depth > longestChain().depth) {
 					longestChainIndex = i;
 				}
 
@@ -50,7 +50,7 @@ public final class Blockchain implements Cloneable {
 		expandArrayIfNeeded();
 
 		// keep track of the longest chain
-		if (block.depth() > longestChain().depth()) {
+		if (block.depth > longestChain().depth) {
 			longestChainIndex = currentForks;
 		}
 

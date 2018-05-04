@@ -117,7 +117,7 @@ public final class BitcoinProtocol implements BlockchainMetric, EDProtocol {
 	private void addBlockToChain(Block block) {
 		blockchain.add(block);
 
-		for (Transaction transaction : block.transactions()) {
+		for (Transaction transaction : block.transactions) {
 			final int id = transaction.id();
 			processedTransactions.set(id, true);
 
@@ -161,7 +161,8 @@ public final class BitcoinProtocol implements BlockchainMetric, EDProtocol {
 			}
 			i++;
 		}
-		return Block.create(blockchain.longestChain(), transactions, miner);
+		final Transaction[] array = new Transaction[transactions.size()];
+		return Block.create(blockchain.longestChain(), transactions.toArray(array), miner);
 	}
 
 	private void publishBlock(Node node, int pid, Block block) {
