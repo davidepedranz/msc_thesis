@@ -1,4 +1,4 @@
-package simulator.protocols.bitcoin.topology;
+package simulator.protocols.bitcoin.topology.messages;
 
 import peersim.core.Node;
 
@@ -6,11 +6,11 @@ import peersim.core.Node;
  * Bitcoin `pong` message: it is used to answer a {@link PingMessage}.
  * See: https://bitcoin.org/en/developer-reference#pong
  */
-final class PongMessage {
+public final class PongMessage {
 
-	final Node sender;
+	public final Node sender;
 
-	PongMessage(Node sender) {
+	public PongMessage(Node sender) {
 		this.sender = sender;
 	}
 }

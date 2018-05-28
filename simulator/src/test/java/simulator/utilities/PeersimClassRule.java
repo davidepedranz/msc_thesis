@@ -7,8 +7,9 @@ import java.util.Properties;
 
 /**
  * JUnit {@link org.junit.Rule} that bootstraps Peersim for testing.
+ * This should be used as a {@link org.junit.ClassRule}.
  */
-public final class PeersimSetup extends ExternalResource {
+public final class PeersimClassRule extends ExternalResource {
 
 	@SuppressWarnings("WeakerAccess")
 	public static final long DEFAULT_SEED = 0;
@@ -18,12 +19,12 @@ public final class PeersimSetup extends ExternalResource {
 
 	private final long seed;
 
-	public PeersimSetup() {
+	public PeersimClassRule() {
 		this.seed = DEFAULT_SEED;
 	}
 
 	@SuppressWarnings("unused")
-	public PeersimSetup(long seed) {
+	public PeersimClassRule(long seed) {
 		this.seed = seed;
 	}
 

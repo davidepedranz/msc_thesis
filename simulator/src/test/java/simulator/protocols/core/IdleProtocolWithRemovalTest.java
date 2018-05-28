@@ -4,7 +4,8 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import peersim.core.Node;
 import simulator.utilities.FakeNode;
-import simulator.utilities.PeersimSetup;
+import simulator.utilities.IdleProtocolWithRemoval;
+import simulator.utilities.PeersimClassRule;
 
 import java.util.function.Supplier;
 
@@ -20,7 +21,7 @@ public final class IdleProtocolWithRemovalTest {
 	private static final Node n4 = new FakeNode();
 
 	@ClassRule
-	public static final PeersimSetup setup = new PeersimSetup();
+	public static final PeersimClassRule setup = new PeersimClassRule();
 
 	@Test
 	public void removal() {

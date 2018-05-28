@@ -1,4 +1,4 @@
-package simulator.protocols.bitcoin.topology;
+package simulator.protocols.bitcoin.topology.messages;
 
 import peersim.core.Node;
 
@@ -6,11 +6,11 @@ import peersim.core.Node;
  * Bitcoin `ping` message: it is used to maintain the list of peers.
  * See: https://bitcoin.org/en/developer-reference#ping
  */
-final class PingMessage {
+public final class PingMessage {
 
-	final Node sender;
+	public final Node sender;
 
-	PingMessage(Node sender) {
+	public PingMessage(Node sender) {
 		this.sender = sender;
 	}
 }

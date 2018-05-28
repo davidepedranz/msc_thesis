@@ -1,26 +1,32 @@
 package simulator.utilities;
 
-import peersim.core.Network;
+import peersim.config.FastConfig;
+import peersim.core.Linkable;
 import peersim.core.Node;
-import peersim.edsim.EDSimulator;
+import peersim.transport.Transport;
 
 /**
- * Class of utilities to interact with the {@link peersim.core.Network}
- * and {@link peersim.edsim.EDSimulator} objects of Peersim.
+ * @author Davide Pedranz (pedranz@fbk.eu)
  */
 public final class NetworkUtilities {
 
-	/**
-	 * Schedules the given event to ALL nodes implementing the given protocol.
-	 *
-	 * @param delay Delay (time units from now) at which to schedule the event.
-	 * @param event Event to schedule to ALL nodes implementing the protocol.
-	 * @param pid   ID of the protocol that will receive the given event.
-	 */
-	public static void scheduleEventForAllNodes(long delay, Object event, int pid) {
-		for (int i = 0; i < Network.size(); i++) {
-			final Node node = Network.get(i);
-			EDSimulator.add(delay, event, node, pid);
+	// TODO: connections symmetric TCP
+
+
+	public static void reply(Node from, Node to, int pid, Object message) {
+		final Linkable linkable = (Linkable) from.getProtocol(FastConfig.getLinkable(pid));
+		assert linkable.contains(to);
+		final Transport transport = (Transport) from.getProtocol(FastConfig.getTransport(pid));
+		transport.send(from, to, message, pid);
+	}
+
+	public static void broadcast(Node from, int pid, Object message) {
+		final Linkable linkable = (Linkable) from.getProtocol(FastConfig.getLinkable(pid));
+		final Transport transport = (Transport) from.getProtocol(FastConfig.getTransport(pid));
+		for (int i = 0; i < linkable.degree(); i++) {
+			if (from.getIndex() != i) {
+				transport.send(from, linkable.getNeighbor(i), message, pid);
+			}
 		}
 	}
 }

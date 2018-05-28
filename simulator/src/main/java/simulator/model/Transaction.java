@@ -2,6 +2,7 @@ package simulator.model;
 
 import com.google.auto.value.AutoValue;
 
+// TODO: remove autovalue
 @AutoValue
 public abstract class Transaction {
 

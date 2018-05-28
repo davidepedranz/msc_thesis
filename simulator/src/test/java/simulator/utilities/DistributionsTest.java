@@ -27,7 +27,7 @@ public final class DistributionsTest {
 	private static final long[] MEANS_EXPONENTIAL = new long[]{1, 5, 10, 100, 10 * 60 * 1000};
 
 	@ClassRule
-	public static final PeersimSetup setup = new PeersimSetup();
+	public static final PeersimClassRule setup = new PeersimClassRule();
 
 	@Test
 	public void samplePoissontDistribution() throws IOException {

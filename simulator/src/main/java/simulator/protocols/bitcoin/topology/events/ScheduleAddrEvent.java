@@ -1,4 +1,4 @@
-package simulator.protocols.bitcoin.topology;
+package simulator.protocols.bitcoin.topology.events;
 
 /**
  * Event used to simulate the random delay in scheduling the `addr`
@@ -6,4 +6,7 @@ package simulator.protocols.bitcoin.topology;
  */
 public final class ScheduleAddrEvent {
 	public static final ScheduleAddrEvent INSTANCE = new ScheduleAddrEvent();
+
+	private ScheduleAddrEvent() {
+	}
 }

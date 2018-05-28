@@ -10,10 +10,9 @@ DAYS								HOURS * 24
 
 # simulation parameters
 SEED 0
-NETWORK_SIZE						1000
 END_TIME							1 * HOURS
 LOG_STEP							END_TIME / 100
-
+NETWORK_SIZE						1000
 NETWORK_MIN_DELAY					50
 NETWORK_MAX_DELAY					300
 NETWORK_DROP						0.025
@@ -67,15 +66,13 @@ control.topology					simulator.observers.ControlMessagesObserver
 control.topology.protocol			topology
 control.topology.step				LOG_STEP
 
-
-# TODO: for the moment we assume the network to be perfect (no delay, reliable)
 protocol.t1							peersim.transport.UniformRandomTransport
 protocol.t1.mindelay				NETWORK_MIN_DELAY
 protocol.t1.maxdelay				NETWORK_MAX_DELAY
 
 protocol.t2							peersim.transport.UnreliableTransport
 protocol.t2.drop					NETWORK_DROP
-protocol.t2.transport				t1git
+protocol.t2.transport				t1
 
 protocol.topology					simulator.protocols.bitcoin.topology.BitcoinTopology
 protocol.topology.transport			t2
@@ -85,7 +82,7 @@ protocol.topology.feeler_sleep		BITCOIN_FEELER_SLEEP_WINDOW
 protocol.topology.feeler_interval	BITCOIN_FEELER_SLEEP_WINDOW
 protocol.topology.pong_timeout		BITCOIN_PONG_TIMEOUT
 
-protocol.bitcoin					simulator.protocols.bitcoin.transactions.BitcoinProtocol
+protocol.bitcoin					simulator.protocols.bitcoin.transactions.BitcoinCore
 protocol.bitcoin.linkable			topology
 protocol.bitcoin.transport			t2
 protocol.bitcoin.mean				BITCOIN_BLOCK_POISSON_MEAN

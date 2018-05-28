@@ -6,4 +6,7 @@ package simulator.events;
  */
 public final class StartEvent {
 	public static final StartEvent INSTANCE = new StartEvent();
+
+	private StartEvent() {
+	}
 }

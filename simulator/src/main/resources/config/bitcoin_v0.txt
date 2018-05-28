@@ -48,7 +48,7 @@ control.forks.step				LOG_STEP
 # control.cpu.step				LOG_STEP
 
 
-protocol.bitcoin				simulator.protocols.bitcoin.transactions.BitcoinProtocol
+protocol.bitcoin				simulator.protocols.bitcoin.transactions.BitcoinCore
 protocol.bitcoin.linkable		lnk
 protocol.bitcoin.transport		urt
 protocol.bitcoin.mean			BLOCK_POISSON_MEAN

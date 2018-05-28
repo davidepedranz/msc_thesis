@@ -18,7 +18,7 @@ abstract class BaseObserver implements Control {
 	private final String name;
 	private final int pid;
 
-	protected BaseObserver(String name) {
+	BaseObserver(String name) {
 		this.name = name;
 		this.pid = Configuration.getPid(name + "." + PARAMETER_PROTOCOL);
 	}

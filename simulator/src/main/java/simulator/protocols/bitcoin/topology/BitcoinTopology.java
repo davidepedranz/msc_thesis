@@ -10,7 +10,12 @@ import peersim.edsim.EDSimulator;
 import peersim.transport.Transport;
 import simulator.events.StartEvent;
 import simulator.observers.ControlMessagesMetric;
-import simulator.protocols.core.IdleProtocolWithRemoval;
+import simulator.protocols.bitcoin.topology.events.ScheduleAddrEvent;
+import simulator.protocols.bitcoin.topology.events.SchedulePongTimeouts;
+import simulator.protocols.bitcoin.topology.messages.AddrMessage;
+import simulator.protocols.bitcoin.topology.messages.PingMessage;
+import simulator.protocols.bitcoin.topology.messages.PongMessage;
+import simulator.utilities.IdleProtocolWithRemoval;
 import simulator.utilities.Shuffler;
 
 import java.util.HashMap;
@@ -112,6 +117,7 @@ public final class BitcoinTopology extends IdleProtocolWithRemoval implements Co
 			handlePongMessage((PongMessage) event);
 		}
 
+		// TODO: schedule SchedulePongTimeouts
 		// time to check for pongs timeout
 		else if (event instanceof SchedulePongTimeouts) {
 			checkPongTimeouts();

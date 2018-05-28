@@ -4,14 +4,16 @@ import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
 import simulator.model.Transaction;
+import simulator.protocols.bitcoin.transactions.messages.TxMessage;
 import simulator.utilities.Distributions;
 import simulator.utilities.GlobalState;
 
-import static simulator.utilities.NetworkUtilities.scheduleEventForAllNodes;
+import static simulator.utilities.SimulationUtilities.scheduleEventForRandomNode;
 
 /**
  * {@link Control} used to simulate external users of the protocol that
  * generate {@link Transaction}s to be stored in the public ledger.
+ * Each transaction will be scheduled to EXACTLY one node in the network.
  */
 public final class TransactionsInitializer implements Control {
 
@@ -47,6 +49,6 @@ public final class TransactionsInitializer implements Control {
 
 	private void scheduleTransaction(long delay) {
 		final Transaction transaction = GlobalState.nextTransaction();
-		scheduleEventForAllNodes(delay, transaction, pid);
+		scheduleEventForRandomNode(delay, new TxMessage(transaction), pid);
 	}
 }
