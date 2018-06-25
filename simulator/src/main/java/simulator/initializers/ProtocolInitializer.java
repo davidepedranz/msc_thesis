@@ -2,9 +2,8 @@ package simulator.initializers;
 
 import peersim.config.Configuration;
 import peersim.core.Control;
-import simulator.events.StartEvent;
 
-import static simulator.utilities.SimulationUtilities.scheduleEventForAllNodes;
+import static simulator.utilities.peersim.SimulationUtilities.scheduleEventForAllNodes;
 
 /**
  * {@link Control} used to initialize a protocol, using a {@link StartEvent}.

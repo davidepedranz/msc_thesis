@@ -1,0 +1,65 @@
+# ------------------------------------------------------------------------
+#  Variables [time is measured in milliseconds]
+# ------------------------------------------------------------------------
+
+# time unit conversions
+SECONDS									1000
+MINUTES									SECONDS * 60
+HOURS									MINUTES * 60
+DAYS									HOURS * 24
+
+# simulation parameters
+SEED 0
+END_TIME								20 * MINUTES
+LOG_STEP								END_TIME / 10
+NETWORK_SIZE							1000
+NETWORK_MIN_DELAY						50
+NETWORK_MAX_DELAY						300
+
+# simulate users of the public ledger that submit transactions to the system
+TRANSACTIONS_POISSON_MEAN				MINUTES / 20
+
+# Bitcoin specific parameters, see references
+BITCOIN_INITIAL_PEERS					25
+
+
+# ------------------------------------------------------------------------
+#  Configuration
+# ------------------------------------------------------------------------
+
+# simulation specific
+random.seed								SEED
+network.size							NETWORK_SIZE
+simulation.endtime						END_TIME
+simulation.logtime						LOG
+
+
+include.init							wire start_topology
+
+init.wire								peersim.dynamics.WireKOut
+init.wire.protocol						topology
+init.wire.k								BITCOIN_INITIAL_PEERS
+
+init.start_topology						simulator.initializers.ProtocolInitializer
+init.start_topology.protocol			topology
+
+
+protocol.t1								peersim.transport.UniformRandomTransport
+protocol.t1.mindelay					NETWORK_MIN_DELAY
+protocol.t1.maxdelay					NETWORK_MAX_DELAY
+
+protocol.topology						simulator.bitcoin.topology.BitcoinTopology
+protocol.topology.transport				t1
+
+
+control.topology						simulator.bitcoin.topology.observers.TopologyObserver
+control.topology.protocol				topology
+control.topology.step					LOG_STEP
+
+control.topology-messages				simulator.bitcoin.topology.observers.MessagesObserver
+control.topology-messages.protocol		topology
+control.topology-messages.step			LOG_STEP
+
+control.topology-removed				simulator.bitcoin.topology.observers.NodesRemovedObserver
+control.topology-removed.protocol		topology
+control.topology-removed.step			LOG_STEP
