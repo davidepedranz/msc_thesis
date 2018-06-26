@@ -3,6 +3,7 @@
 # --------------------------------------------
 .idea/*
 .externalToolBuilders/
+!.idea/runConfigurations/
 
 # --------------------------------------------
 # Gradle
