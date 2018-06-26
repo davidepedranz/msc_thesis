@@ -1,9 +1,13 @@
-group 'simulator'
-version '0.1.0'
-
-apply plugin: 'java'
+plugins {
+	id 'java'
+	id 'idea'
+	id 'com.github.johnrengelman.shadow' version '2.0.4'
+}
 
 sourceCompatibility = 1.8
+
+group 'simulator'
+version getGitHash()
 
 repositories {
 	mavenCentral()
@@ -26,4 +30,25 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: project.ext.junit
 	testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: project.ext.hamcrest
 	testCompile group: 'org.jfree', name: 'jfreechart', version: project.ext.jfreechart
+}
+
+jar {
+	manifest {
+		attributes(
+			'Main-Class': 'peersim.rangesim.RangeSimulator'
+		)
+	}
+}
+
+shadowJar {
+	archiveName = "simulator.jar"
+}
+
+final def getGitHash() {
+	final def stdout = new ByteArrayOutputStream()
+	exec {
+		commandLine 'git', 'rev-parse', 'HEAD'
+		standardOutput = stdout
+	}
+	return stdout.toString().trim()
 }
