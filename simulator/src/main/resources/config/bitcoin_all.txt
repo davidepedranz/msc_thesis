@@ -9,10 +9,10 @@ HOURS									MINUTES * 60
 DAYS									HOURS * 24
 
 # simulation parameters
-SEED 0
 END_TIME								20 * MINUTES
 LOG_STEP								END_TIME / 10
-NETWORK_SIZE							1000
+
+# networking settings
 NETWORK_MIN_DELAY						50
 NETWORK_MAX_DELAY						300
 
@@ -21,6 +21,10 @@ TRANSACTIONS_POISSON_MEAN				MINUTES / 20
 
 # Bitcoin specific parameters, see references
 BITCOIN_INITIAL_PEERS					25
+
+# changing parameters
+range.0 NETWORK_SIZE;10,100,100
+range.1 SEED;1:2
 
 
 # ------------------------------------------------------------------------
