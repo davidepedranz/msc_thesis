@@ -22,6 +22,9 @@ public final class Blocks {
 	// assign to each block a different progressive ID
 	private static int blocksCounter;
 
+	// keep track of the "global" blockchain
+	public static Blockchain globalBlockchain;
+
 	static {
 		_init();
 	}
@@ -35,6 +38,7 @@ public final class Blocks {
 		GENESIS.children = new Block[1];
 		GENESIS.childrenNumber = 0;
 		blocks.add(GENESIS);
+		globalBlockchain = new Blockchain(GENESIS);
 	}
 
 	/**
@@ -61,6 +65,7 @@ public final class Blocks {
 		updateChildren(previous, block);
 		updateLongestChain(block);
 		blocks.add(block);
+		globalBlockchain.addBlock(block);
 		return block;
 	}
 
