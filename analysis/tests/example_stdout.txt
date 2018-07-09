@@ -1,0 +1,7 @@
+
+control.core-blockchain: NETWORK_SIZE 10 SEED 1 [0]  (0,10)
+control.core-transactions: NETWORK_SIZE 10 SEED 1 [0] Infinity -Infinity 0 NaN 0.0 0 0
+control.core-blockchain: NETWORK_SIZE 100 SEED 1 [720000]  (0,108) (1,100)
+
+control.topology-messages-addr: NETWORK_SIZE 100 SEED 1 [1080000] 3.0 17.0 100 8.49 11.2 4 3
+
