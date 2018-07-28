@@ -28,7 +28,7 @@ public final class BlockchainObserver implements Control {
 	public boolean execute() {
 
 		// compute the statistics over all nodes in the network
-		// NB: we count the TOTALS, so please divide by the number of nodes in the simulation to getBlock the mean
+		// NB: we count the TOTALS, so please divide by the number of nodes in the simulation to get the mean
 		final IncrementalFreq stats = new IncrementalFreq();
 		for (int i = 0; i < Network.size(); i++) {
 			final BitcoinCore protocol = (BitcoinCore) Network.get(i).getProtocol(pid);
