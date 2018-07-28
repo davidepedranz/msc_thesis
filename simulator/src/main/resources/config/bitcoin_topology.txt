@@ -57,10 +57,6 @@ protocol.topology                       simulator.bitcoin.topology.BitcoinTopolo
 protocol.topology.transport             t1
 
 
-control.topology                        simulator.bitcoin.topology.observers.NodesRemovedObserver
-control.topology.protocol               topology
-control.topology.step                   LOG_STEP
-
 control.topology-messages               simulator.bitcoin.topology.observers.MessagesObserver
 control.topology-messages.protocol      topology
 control.topology-messages.step          LOG_STEP
