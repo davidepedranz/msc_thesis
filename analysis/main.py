@@ -28,12 +28,18 @@ def main():
     plots_dir = 'plots'
     utils.mkdir(plots_dir)
 
-    # make plots
-    # parameters_no_seed = filter_seed(parameters) + ['time']
-    # plotter.messages_plot(data=stats, protocol='topology', aggregation=parameters_no_seed)
-    # plotter.blockchain_histogram(data=freq, agg_diff=parameters_no_seed, agg_same=None, out_dir=plots_dir)
-    plotter.blockchain_histogram(data=freq, agg_diff=('network_size', 'time'), agg_same='delay', out_dir=plots_dir)
-    plotter.blockchain_histogram(data=freq, agg_diff=('delay', 'time'), agg_same='network_size', out_dir=plots_dir)
+    # [plots]: extract simulations parameters
+    params_no_seed = filter_seed(parameters)
+    params_no_seed_with_time = params_no_seed + ['time']
+
+    # [plots]: messages
+    plotter.messages_plot(stats, protocol='topology', agg_diff=params_no_seed, agg_same=None, out_dir=plots_dir)
+    plotter.messages_plot(stats, protocol='topology', agg_diff=('network_size',), agg_same='delay', out_dir=plots_dir)
+
+    # [plots]: blockchain
+    plotter.blockchain_histogram(freq, agg_diff=params_no_seed_with_time, agg_same=None, out_dir=plots_dir)
+    plotter.blockchain_histogram(freq, agg_diff=('network_size', 'time'), agg_same='delay', out_dir=plots_dir)
+    plotter.blockchain_histogram(freq, agg_diff=('delay', 'time'), agg_same='network_size', out_dir=plots_dir)
 
 
 def load_cache_or_parse_logs(run_dir):
