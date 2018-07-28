@@ -8,22 +8,22 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as plticker
 
 
-def messages_plot(data, protocol, agg_diff=('network_size', 'delay'), agg_same='delay', out_dir='plots'):
+def messages_line_chart(data, agg_diff=('network_size', 'delay'), agg_same='delay', out_dir='plots'):
     """
     Generate a plot for each metric collected for a given given protocol.
     :param data: Pandas DataFrame that contains the simulator logs.
-    :param protocol: PeerSim protocol that generated the messages.
     :param agg_diff: Columns to use for the aggregation.
     :param agg_same: Column to use for the aggregation, generating multiple data series for the same plot.
     :param out_dir: Path of the directory where to store the generated plots.
     """
-    metrics = data.query('protocol == "%s"' % protocol)['metric'].unique()
-    for metric in metrics:
-        _dir = out_dir + '/' + str(metric)
-        message_plot(data, protocol, metric, agg_diff=agg_diff, agg_same=agg_same, out_dir=_dir)
+    protocols = data['protocol'].unique()
+    for protocol in protocols:
+        metrics = data.query('protocol == "%s"' % protocol)['metric'].unique()
+        for metric in metrics:
+            message_line_chart(data, protocol, metric, agg_diff=agg_diff, agg_same=agg_same, out_dir=out_dir)
 
 
-def message_plot(data, protocol, metric, agg_diff=('network_size', 'delay'), agg_same='delay', out_dir='plots'):
+def message_line_chart(data, protocol, metric, agg_diff, agg_same, out_dir):
     """
     Generate a plot of the number of messages (metric) used by a given protocol.
     :param data: Pandas DataFrame that contains the simulator logs.
@@ -34,8 +34,10 @@ def message_plot(data, protocol, metric, agg_diff=('network_size', 'delay'), agg
     :param out_dir: Path of the directory where to store the generated plots.
     """
 
+    # TODO: remove str HACK!
     # prepare the folders for the plots
-    utils.mkdir(out_dir)
+    output_dir = '/'.join([out_dir, protocol, str(metric)])
+    utils.mkdir(output_dir)
 
     # extract the logs for the given protocol and metric
     aggregation_with_time = list(agg_diff) + ([agg_same] if agg_same is not None else []) + ['time']
@@ -55,7 +57,7 @@ def message_plot(data, protocol, metric, agg_diff=('network_size', 'delay'), agg
         query = make_query(agg_diff, row)
         match = df.query(query)
 
-        print(' - Metric [protocol=%s, metric=%s]: %s' % (protocol, metric, query))
+        print('   - Metric: protocol == %s, metric == %s, %s' % (protocol, metric, query))
 
         figure = plt.figure()
         ax = figure.add_subplot(111)
@@ -84,12 +86,12 @@ def message_plot(data, protocol, metric, agg_diff=('network_size', 'delay'), agg
         ax.set_title(metric + ': ' + make_title(agg_diff, row))
         ax.grid(True)
 
-        path = '%s/messages-%s-%s-plot-%s.png' % (out_dir, protocol, metric, make_filename(agg_diff, row))
+        path = '%s/%s.png' % (output_dir, make_filename(agg_diff, row))
         figure.savefig(path, bbox_inches='tight')
         plt.close(figure)
 
 
-def blockchain_histogram(data, agg_diff=('network_size', 'time'), agg_same='delay', out_dir='plots'):
+def forks_histogram(data, agg_diff=('network_size', 'time'), agg_same='delay', out_dir='plots'):
     """
     Generate histograms of the frequencies of forks of different sizes (in the global blockchain).
     :param data: Pandas DataFrame that contains the simulator logs.
@@ -100,7 +102,7 @@ def blockchain_histogram(data, agg_diff=('network_size', 'time'), agg_same='dela
     """
 
     # prepare the folders for the plots
-    output_dir = out_dir + '/global-blockchain'
+    output_dir = out_dir + '/blockchain-forks'
     utils.mkdir(output_dir)
 
     # extract the logs of the global blockchain
@@ -118,7 +120,7 @@ def blockchain_histogram(data, agg_diff=('network_size', 'time'), agg_same='dela
         query = make_query(agg_diff, row)
         match = df.query(query)
 
-        print(' - [histogram] Global Blockchain: %s' % query)
+        print('   - Blockchain Forks [histogram]: %s' % query)
 
         figure = plt.figure()
         ax = figure.add_subplot(111)
@@ -146,7 +148,7 @@ def blockchain_histogram(data, agg_diff=('network_size', 'time'), agg_same='dela
 
         ax.set_xlabel('Fork Size')
         ax.set_ylabel('Frequency')
-        ax.set_title('Global Forks: ' + make_title(agg_diff, row))
+        ax.set_title('Blockchain Forks: ' + make_title(agg_diff, row))
         ax.grid(True)
         ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(base=1.0))
 
@@ -155,7 +157,7 @@ def blockchain_histogram(data, agg_diff=('network_size', 'time'), agg_same='dela
         plt.close(figure)
 
 
-def blockchain_line_chart(data, agg_diff=('network_size', 'time'), agg_same='delay', log_scale=True, out_dir='plots'):
+def forks_line_chart(data, agg_diff=('network_size', 'time'), agg_same='delay', log_scale=True, out_dir='plots'):
     """
     Generate a line chart of the frequencies of forks of different sizes (in the global blockchain).Î
     :param data: Pandas DataFrame that contains the simulator logs.
@@ -167,7 +169,7 @@ def blockchain_line_chart(data, agg_diff=('network_size', 'time'), agg_same='del
     """
 
     # prepare the folders for the plots
-    output_dir = out_dir + '/global-blockchain'
+    output_dir = out_dir + '/blockchain-forks'
     utils.mkdir(output_dir)
 
     # extract the logs of the global blockchain
@@ -188,7 +190,7 @@ def blockchain_line_chart(data, agg_diff=('network_size', 'time'), agg_same='del
         query = make_query(agg_diff, row)
         match = df.query(query)
 
-        print(' - [line chart] Global Blockchain: %s' % query)
+        print('   - Blockchain Forks [line-chart]: %s' % query)
 
         figure = plt.figure()
         ax = figure.add_subplot(111)
@@ -211,8 +213,8 @@ def blockchain_line_chart(data, agg_diff=('network_size', 'time'), agg_same='del
                     ys_err_to_plot = ys_err
                 else:
                     xs_to_plot = all_xs
-                    ys_to_plot = complete_with_detault_values(xs, ys, all_xs)
-                    ys_err_to_plot = complete_with_detault_values(xs, ys_err, all_xs)
+                    ys_to_plot = complete_with_default_values(xs, ys, all_xs)
+                    ys_err_to_plot = complete_with_default_values(xs, ys_err, all_xs)
 
                 ax.errorbar(xs_to_plot, ys_to_plot, ys_err_to_plot, label=label, linestyle=style.__next__(),
                             capsize=5, marker='.')
@@ -230,7 +232,7 @@ def blockchain_line_chart(data, agg_diff=('network_size', 'time'), agg_same='del
 
         ax.set_xlabel('Fork Size')
         ax.set_ylabel('Frequency')
-        ax.set_title('Global Forks: ' + make_title(agg_diff, row))
+        ax.set_title('Blockchain Forks: ' + make_title(agg_diff, row))
         ax.grid(True)
         ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(base=1.0))
 
@@ -255,7 +257,7 @@ def make_stuff(columns, row, sep_1, sep_2):
     return sep_1.join([column + sep_2 + str(float(row[column])) for column in columns])
 
 
-def complete_with_detault_values(xs, ys, all_xs, default_y=0):
+def complete_with_default_values(xs, ys, all_xs, default_y=0):
     return list(map(lambda x: get_or_default(x, xs, ys, default_y), all_xs))
 
 

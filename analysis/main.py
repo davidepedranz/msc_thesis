@@ -8,7 +8,9 @@ import plotter
 
 
 def main():
-    """"""
+    """
+    Compute various kinds of plots useful to analyze the results of one simulation.
+    """
 
     # check the command line parameters
     argv = sys.argv
@@ -23,9 +25,9 @@ def main():
     # load the cache or parse the file
     stats, freq, parameters = load_cache_or_parse_logs(run_dir)
 
-    # create directory for the plots ... TODO (uncomment line)
-    # plots_dir = run_dir + 'plots'
-    plots_dir = 'plots'
+    # create directory for the plots ...
+    # plots_dir = 'plots'
+    plots_dir = run_dir + 'plots'
     utils.mkdir(plots_dir)
 
     # [plots]: extract simulations parameters
@@ -33,18 +35,23 @@ def main():
     # params_no_seed_with_time = params_no_seed + ['time']
 
     # [plots]: messages
+    print(' - Process Protocols Metrics')
     # plotter.messages_plot(stats, protocol='topology', agg_diff=params_no_seed, agg_same=None, out_dir=plots_dir)
-    plotter.messages_plot(stats, protocol='topology', agg_diff=('network_size',), agg_same='delay', out_dir=plots_dir)
+    plotter.messages_line_chart(stats, agg_diff=('network_size',), agg_same='delay', out_dir=plots_dir)
+    plotter.messages_line_chart(stats, agg_diff=('delay',), agg_same='network_size', out_dir=plots_dir)
+    plotter.messages_line_chart(stats, agg_diff=('network_size',), agg_same='delay', out_dir=plots_dir)
+    plotter.messages_line_chart(stats, agg_diff=('delay',), agg_same='network_size', out_dir=plots_dir)
 
     # [plots]: blockchain - histogram
+    print(' - Process Blockchain Forks')
     # plotter.blockchain_histogram(freq, agg_diff=params_no_seed_with_time, agg_same=None, out_dir=plots_dir)
-    plotter.blockchain_histogram(freq, agg_diff=('network_size', 'time'), agg_same='delay', out_dir=plots_dir)
-    plotter.blockchain_histogram(freq, agg_diff=('delay', 'time'), agg_same='network_size', out_dir=plots_dir)
+    plotter.forks_histogram(freq, agg_diff=('network_size', 'time'), agg_same='delay', out_dir=plots_dir)
+    plotter.forks_histogram(freq, agg_diff=('delay', 'time'), agg_same='network_size', out_dir=plots_dir)
 
     # [plots]: blockchain - line chart
     # plotter.blockchain_line_chart(freq, agg_diff=params_no_seed_with_time, agg_same=None, out_dir=plots_dir)
-    plotter.blockchain_line_chart(freq, agg_diff=('network_size', 'time'), agg_same='delay', out_dir=plots_dir)
-    plotter.blockchain_line_chart(freq, agg_diff=('delay', 'time'), agg_same='network_size', out_dir=plots_dir)
+    plotter.forks_line_chart(freq, agg_diff=('network_size', 'time'), agg_same='delay', out_dir=plots_dir)
+    plotter.forks_line_chart(freq, agg_diff=('delay', 'time'), agg_same='network_size', out_dir=plots_dir)
 
 
 def load_cache_or_parse_logs(run_dir):
@@ -64,14 +71,14 @@ def load_cache_or_parse_logs(run_dir):
 
     # cache found, load it
     if utils.exits(stats_file) and utils.exits(freq_file) and utils.exits(params_file):
-        print('Cache found for simulation: ' + log_file)
+        print(' - Cache found... do NOT process the results again')
         stats = pandas.read_csv(stats_file)
         freq = pandas.read_csv(freq_file)
         parameters = list(pandas.read_csv(params_file)['parameters'])
 
     # cache not found
     else:
-        print('Cache NOT found for simulation: ' + log_file)
+        print(' - Cache NOT found... process the results')
         stats, freq, parameters = parser.parse_file(log_file)
         utils.mkdir(cache_dir)
         stats.to_csv(stats_file, index=False)
