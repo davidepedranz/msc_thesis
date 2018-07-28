@@ -35,5 +35,5 @@ simulate: compile
 	@echo "commit=$(commit)" >> $(info)
 	@echo "status=$(status)" >> $(info)
 	cp $(SIMULALATOR_CONFIG) $(config)
-	java -jar $(SIMULATOR_BIN) $(config) > $(logs_directory)/stdout.txt 2> $(logs_directory)/stderr.txt
+	java -jar $(SIMULATOR_BIN) $(config) > $(logs_directory)/stdout.txt 2> >(tee -a $(logs_directory)/stderr.txt | grep 'Experiment' >&2) 
 	@echo ""
