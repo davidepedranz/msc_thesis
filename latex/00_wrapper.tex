@@ -1,0 +1,53 @@
+% !TeX root = ./00_wrapper.tex
+\documentclass[11pt, a4paper]{report}
+
+% custom margins, required by UniTN
+\usepackage[a4paper, left=2cm, right=2cm, top=2cm, bottom=2cm, footskip=1cm]{geometry}
+
+% english document
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+% bibliography (see https://tex.stackexchange.com/questions/58152/how-to-emulate-the-traditional-bibtex-styles-plain-abbrv-unsrt-alpha-as-clo)
+\usepackage{csquotes}
+\usepackage[style=trad-plain]{biblatex}
+\addbibresource{references.bib}
+
+% fix urls in bibliography
+\usepackage[hidelinks]{hyperref}
+\renewcommand{\UrlFont}{\small\tt}
+
+% units and nice numbers
+\usepackage{siunitx}
+
+% images
+\usepackage{graphicx}
+
+% cref command
+\usepackage[noabbrev,capitalise]{cleveref}
+
+% TODO: use only for draft versions
+% \renewcommand{\baselinestretch}{1.5}
+
+\title{MSc. Thesis:\\Bitcoin Simulator}
+\author{Davide Pedranz}
+\date{\today}
+
+\begin{document}
+
+\begin{titlepage}
+	\maketitle
+	\tableofcontents
+\end{titlepage}
+
+% \input{introduction.tex}
+\input{bitcoin.tex}
+\input{protocol.tex}
+% \input{attacks.tex}
+% \input{simulator.tex}
+% \input{results.tex}
+% \input{conclusions.tex}
+
+\printbibliography
+
+\end{document}
