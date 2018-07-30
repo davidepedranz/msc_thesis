@@ -36,9 +36,9 @@ the geographical distribution of nodes around the world and the decentralization
 \end{figure}
 
 \section{Blocks}
-Each block contains and confirms a number of transactions up to about \num{3000}.
+Each block contains up to about \num{3000} transactions.
 By design, a new block is generated and appended to the blockchain every \num{10} minutes on average \cite{bitcoin_2008}.
-Bitcoin blocks are distributed using a peer-to-peer protocol, which is explained in \cref{chapter:protocol}.
+Bitcoin blocks are distributed using a peer-to-peer protocol, which is explained in detail in \cref{chapter:protocol}.
 
 The transactions inside each block are organized as a Merkle tree \cite{merkle_tree_1980}, a special binary tree with hash pointers (\cref{fig:merkle}).
 The items in the tree are grouped in pairs and the hash of each of them is stored in the parent node.
@@ -62,10 +62,11 @@ The header contains only the hash of the Merkle tree root, the hash of the previ
 The body stores the set the transactions as a serialized representation of the Merkle tree.
 
 The second advantage of a Merkle tree is that transaction lookups in a block take $\mathcal{O}(n\log n)$ time, where $n$ is the number of transactions stored in the block.
+This property is very useful to efficiently validate new transactions.
 
 \section{Transactions}
 Transactions are used to spend bitcoins, i.e. move bitcoins between different addresses (see \cref{sec:addresses}).
-Transactions in Bitcoin are not as simple as a tuple of \texttt{\textlangle sender, amount, receiver\textrangle}.
+Transactions in Bitcoin are not a simple tuple of \texttt{\textlangle sender, amount, receiver\textrangle}.
 They are expressed as a small script, written in a custom, stateless and non-Turing-complete language.
 Transactions can have many inputs and many outputs, offer a transaction fee as incentive to be processed faster (see \cref{sec:mining}) or even define a kind of contract between parties (for example, some money ``spent'' in the transaction might be redeemable only on certain conditions).
 
@@ -80,7 +81,7 @@ It is only important to outline that:
 \label{sec:addresses}
 A Bitcoin address corresponds to a pair of public and private key: the hash of the public key is the actual Bitcoin address, while the private key is needed to make payments using the bitcoins stored in the address.
 Each address can store some bitcoins, which are the result of some transaction stored in the blockchain.
-The owner of the private key associated to the address is able to create valid transactions to move the stored bitcoins to other addresses, or to create a contract.
+The owner of the private key associated to the address is able to create valid transactions to move the stored bitcoins to other addresses, or to create a new contract.
 
 A Bitcoin address can be compared to the concept a bank account:
 it stores an amount of money (bitcoins in this case) and it is the only information required to make a payment to someone;
@@ -90,21 +91,21 @@ since all transactions are publicly stored in the blockchain, it is trivial to t
 
 \section{Wallets}
 A wallet is a convenient way to manage Bitcoin addresses.
-Bitcoin wallets create public keys (i.e. addresses) where to receive bitcoins and use the corresponding private keys to spend the bitcoins in the addresses.
-They can simultaneously manage multiple addresses and provide a nice user interface to facilitate different tasks, such as buying something in a shop or make an online payment.
-A wallet also solves the problem or ``rotating'' addresses at each transaction in order to make the user more difficult to track, without need of human intervention or understanding of all exact operations performed from the waller owner.
+Bitcoin wallets are able to create public keys (i.e. addresses) where to receive bitcoins and use the corresponding private keys to spend the bitcoins in the addresses.
+They can simultaneously manage multiple addresses and provide a nice user interface to facilitate different tasks, such as buying something in a shop or making an online payment.
+A wallet also solves the problem or ``rotating'' addresses at each transaction in order to make the user more difficult to track, without need of human intervention.
 
 Wallets can be either a software or a physical device.
 Software wallets are usually easier to use, since they can simply use the available internet connection to interact with the peer-to-peer network to get information from the blockchain and broadcast new transactions.
-On the other hand, software wallets more vulnerable to attacks, since an attacker only needs to compromise the user's device running the software to steal the private keys stored in the wallet and take control of the bitcoins stored in the corresponding addresses.
+On the other hand, software wallets are more vulnerable to attacks, since an attacker only needs to compromise the user's device running the software to steal the private keys stored in the wallet and take control of the bitcoins stored in the corresponding addresses.
 Hardware wallets are physical devices able to manage Bitcoin addresses and store the private keys securely in a dedicated hardware module.
 
 \section{Forks}
 A fork is a bifurcation of the blockchain:
 it happens when \num{2} or more different blocks have the same parent block, as shown in \cref{fig:forks}.
-Blocks in different branches in the blockchain may contain different or even contrasting transactions and create inconsistencies in the global state, since different nodes may decide to follow different forks.
+Blocks in different branches of the blockchain may contain different or even contrasting transactions and create inconsistencies in the global state, since different nodes may decide to follow different forks.
 To solve this problem, Bitcoin introduces a resolution rule for forks:
-correct Bitcoin nodes should follow the longest chain, i.e. the chain whose last block has the higher number of preceding blocks.
+Bitcoin nodes should follow the longest chain, i.e. the chain whose last block has the higher number of preceding blocks.
 
 \begin{figure}[h]
 	\centering
@@ -127,11 +128,19 @@ We will cover the ``double-spend'' attack in greater detail in \cref{chapter:att
 \label{sec:mining}
 The usage of modern cryptography in Bitcoin addresses and transactions guarantees that only the owner of some money can actually spend it (at least until the private key associated to the address is carefully protected).
 Also, since all transactions are recorded and stored in the blockchain, the blockchain uses cryptographic hashes to detect tampering and it is replicated around many computer and devices around the world, it is very difficult or even impossible to remove old transactions from the past (i.e. revert payments).
-However, there is so far no mechanism that prevents an attacker to create a big number of forks by forging new blocks.
+However, there is so far no mechanism that prevents an attacker to create a big number of forks by simply forging new blocks.
 
+\bigskip
 Bitcoin uses \ac{PoW} \cite{pow_2002} to reduce the feasibility of such an attack.
-It requires to solve a cryptographic puzzle and include the its solution to make a block valid.
-The difficulty of the puzzle is agreed by the network depending on the total computational power available.
+It requires to solve a cryptographic puzzle and include its solution to create a valid block.
+The difficulty of the puzzle is agreed by the network and depends on the total computational power available.
 The puzzle consists in finding a nonce to include in the block such that the cryptographic hash of the serialized block is less than a target number, i.e. it starts with a certain number of zeros.
 Thanks to the properties of cryptographic hash functions, the only way to solve the puzzle is a brute-force approach, which requires time and resources (in terms of both computation power and energy).
 This mechanism prevents an attacker to forge too many blocks, since it would require too many resources and time.
+
+People that manage to create a new block (miners) get a reward in bitcoins when the block is stored in the main chain.
+Also, they get the fees of all transactions stored in the block.
+It is important to notice that a miner is able to spend the reward obtained only if the corresponding block is stored in the main chain:
+blocks in different branches of the blockchain are not recognized, since all correct nodes will only consider the longest (main) chain as valid.
+Bitcoin rules try to encourage miners to behave correctly:
+if a miner has a block stored in the blockchain, it is its interest to keep mining on the longest chain, in order to make more difficult or impossible for an attacker to create a branch which gets longer than the main chain, since this might ``cancel'' the rewards of the miner.
