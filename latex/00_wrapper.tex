@@ -6,7 +6,7 @@
 
 % english document
 \usepackage[utf8]{inputenc}
-\usepackage[english]{babel}
+\usepackage[american]{babel}
 
 % bibliography (see https://tex.stackexchange.com/questions/58152/how-to-emulate-the-traditional-bibtex-styles-plain-abbrv-unsrt-alpha-as-clo)
 \usepackage{csquotes}
@@ -26,8 +26,19 @@
 % cref command
 \usepackage[noabbrev,capitalise]{cleveref}
 
+% special symbols, eg. <, >
+\usepackage{textcomp}
+
 % TODO: use only for draft versions
 % \renewcommand{\baselinestretch}{1.5}
+
+% list of acronyms
+\RequirePackage[index=true]{acro}
+\NewDocumentCommand\acrodef{mO{#1}mG{}}{\DeclareAcronym{#1}{short={#2}, long={#3}, #4}}
+\NewDocumentCommand\acused{m}{\acuse{#1}}
+
+\acrodef{PoW}{Proof-of-Work}
+
 
 \title{MSc. Thesis:\\Bitcoin Simulator}
 \author{Davide Pedranz}
@@ -37,13 +48,14 @@
 
 \begin{titlepage}
 	\maketitle
-	\tableofcontents
 \end{titlepage}
+
+\tableofcontents
 
 % \input{introduction.tex}
 \input{bitcoin.tex}
 \input{protocol.tex}
-% \input{attacks.tex}
+\input{attacks.tex}
 % \input{simulator.tex}
 % \input{results.tex}
 % \input{conclusions.tex}
