@@ -149,43 +149,43 @@ if a miner has a block stored in the blockchain, it is its interest to keep mini
 
 \bigskip
 The process of mining in Bitcoin can be seen as a competition between miners.
-As soon as a new block is created, it is published and appended to the longest branch in the blockchain, then miners move the next block:
-they choose the transactions to include from the one not yet processes, create the block by including the current timestamp, their address and the other information required and start to look for a nonce value that solves the cryptographic puzzle.
+As soon as a new block is created, it is published and appended to the longest branch in the blockchain.
+Then, miners move the next block:
+they choose the transactions to include from the one not yet processes, create the block by including the current timestamp, their address and the other information required and start to look for a nonce value that solves new the cryptographic puzzle.
 When a miner finishes a block, all the others stop and start again from the longest branch:
 it would make no sense to complete the current block\footnote{At least for honest miners (those that does not deviate from the Bitcoin protocol); malicious miners might have an advantage to choose a different strategy, as explained in \cref{chapter:attacks}}, since it would be in conflict with the current longest chain and would probably be ignored by the other nodes in the network.
-The idea behind this strategy - which is the one implemented in official Bitcoin implementation started Satoshi Nakamoto \cite{bitcoin_github} - is to waste as little computational power as possible:
+The idea behind this strategy - which is the one implemented in official Bitcoin implementation originally created by Satoshi Nakamoto \cite{bitcoin_github} - is to waste as little computational power as possible:
 when a block is attached to the longest chain, it would be a waste to complete another block that should be put in the same place as the first one.
 
 \section{Mining Pools}
 It is important to notice that the cryptographic puzzle used by Bitcoin is highly parallelizable, both on a single computer with a multi-core \ac{CPU} and as a distributed algorithms in a cluster of machines.
-The only known way to solve the puzzle is a brute-force approach, which means to try all possible values for the nonce, until a good nonce is found.
-Also, since the nonce has a binary representation on a finite number of bits, it is trivial to partition the possible values for the nonce in $n$ ranges.
-Depending on the implementation, each range can be assigned to a different core of the \ac{CPU} or distributed to a different machine in a cluster;
-each core or machine reports the good nonces to a central coordinator, which it responsible to publish the block to the network.
+The only known way to solve the puzzle is a brute-force approach, which means trying all possible values for the nonce until a good nonce is found.
+Also, since the nonce has a binary representation on a finite number of bits, it is trivial to partition the set of all possible values in ranges.
+Each range can be assigned to a different core of the \ac{CPU} or distributed to a different machine in a cluster;
+each core or machine reports the good nonces to some central coordinator, which it responsible to publish the block to the network and distribute new tasks to perform.
 
 Because of the properties of cryptographic hash functions, the expected number of trials required to find a good nonce is $2^{b - 1}$, where $b$ is the number of bits in the binary representation of the nonce in a block header.
 To verify if a nonce is good for a block, a miner only needs to put the nonce in the correct location in the block header and compute the hash function on the complete block.
-The expected time to complete a block is thus proportional to the speed of the miner in computing an hash function; this value is usually called ``Hash Rate''
-in the Bitcoin vocabulary \cite{bitcoin_vocabulary}.
+The expected time to complete a block is thus proportional to the speed of the miner in computing an hash function.
+This value is usually called ``Hash Rate'' in the Bitcoin vocabulary \cite{bitcoin_vocabulary}.
 
-Each miner is in competition with other miners:
-after a new block is published, honest miners start the mining process on a new block.
-The probability of a miner to be the first one to find the next block is proportional to its hash rate.
-This means that miners with a small hash rate (e.g. those that use a general-purpose computer) are statistically very unlikely to ever find a block, and thus to earn a reward.
-For this reason, miners tend to create groups and cooperate with each other to create the so-called ``Mining Pools''.
+Miners are in competition with each other:
+after a new block is published, honest miners start to work on the next block.
+The probability of a miner to be the first one to complete a block is proportional to its hash rate.
+Miners with small hash rates (e.g. those that use a general-purpose computer) are statistically very unlikely to ever find a block, and thus to earn a reward.
+For this reason, miners to cooperate with each other in groups and create the so-called ``Mining Pools''.
 
 \bigskip
 A mining pool is a set of miners that share their computational power in the mining process.
-Each pool as a coordinator that participates in the normal Bitcoin protocol:
+Each pool has a coordinator that participates in the normal Bitcoin protocol:
 it collects pending transactions, distribute blocks etc.
-In addition, the coordinator creates ranges of nonces values and distribute them in the pool (as described above);
-when a node in the pool finds a good nonce, the coordinator completes the block and distributes it to the Bitcoin network;
-the same process is then repeated for the next block.
-The coordinator is also responsible of sharing the rewards among the nodes in the pool:
-all blocks are created using the address of the coordinator, which collects all rewards;
-periodically, it pays the nodes in the pool based on their contribution to the mining process.
+In addition, the coordinator creates ranges of nonces values and distributes them to the pool (as described above);
+when a node finds a good nonce, it reports it to the coordinator, which completes and distributes the block to the rest of the Bitcoin network.
+The same process is repeated for the next blocks.
+The coordinator is also responsible for sharing the rewards among the nodes in the pool:
+all blocks are created using the address of the coordinator, which collects all rewards, and periodically pays each node based on its contribution to the mining process.
 
-Joining a mining pool is a way to minimize the risk.
+Mining pools are a way to minimize the risk.
 If the pool has a sufficient hash rate, it is likely to complete blocks before other miners and get the reward;
 even small miners can contribute to a pool and get a small reward.
 
