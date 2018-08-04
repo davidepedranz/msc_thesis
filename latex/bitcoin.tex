@@ -58,7 +58,7 @@ In the specific case of Bitcoin, each item in the tree represents a single trans
 The main advantage of using a Merkle tree is that the hash of the root uniquely identifies a specific set of transactions.
 In fact, a change of a single item would modify the hashes of all ancestor nodes in the tree, thanks to the properties of the cryptographic hash functions.
 This allows to divide a Bitcoin block in \num{2} parts - a header and a body - and distribute them independently of each other \cite{bitcoin_reference}.
-The header contains only the hash of the Merkle tree root, the hash of the previous block in the blockchain and a couple of additional information such as protocol version and timestamp of creation.
+The header contains only the hash of the Merkle tree root, the hash of the previous block in the blockchain, the address of the miner that created the block (see \cref{sec:addresses} and \cref{sec:mining}) and a couple of additional information such as protocol version and timestamp of creation.
 The body stores the set the transactions as a serialized representation of the Merkle tree.
 
 The second advantage of a Merkle tree is that transaction lookups in a block take $\mathcal{O}(n\log n)$ time, where $n$ is the number of transactions stored in the block.
@@ -138,9 +138,55 @@ The puzzle consists in finding a nonce to include in the block such that the cry
 Thanks to the properties of cryptographic hash functions, the only way to solve the puzzle is a brute-force approach, which requires time and resources (in terms of both computation power and energy).
 This mechanism prevents an attacker to forge too many blocks, since it would require too many resources and time.
 
-People that manage to create a new block (miners) get a reward in bitcoins when the block is stored in the main chain.
-Also, they get the fees of all transactions stored in the block.
+\bigskip
+People that manage to create a new block (miners) get a reward in bitcoins when the block is stored in the main chain;
+also, they get the fees of all transactions stored in the block.
+The address of the miner is stored in the header of the block, so the other nodes that run the Bitcoin protocol know who to acknowledge both rewards.
 It is important to notice that a miner is able to spend the reward obtained only if the corresponding block is stored in the main chain:
 blocks in different branches of the blockchain are not recognized, since all correct nodes will only consider the longest (main) chain as valid.
 Bitcoin rules try to encourage miners to behave correctly:
 if a miner has a block stored in the blockchain, it is its interest to keep mining on the longest chain, in order to make more difficult or impossible for an attacker to create a branch which gets longer than the main chain, since this might ``cancel'' the rewards of the miner.
+
+\bigskip
+The process of mining in Bitcoin can be seen as a competition between miners.
+As soon as a new block is created, it is published and appended to the longest branch in the blockchain, then miners move the next block:
+they choose the transactions to include from the one not yet processes, create the block by including the current timestamp, their address and the other information required and start to look for a nonce value that solves the cryptographic puzzle.
+When a miner finishes a block, all the others stop and start again from the longest branch:
+it would make no sense to complete the current block\footnote{At least for honest miners (those that does not deviate from the Bitcoin protocol); malicious miners might have an advantage to choose a different strategy, as explained in \cref{chapter:attacks}}, since it would be in conflict with the current longest chain and would probably be ignored by the other nodes in the network.
+The idea behind this strategy - which is the one implemented in official Bitcoin implementation started Satoshi Nakamoto \cite{bitcoin_github} - is to waste as little computational power as possible:
+when a block is attached to the longest chain, it would be a waste to complete another block that should be put in the same place as the first one.
+
+\section{Mining Pools}
+It is important to notice that the cryptographic puzzle used by Bitcoin is highly parallelizable, both on a single computer with a multi-core \ac{CPU} and as a distributed algorithms in a cluster of machines.
+The only known way to solve the puzzle is a brute-force approach, which means to try all possible values for the nonce, until a good nonce is found.
+Also, since the nonce has a binary representation on a finite number of bits, it is trivial to partition the possible values for the nonce in $n$ ranges.
+Depending on the implementation, each range can be assigned to a different core of the \ac{CPU} or distributed to a different machine in a cluster;
+each core or machine reports the good nonces to a central coordinator, which it responsible to publish the block to the network.
+
+Because of the properties of cryptographic hash functions, the expected number of trials required to find a good nonce is $2^{b - 1}$, where $b$ is the number of bits in the binary representation of the nonce in a block header.
+To verify if a nonce is good for a block, a miner only needs to put the nonce in the correct location in the block header and compute the hash function on the complete block.
+The expected time to complete a block is thus proportional to the speed of the miner in computing an hash function; this value is usually called ``Hash Rate''
+in the Bitcoin vocabulary \cite{bitcoin_vocabulary}.
+
+Each miner is in competition with other miners:
+after a new block is published, honest miners start the mining process on a new block.
+The probability of a miner to be the first one to find the next block is proportional to its hash rate.
+This means that miners with a small hash rate (e.g. those that use a general-purpose computer) are statistically very unlikely to ever find a block, and thus to earn a reward.
+For this reason, miners tend to create groups and cooperate with each other to create the so-called ``Mining Pools''.
+
+\bigskip
+A mining pool is a set of miners that share their computational power in the mining process.
+Each pool as a coordinator that participates in the normal Bitcoin protocol:
+it collects pending transactions, distribute blocks etc.
+In addition, the coordinator creates ranges of nonces values and distribute them in the pool (as described above);
+when a node in the pool finds a good nonce, the coordinator completes the block and distributes it to the Bitcoin network;
+the same process is then repeated for the next block.
+The coordinator is also responsible of sharing the rewards among the nodes in the pool:
+all blocks are created using the address of the coordinator, which collects all rewards;
+periodically, it pays the nodes in the pool based on their contribution to the mining process.
+
+Joining a mining pool is a way to minimize the risk.
+If the pool has a sufficient hash rate, it is likely to complete blocks before other miners and get the reward;
+even small miners can contribute to a pool and get a small reward.
+
+% Also, each miner is looking for a different nonce, since their address needs to be included in the block in order to get the reward.
