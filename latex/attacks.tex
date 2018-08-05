@@ -31,7 +31,7 @@ The attack is illustrated in \cref{fig:race-attack} and works as follows:
 	\item the merchants sees the unconfirmed transaction and accepts the payment; this scenario is more likely for in-shop purchases, where, in many cases, the merchant can not wait for the transaction to be stored in the blockchain;
 	\item \texttt{tx-2} is received before \texttt{tx-1} from the miners, so it is more likely to be stored in some block before \texttt{tx-1};
 	\item \texttt{tx-2} is stored in a block, while \texttt{tx-1} is rejected since in conflict with \texttt{tx-1}.
-	% \item the attacker receives its bitcoins back, while the merchant does not get anything.
+	      % \item the attacker receives its bitcoins back, while the merchant does not get anything.
 \end{itemize}
 
 \begin{figure}[t]
@@ -90,5 +90,79 @@ Similarly to the Race attack, the Finney attack relies on conflicting transactio
 The defense for the merchant is the same discussed in \cref{sub:race-attack}.
 
 \section{Majority Attack}
-51\%
-\cite{selfish_mining, selfish_mining_acm}
+The majority attack, also known as \num{51}\% attack, refers to a situation in which one miner (or one group of miners) control more that \num{50}\% of the entire network's mining hash rate \cite{majority_investopedia, majority_bitcoin_wiki}.
+An attacker with such a computational power can generate blocks faster than the rest of the network, so it can take control of the entire blockchain and each block in the longest chain.
+The attacker strategy is to mine its private chain, ignoring the current longest chain and each block honest miner published.
+This strategy gives statically guarantees to eventually generate the longest chain, no matter the advantage of honest miners (in terms of the difference in the number of blocks on the current longest chain and the number of blocks in the attacker's chain).
+Such an attacker could, potentially, start its own chain from the genesis block and revert the entire history of Bitcoin, as illustrated in \cref{fig:majority-attack}.
+
+There is no defense against this attack:
+Bitcoin's security relies on an honest majority of nodes that collectively control more computational power than any attacker (or group of attackers) \cite{bitcoin_2009}.
+To be more precise, the system is not vulnerable to the majority attack as long as no single coalition of miners controlling more than \num{50}\% of the total hash rate \cite{bitcoin_wiki_irreversible_transactions}.
+
+\begin{figure}[t!]
+	\begin{subfigure}{\textwidth}
+		\centering
+		\vspace*{0.25cm}
+		\includegraphics[scale=0.9]{figures/majority_attack_1}
+		\vspace*{0.25cm}
+		\caption{
+			The attacker starts to mine block (in red) from the genesis (number \texttt{0}, in blue) instead of following the longest chain (in green).
+			Honest miners keep following the green chain that finishes with block \texttt{3a}.
+		}
+		\vspace*{0.75cm}
+		\label{fig:majority-attack-1}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\vspace*{0.25cm}
+		\includegraphics[scale=0.9]{figures/majority_attack_2}
+		\vspace*{0.25cm}
+		\caption{
+			Eventually, the attacker's chain gets longer than the previous longest chain.
+			The attacker broadcasts all blocks in his chain to the Bitcoin network.
+		}
+		\vspace*{0.75cm}
+		\label{fig:majority-attack-2}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\vspace*{0.25cm}
+		\includegraphics[scale=0.9]{figures/majority_attack_3}
+		\vspace*{0.25cm}
+		\caption{
+			Honest miners start following the attacker's chain (now in green), since it is not longer than the chain terminating with block \texttt{3a}.
+			The oldest chain (now in yellow) is orphaned: all transactions stored in blocks \texttt{1a}, \texttt{2a} and \texttt{3a} are not valid anymore.
+			Potentially, the attacker may include transactions conflict with the canceled once in any of the new blocks \texttt{1b}, \texttt{2b}, \texttt{3b} and \texttt{4b}, effectively double-spending some or all of its bitcoins.
+		}
+		\vspace*{0.25cm}
+		\label{fig:majority-attack-3}
+	\end{subfigure}
+	\caption{
+		Illustration of the different phases of a majority attack, where an attacker takes control of the entire blockchain, starting from the genesis block.
+		The attacker is able to revert the history of all transactions stored in the blockchain.
+	}
+	\label{fig:majority-attack}
+\end{figure}
+
+The majority attack allows an attacker to perform the following actions \cite{weaknesses_bitcoin_wiki}:
+\begin{itemize}
+	\item rewrite the history of the blockchain;
+	\item prevent some or all transactions from becoming part of the longest chain;
+	\item prevent some or all other miners from attaching new blocks to the longest chain (and thus getting any reward);
+	\item reverse transactions it has made in the past, effectively double-spending its bitcoins;
+	\item gain the revenue of all new blocks.
+\end{itemize}
+
+A majority attack can completely destroy the working of Bitcoin and violate some of its main guarantees (e.g. spending the same bitcoins only once).
+Such an attack is thought to be very unlikely \cite{ghash_never_51_attack_cex, ghash_never_51_attack_coindesk}, because of its huge cost in terms of computing power and the risk for an attacker not to gain anything from it:
+even if it is theoretically possible to revert all blocks following the genesis, it is incredible expensive.
+The attack would immediately destroy the credibility of Bitcoin and has \num{2} possible effects:
+\begin{enumerate}
+	\item bitcoins value drops completely, and the attacker had no real reward;
+	\item the rules of the software are changed by the community to revert the attack \cite{weaknesses_bitcoin_wiki}.
+\end{enumerate}
+
+
+\section{Selfish Mining}
+TODO: \cite{selfish_mining, selfish_mining_acm}
