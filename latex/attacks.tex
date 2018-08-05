@@ -15,10 +15,11 @@ it gets the purchase for free, while the merchant never receives the due bitcoin
 
 Double-spending breaks the most important guarantee that Bitcoin tries to give:
 transactions are irreversible and bitcoins can be spent only once.
-The double-spending attack can be performed directly in some cases, or can be the result of more complex attacks.
+The double-spending attack can be performed directly in some cases, or it can be the result of more complex attacks.
 There are many variants of double-spending, we analyze the most common ones here.
 
 \subsection{Race Attack}
+\label{sub:race-attack}
 The race attack involves merchants that immediately accepts payments, without waiting for the unconfirmed transaction to be securely store in some block in the blockchain \cite{bitcoin_wiki_irreversible_transactions}.
 The race attack has a high degree of success for an attacker \cite{double_spending_two_for_one}.
 The attack is illustrated in \cref{fig:race-attack} and works as follows:
@@ -33,9 +34,9 @@ The attack is illustrated in \cref{fig:race-attack} and works as follows:
 
 \begin{figure}[h]
 	\centering
-	\vspace*{0.20cm}
-	\includegraphics[scale=0.75]{figures/race_attack}
-	\vspace*{0.20cm}
+	\vspace*{0.25cm}
+	\includegraphics[scale=0.73]{figures/race_attack}
+	\vspace*{0.25cm}
 	\caption{
 		Illustration of the race attack, a variant of double-spending.
 		The attacker (in red) owns some bitcoins in the address \texttt{0x11}.
@@ -54,13 +55,13 @@ Bitcoin's developers recommendation is to wait for \num{6} confirmations, i.e. t
 Some blocks can be conflicting with each other (if they have the same parent):
 only one of them can belong to the longest chain, while the others are said to be ``orphaned'' \cite{orphaned_block} and simply ignored, as illustrated in \cref{fig:orphaned-block}.
 Thus, a transaction can be rejected even if it manages to get part of a block, if that block is orphaned.
-Waiting for \num{6} confirmations gives a good tradeoff between the time to wait (on average \SI{1}{hour}) and statistical guarantee that the transaction is very unlikely to be rejected later \cite{bitcoin_2009}.
+Waiting for \num{6} confirmations gives a good tradeoff between the time to wait (on average \SI{1}{hour}) and statistical guarantee that the transaction is unlikely to be rejected later \cite{bitcoin_2009}.
 
 \begin{figure}[h]
 	\centering
-	\vspace*{0.20cm}
+	\vspace*{0.25cm}
 	\includegraphics[scale=1.1]{figures/orphaned_block}
-	\vspace*{0.20cm}
+	\vspace*{0.25cm}
 	\caption{
 		Illustration of an orphaned block.
 		Blocks \texttt{9a} and \texttt{9b} have the same parent.
@@ -70,6 +71,21 @@ Waiting for \num{6} confirmations gives a good tradeoff between the time to wait
 	}
 	\label{fig:orphaned-block}
 \end{figure}
+
+\subsection{Finney Attack}
+The Finney attack is another variant of double-spending targeting merchants that accepts unconfirmed payments.
+It can be performed by an attacker that is able to mine some blocks.
+The attack works as follows:
+\begin{itemize}
+	\item the attacker controls addresses \texttt{addr-a} and \texttt{addr-b};
+	\item the attacker mines a new block on the longest chain; the block includes a transactions \texttt{tx-2} that moves all bitcoins from address \texttt{addr-a} to \texttt{addr-b};
+	\item before broadcasting the block to the Bitcoin network, the attacker sends a transaction \texttt{tx-1} to a merchant, spending again the bitcoins in \texttt{addr-a};
+	\item as soon as the merchants accepts the payment, the attacker broadcasts its block to the network;
+	\item \texttt{tx-2} is stored in the blockchain before \texttt{tx-1}, so \texttt{tx-1} is rejected because in conflict with \texttt{tx-2};
+	\item the attacker receives its bitcoins back, while the merchant does not get anything.
+\end{itemize}
+Similarly to the Race attack, the Finney attack relies on conflicting transactions and the significant time required to confirm a transaction with a high confidence in Bitcoin.
+The defense for the merchant is the same discussed in \cref{sub:race-attack}.
 
 \section{Majority Attack}
 51\%
