@@ -90,6 +90,7 @@ Similarly to the Race attack, the Finney attack relies on conflicting transactio
 The defense for the merchant is the same discussed in \cref{sub:race-attack}.
 
 \section{Majority Attack}
+\label{sec:majority-attack}
 The majority attack, also known as \num{51}\% attack, refers to a situation in which one miner (or one group of miners) control more that \num{50}\% of the entire network's mining hash rate \cite{majority_investopedia, majority_bitcoin_wiki}.
 An attacker with such a computational power can generate blocks faster than the rest of the network, so it can take control of the entire blockchain and each block in the longest chain.
 The attacker strategy is to mine its private chain, ignoring the current longest chain and each block honest miner published.
@@ -111,7 +112,6 @@ To be more precise, the system is not vulnerable to the majority attack as long 
 			Honest miners keep following the green chain that finishes with block \texttt{3a}.
 		}
 		\vspace*{0.75cm}
-		\label{fig:majority-attack-1}
 	\end{subfigure}
 	\begin{subfigure}{\textwidth}
 		\centering
@@ -123,7 +123,6 @@ To be more precise, the system is not vulnerable to the majority attack as long 
 			The attacker broadcasts all blocks in his chain to the Bitcoin network.
 		}
 		\vspace*{0.75cm}
-		\label{fig:majority-attack-2}
 	\end{subfigure}
 	\begin{subfigure}{\textwidth}
 		\centering
@@ -136,7 +135,6 @@ To be more precise, the system is not vulnerable to the majority attack as long 
 			Potentially, the attacker may include transactions conflict with the canceled once in any of the new blocks \texttt{1b}, \texttt{2b}, \texttt{3b} and \texttt{4b}, effectively double-spending some or all of its bitcoins.
 		}
 		\vspace*{0.25cm}
-		\label{fig:majority-attack-3}
 	\end{subfigure}
 	\caption{
 		Illustration of the different phases of a majority attack, where an attacker takes control of the entire blockchain, starting from the genesis block.
@@ -172,4 +170,60 @@ a number of miners voluntarily dropped out of the pool and \texttt{GHash.IO} imp
 
 
 \section{Selfish Mining}
-TODO: \cite{selfish_mining, selfish_mining_acm}
+Selfish Mining \cite{selfish_mining_acm} is a strategy where a group of miners strategically chooses when to submit the new blocks to the public chain, rather than submitting them immediately upon discovery.
+The selfish miners keep the discovered blocks private, intentionally forking the blockchain and mining on their own private branch.
+The honest nodes do not know about the blocks discovered by the selfish miners, so they continue to mine on the public chain.
+If the public longest chain approaches the selfish miners' private branch length, they reveal some blocks to surpass the public chain again.
+The selfish miners causes the honest miners to waste a lot of computational power on obsolete chains, since the longest one is not yet public.
+The idea is illustrated in \cref{fig:selfish-mining}.
+
+Selfish Mining has been proposed in 2013 by Ittay Eyal and Emin G\"un Sirer \cite{selfish_mining}.
+In their paper, they show that both the selfish and the honest miners waste some resources, but the honest miners waste proportionally more:
+overall, the rewards share for the selfish miners is higher than the proportion of computational power they own.
+In practice, this gives the selfish miners an advantage over the others and encourages rational miners to join the group of selfish miners.
+According to the paper, relatively small group of miners can adopt the selfish strategy and attract many other miners, with the risk of gaining the majority of the mining power (see \cref{sec:majority-attack}).
+
+\begin{figure}[h]
+	\begin{subfigure}{\textwidth}
+		\centering
+		\vspace*{0.25cm}
+		\includegraphics[scale=0.9]{figures/selfish_1}
+		\vspace*{0.25cm}
+		\caption{
+			The selfish miners secretly mine block \texttt{13b} from the current public longest chain (in green).
+			The honest miners do not know about block \texttt{13b}, so they keep working from block \texttt{12}.
+		}
+		\vspace*{0.75cm}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\vspace*{0.25cm}
+		\includegraphics[scale=0.9]{figures/selfish_2}
+		\vspace*{0.25cm}
+		\caption{The selfish miners manage to secretly mine another block \texttt{14b} and keep it secret (secret blocks are indicated by the red dashed box).}
+		\vspace*{0.75cm}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\vspace*{0.25cm}
+		\includegraphics[scale=0.9]{figures/selfish_3}
+		\vspace*{0.25cm}
+		\caption{
+			Honest miners manage to mine block \texttt{13a} and publish it.
+			Selfish miners reveal the secret chain, which is longer than the public longest chain.
+			Honest miners discard block \texttt{13a} (in yellow) and start to follow the new longest chain (block \texttt{14b}).
+			The computational power used to mine block \texttt{13a} gets wasted and the honest miners do not get any revenue.
+		}
+		\vspace*{0.25cm}
+	\end{subfigure}
+	\caption{Illustration of the Selfish Mining strategy.}
+	\label{fig:selfish-mining}
+\end{figure}
+
+\bigskip
+Some work has been done in academics to investigate alternative mining strategy.
+Nayak Kartik et at. have proposed Stubborn Mining \cite{stubborn_mining_2016}, a strategy heavily inspired by Selfish Mining, but that accepts some more risk (e.g. keep mining on chains shorter than the longest one) in return to a higher expected revenue.
+They claim that stubborn mining strategies can beat Selfish Mining by up to \num{25}\%.
+
+Ayelet Sapirshtein, Yonatan Sompolinsky and Aviv Zohar have investigated the space of possible selfish mining strategies, looking for the optimal strategy for selfish miners \cite{optimal_selfish_mining_2016}.
+They also show that selfish mining strategies can be combined with double-spending attempts to make them even more profitable for selfish miners.
