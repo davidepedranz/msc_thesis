@@ -3,7 +3,7 @@
 Bitcoin (BTC) is a decentralized digital currency without a central bank or single administrator.
 The original paper \cite{bitcoin_2009} and the first implementation of Bitcoin were published respectively in November \num{2008} and January \num{2009} by an unknown person or group of people using the name of Satoshi Nakamoto \cite{bitcoin_website}.
 Since its release, Bitcoin has gained popularity and attention of the media, especially between the end of \num{2017} and the beginning of \num{2018} \cite{bbc_2018, telegraph_2018, ilsole24ore_2018}.
-Nowadays, Bitcoin is the most used and valuable cryptocurrency available on the market, with a price of over \SI{8000}{\$ \per BTC} and a market cup of about \num{141} billion \$ \cite{bitcoin_usage_study_2017, stats_coinmarketcap, stats_coinranking, stats_cryptocompare, stats_coincheckup, stats_moonstats}.
+Nowadays, Bitcoin is the most used and valuable cryptocurrency available on the market, with a price of over \SI{8000}{\$ \per BTC} and a market cap of about \num{141} billion \$ \cite{bitcoin_usage_study_2017, stats_coinmarketcap, stats_coinranking, stats_cryptocompare, stats_coincheckup, stats_moonstats}.
 Bitcoin can be used for both online and in-shop payments, fast and low-cost money transfer, and pseudonymous money spending.
 
 \bigskip
@@ -18,7 +18,7 @@ This technique guarantees that the transactions stored in the ledger can not be 
 The first block is called ``genesis'' and it is hard-coded in the software implementation.
 
 Nodes that participate in the Bitcoin protocol run a consensus algorithm to agree on the order of blocks in the ledger:
-in particular, it is enough to agree on the last block in the chain, thanks to the guarantees given by linked timestamping.
+in particular, it is enough to agree on the last block in the chain, thanks to the guarantees given by the linked timestamps.
 The blockchain is stored in each computer that participates in the consensus:
 the geographical distribution of nodes around the world and the decentralization of the protocol make attacks that try to change the history of transactions stored in the ledger very difficult or nearly impossible to achieve.
 
@@ -36,13 +36,13 @@ the geographical distribution of nodes around the world and the decentralization
 \end{figure}
 
 \section{Blocks}
-Each block contains up to about \num{3000} transactions.
+Each block contains about \num{3000} transactions.
 By design, a new block is generated and appended to the blockchain every \SI{10}{minutes} on average \cite{bitcoin_2009}.
 Bitcoin blocks are distributed using a peer-to-peer protocol, which is explained in detail in \cref{chapter:protocol}.
 
 The transactions inside each block are organized as a Merkle tree \cite{merkle_tree_1980}, a special binary tree with hash pointers (\cref{fig:merkle}).
 The items in the tree are grouped in pairs and the hash of each of them is stored in the parent node.
-The parent nodes are then grouped in other pairs and their hashed are stored in their parents:
+The parent nodes are then grouped in other pairs and their hashes are stored in their parents:
 this construction is repeated recursively until a single root node is created.
 In the specific case of Bitcoin, each item in the tree represents a single transaction.
 
@@ -61,7 +61,7 @@ This allows to divide a Bitcoin block in \num{2} parts - a header and a body - a
 The header contains only the hash of the Merkle tree root, the hash of the previous block in the blockchain, the address of the miner that created the block (see \cref{sec:addresses} and \cref{sec:mining}) and a couple of additional information such as protocol version and timestamp of creation.
 The body stores the set the transactions as a serialized representation of the Merkle tree.
 
-The second advantage of a Merkle tree is that transaction lookups in a block take $\mathcal{O}(n\log n)$ time, where $n$ is the number of transactions stored in the block.
+The second advantage of a Merkle tree is that transaction lookups in a block take $\mathcal{O}(\log n)$ time, where $n$ is the number of transactions stored in the block.
 This property is very useful to efficiently validate new transactions.
 
 \section{Transactions}
@@ -84,9 +84,9 @@ Each address can store some bitcoins, which are the result of some transaction s
 The owner of the private key associated to the address is able to create valid transactions to move the stored bitcoins to other addresses, or to create a new contract.
 
 A Bitcoin address can be compared to the concept a bank account:
-it stores an amount of money (bitcoins in this case) and it is the only information required to make a payment to someone;
+it stores an amount of money (bitcoins in this case) and its identifier is the only information required to make a payment to someone;
 in addition, only the owner is able to spend the money contained in the account.
-In contrast to traditional bank accounts, Bitcoin developers suggest to use each address only for a single transactions to preserve the privacy of the owner \cite{bitcoin_guide}:
+In contrast to traditional bank accounts, Bitcoin developers suggest to use each address only for a single transaction to preserve the privacy of the owner \cite{bitcoin_guide}:
 since all transactions are publicly stored in the blockchain, it is trivial to trace all transactions involving a specific address.
 
 \section{Wallets}
@@ -141,7 +141,7 @@ This mechanism prevents an attacker to forge too many blocks, since it would req
 \bigskip
 People that manage to create a new block (miners) get a reward in bitcoins when the block is stored in the main chain;
 also, they get the fees of all transactions stored in the block.
-The address of the miner is stored in the header of the block, so the other nodes that run the Bitcoin protocol know who to acknowledge both rewards.
+The address of the miner is stored in the header of the block, so the other nodes that run the Bitcoin protocol know who to acknowledge for both rewards.
 It is important to notice that a miner is able to spend the reward obtained only if the corresponding block is stored in the main chain:
 blocks in different branches of the blockchain are not recognized, since all correct nodes will only consider the longest (main) chain as valid.
 Bitcoin rules try to encourage miners to behave correctly:
@@ -151,7 +151,7 @@ if a miner has a block stored in the blockchain, it is its interest to keep mini
 The process of mining in Bitcoin can be seen as a competition between miners.
 As soon as a new block is created, it is published and appended to the longest branch in the blockchain.
 Then, miners move the next block:
-they choose the transactions to include from the one not yet processes, create the block by including the current timestamp, their address and the other information required and start to look for a nonce value that solves new the cryptographic puzzle.
+they choose the transactions to include from the one not yet processed, create the block by including the current timestamp, their address and the other information required and start to look for a nonce value that solves new the cryptographic puzzle.
 When a miner finishes a block, all the others stop and start again from the longest branch:
 it would make no sense to complete the current block\footnote{At least for honest miners (those that does not deviate from the Bitcoin protocol); malicious miners might have an advantage to choose a different strategy, as explained in \cref{chapter:attacks}}, since it would be in conflict with the current longest chain and would probably be ignored by the other nodes in the network.
 The idea behind this strategy - which is the one implemented in official Bitcoin implementation originally created by Satoshi Nakamoto \cite{bitcoin_github} - is to waste as little computational power as possible:

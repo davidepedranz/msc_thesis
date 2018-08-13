@@ -53,7 +53,7 @@ The attack is illustrated in \cref{fig:race-attack} and works as follows:
 A trivial defense for the merchant is to wait for the transaction \texttt{tx-1} to be stored in the blockchain:
 if it is rejected because of any conflicts, the merchant can simply refuse the payment and do not sell the good.
 Unfortunately, Bitcoin requires on average \SI{10}{minutes} to confirm a transaction, so this technique can not be always applied.
-Bitcoin's developers recommendation is to wait for \num{6} confirmations, i.e. to wait for the block that stored the transaction to be in the longest chain and to have \num{6} following blocks \cite{confirmation}.
+Bitcoin's developers recommendation is also to wait for \num{6} confirmations, i.e. to wait for the block that stored the transaction to be in the longest chain and to have \num{6} following blocks \cite{confirmation}.
 Some blocks can be conflicting with each other (if they have the same parent):
 only one of them can belong to the longest chain, while the others are said to be ``orphaned'' \cite{orphaned_block} and simply ignored, as illustrated in \cref{fig:orphaned-block}.
 Thus, a transaction can be rejected even if it manages to get part of a block, if that block is orphaned.
