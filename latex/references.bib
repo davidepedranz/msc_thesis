@@ -66,6 +66,18 @@
 # Bitcoin papers and resources
 #------------------------------------------------------------------------------------
 
+@article{byzantin_generals_1982,
+	title        = {The {Byzantine} generals problem},
+	author       = {Lamport, Leslie and Shostak, Robert and Pease, Marshall},
+	journal      = {ACM Transactions on Programming Languages and Systems (TOPLAS)},
+	volume       = {4},
+	number       = {3},
+	pages        = {382--401},
+	year         = {1982},
+	publisher    = {ACM},
+	howpublished = {https://dl.acm.org/citation.cfm?id=357176}
+}
+
 @online{bitcoin_2009,
 	title        = {{Bitcoin: A Peer-to-Peer Electronic Cash System}},
 	author       = {Nakamoto, Satoshi},
@@ -148,17 +160,18 @@
 	howpublished = {https://github.com/bitcoin/bitcoin}
 }
 
-@article{byzantin_generals_1982,
-	title        = {The {Byzantine} generals problem},
-	author       = {Lamport, Leslie and Shostak, Robert and Pease, Marshall},
-	journal      = {ACM Transactions on Programming Languages and Systems (TOPLAS)},
-	volume       = {4},
-	number       = {3},
-	pages        = {382--401},
-	year         = {1982},
-	publisher    = {ACM},
-	howpublished = {https://dl.acm.org/citation.cfm?id=357176}
+@online{stratum,
+	title        = {Stratum mining protocol},
+	url          = {https://en.bitcoin.it/wiki/Stratum_mining_protocol},
+	urldate      = {2018-08-10}
 }
+
+@online{stratum_manual,
+	title        = {{Stratum Mining Protocol}},
+	url          = {https://slushpool.com/help/manual/stratum-protocol},
+	urldate      = {2018-08-13}
+}
+
 
 #------------------------------------------------------------------------------------
 # Bitcoin Attacks
@@ -408,4 +421,61 @@
 	title        = {{Common Vulnerabilities and Exposures - Bitcoin Wiki}},
 	url          = {https://en.bitcoin.it/wiki/Common_Vulnerabilities_and_Exposures},
 	urldate      = {2018-08-09}
+}
+
+@online{bgp_wikipedia,
+	title        = {Border Gateway Protocol --- {Wikipedia}{,} The Free Encyclopedia},
+	author       = {{Wikipedia contributors}},
+	year         = {2018},
+	url          = {https://en.wikipedia.org/w/index.php?title=Border_Gateway_Protocol&oldid=854290407},
+	urldate      = {2018-08-10}
+}
+
+@techreport{rfc4271,
+	title        = {{A Border Gateway Protocol 4 (BGP-4)}},
+	author       = {Y. Rekhter, Ed. and T. Li, Ed. and S. Hares, Ed.},
+	type         = {{RFC}},
+	number       = 4271,
+	pages        = {1-104},
+	year         = {2006},
+	month        = {January},
+	issn         = {2070-1721},
+	publisher    = {{RFC Editor}},
+	institution  = {{RFC Editor}},
+	url          = {http://www.rfc-editor.org/rfc/rfc1654.txt},
+	howpublished = {Internet Requests for Comments}
+}
+
+% TODO: drop
+@online{autonomous_systems_wikipedia,
+	title        = {Autonomous system (Internet) --- {Wikipedia}{,} The Free Encyclopedia},
+	author       = {{Wikipedia contributors}},
+	year         = {2018},
+	url          = {https://en.wikipedia.org/w/index.php?title=Autonomous_system_(Internet)&oldid=850854570},
+	urldate      = {2018-08-10}
+}
+
+@online{bgp_hijacking_secureworks,
+	title        = {{BPG Hijacking for Crytocurrency Profit}},
+	author       = {Litke, Pat and Stewart, Joe},
+	year         = {2014},
+	month        = {August},
+	day          = {7},
+	url          = {https://www.secureworks.com/research/bgp-hijacking-for-cryptocurrency-profit},
+	urldate      = {2018-06-15}
+}
+
+@article{hijacking_bitcoin_2017,
+	title        = {{Hijacking Bitcoin: Routing Attacks on Cryptocurrencies}},
+	author       = {Maria Apostolaki and Aviv Zohar and Laurent Vanbever},
+	journal      = {2017 IEEE Symposium on Security and Privacy (SP)},
+	year         = {2017},
+	pages        = {375-392},
+	howpublished = {https://arxiv.org/pdf/1605.07524.pdf}
+}
+
+@online{bgpstream,
+	title        = {{BGPStream}},
+	url          = {https://bgpstream.com/},
+	urldate      = {2018-08-10}
 }

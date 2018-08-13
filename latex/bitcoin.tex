@@ -189,4 +189,9 @@ Mining pools are a way to minimize the risk.
 If the pool has a sufficient hash rate, it is likely to complete blocks before other miners and get the reward;
 even small miners can contribute to a pool and get a small reward.
 
-% Also, each miner is looking for a different nonce, since their address needs to be included in the block in order to get the reward.
+\bigskip
+Mining pools use Stratum \cite{stratum}, a protocol introduces in \num{2012} to coordinate the mining process.
+The protocol is based on plain HTTP \cite{stratum_manual}:
+miners authenticate against the pools, but there is no verification of the pool's identity and the network traffic is in clear.
+The pool coordinator and the miners communicate using JSON-RPC:
+some commands are used to establish the initial connection between a miner and a pool (authenticate, reconnect, show message to the user, etc.), other commands are available to distribute mining tasks and collect the results.
