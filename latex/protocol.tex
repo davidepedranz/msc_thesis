@@ -1,11 +1,30 @@
 \chapter{Protocol}
 \label{chapter:protocol}
-Overview, TCP, layers of the protocol.
+This chapter focuses on the low-level peer-to-peer protocol that runs Bitcoin.
+Unfortunately, the Bitcoin protocol has never been documented properly:
+the original paper \cite{bitcoin_2009} does not describe the details of the protocol and no official and complete description is available.
+The single point of truth available is the open-source original Bitcoin client, \texttt{bitcoind} \cite{bitcoin_github}:
+at the time of writing, around \num{95}\% of nodes in the network run some version of this client \cite{bitnodes}.
+Unfortunately, the source code is quite hard to understand and contains almost no comment.
+The content of this chapter is based primarily on academical papers \cite{eclipse_attack_2015, deanonymization_2014}, on some online references \cite{bitcoin_reference, bitcoin_guide} and only marginally on the source code itself.
+
+\bigskip
+Peers in the Bitcoin network are identified by their IP address.
+Each node can initiate up \num{8} outgoing connections with other nodes, and accept up to \num{117} incoming connections, for a total of \num{125} \footnote{With the default settings (it is possible to configure custom values if necessary). Measures show that the majority of nodes have at most \num{8} outgoing connections and never reach the maximum number of incoming ones \cite{discovering_influential_nodes_2014}.}.
+All connections use unencrypted TCP channels.
+Nodes propagate and store only public IP addresses.
+At the moment of writing, there are about \num{9000} reachable server, while the number of clients is estimated to be between \num{100000} and \num{200000}.
+Nodes can also connect to the network via Tor \cite{bicoin_tor}.
+
+\bigskip
+We divide the description of the protocol in \num{2} parts: topology and core.
+The former is responsible to create and maintain a peer-to-peer overlay network between Bitcoin nodes;
+the latter uses the underlying overlay network to propagate blocks and transactions.
 
 \section{Topology}
 TODO
 
-\section{Peers Discovery}
+\subsection{Peers Discovery}
 \label{sec:discovery}
 
 \subsection{Bootstrap}
