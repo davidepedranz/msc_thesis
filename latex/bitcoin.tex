@@ -22,12 +22,12 @@ in particular, it is enough to agree on the last block in the chain, thanks to t
 The blockchain is stored in each computer that participates in the consensus:
 the geographical distribution of nodes around the world and the decentralization of the protocol make attacks that try to change the history of transactions stored in the ledger very difficult or nearly impossible to achieve.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering
 	\vspace*{0.25cm}
 	\includegraphics[scale=0.7]{figures/blockchain}
 	\vspace*{0.25cm}
-	\caption[Schematic representation of a blockchain.]{
+	\caption[Schematic representation of a blockchain]{
 		Schematic representation of a blockchain.
 		A blockchain is a list of blocks, connected to each other with an hash pointer.
 		Each block contains a set of transactions.
@@ -46,12 +46,12 @@ The parent nodes are then grouped in other pairs and their hashes are stored in 
 this construction is repeated recursively until a single root node is created.
 In the specific case of Bitcoin, each item in the tree represents a single transaction.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering
 	\vspace*{0.1cm}
 	\includegraphics[scale=0.7]{figures/merkle}
 	\vspace*{0.25cm}
-	\caption{Schematic representation of a Merkle tree with \num{4} items.}
+	\caption[Schematic representation of a Merkle tree]{Schematic representation of a Merkle tree with \num{4} items.}
 	\label{fig:merkle}
 \end{figure}
 
@@ -107,12 +107,12 @@ Blocks in different branches of the blockchain may contain different or even con
 To solve this problem, Bitcoin introduces a resolution rule for forks:
 Bitcoin nodes should follow the longest chain, i.e. the chain whose last block has the higher number of preceding blocks.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering
 	\vspace*{0.25cm}
 	\includegraphics[scale=0.9]{figures/forks}
 	\vspace*{0.25cm}
-	\caption[Schematic representation of a blockchain with \num{3} branches.]{
+	\caption[Schematic representation of a blockchain with \num{3} branches]{
 		Schematic representation of a blockchain with \num{3} branches.
 		The red block \texttt{2b} and the yellow blocks \texttt{5c} and \texttt{6c} are forks of the main chain that originate respectively at blocks \texttt{1} and \texttt{4}.
 		Green blocks are on the longest chain, since block \texttt{7} is the one with the highest number of preceding blocks.
@@ -153,7 +153,7 @@ As soon as a new block is created, it is published and appended to the longest b
 Then, miners move the next block:
 they choose the transactions to include from the one not yet processed, create the block by including the current timestamp, their address and the other information required and start to look for a nonce value that solves new the cryptographic puzzle.
 When a miner finishes a block, all the others stop and start again from the longest branch:
-it would make no sense to complete the current block\footnote{At least for honest miners (those that does not deviate from the Bitcoin protocol); malicious miners might have an advantage to choose a different strategy, as explained in \cref{chapter:attacks}}, since it would be in conflict with the current longest chain and would probably be ignored by the other nodes in the network.
+it would make no sense to complete the current block \footnote{At least for honest miners (those that does not deviate from the Bitcoin protocol); malicious miners might have an advantage to choose a different strategy, as explained in \cref{chapter:attacks}}, since it would be in conflict with the current longest chain and would probably be ignored by the other nodes in the network.
 The idea behind this strategy - which is the one implemented in official Bitcoin implementation originally created by Satoshi Nakamoto \cite{bitcoin_github} - is to waste as little computational power as possible:
 when a block is attached to the longest chain, it would be a waste to complete another block that should be put in the same place as the first one.
 
@@ -167,12 +167,12 @@ each core or machine reports the good nonces to some central coordinator, which 
 Because of the properties of cryptographic hash functions, the expected number of trials required to find a good nonce is $2^{b - 1}$, where $b$ is the number of bits in the binary representation of the nonce in a block header.
 To verify if a nonce is good for a block, a miner only needs to put the nonce in the correct location in the block header and compute the hash function on the complete block.
 The expected time to complete a block is thus proportional to the speed of the miner in computing an hash function.
-This value is usually called ``Hash Rate'' in the Bitcoin vocabulary \cite{bitcoin_vocabulary}.
+This value is usually called ``Hashrate'' in the Bitcoin vocabulary \cite{bitcoin_vocabulary}.
 
 Miners are in competition with each other:
 after a new block is published, honest miners start to work on the next block.
-The probability of a miner to be the first one to complete a block is proportional to its hash rate.
-Miners with small hash rates (e.g. those that use a general-purpose computer) are statistically very unlikely to ever find a block, and thus to earn a reward.
+The probability of a miner to be the first one to complete a block is proportional to its hashrate.
+Miners with small hashrates (e.g. those that use a general-purpose computer) are statistically very unlikely to ever find a block, and thus to earn a reward.
 For this reason, miners to cooperate with each other in groups and create the so-called ``Mining Pools''.
 
 \bigskip
@@ -185,9 +185,15 @@ The same process is repeated for the next blocks.
 The coordinator is also responsible for sharing the rewards among the nodes in the pool:
 all blocks are created using the address of the coordinator, which collects all rewards, and periodically pays each node based on its contribution to the mining process.
 
+\bigskip
 Mining pools are a way to minimize the risk.
-If the pool has a sufficient hash rate, it is likely to complete blocks before other miners and get the reward;
+If the pool has a sufficient hashrate, it is likely to complete blocks before other miners and get the reward;
 even small miners can contribute to a pool and get a small reward.
+Because of this, most mining power is concentrated in just a few mining pools.
+\cref{tab:pools} shows an estimate of the hashrate distribution among the biggest pools:
+the top \num{5} pools control about \num{65}\% of the total hashrate;
+the top \num{10} pools count for about \num{90}\% and the remaining \num{10}\% is shared among small pools and alone miners.
+For convenience, the same information is shown in \cref{fig:pools} as a pie chart.
 
 \bigskip
 Mining pools use Stratum \cite{stratum}, a protocol introduces in \num{2012} to coordinate the mining process.
@@ -195,3 +201,47 @@ The protocol is based on plain HTTP \cite{stratum_manual}:
 miners authenticate against the pools, but there is no verification of the pool's identity and the network traffic is in clear.
 The pool coordinator and the miners communicate using JSON-RPC:
 some commands are used to establish the initial connection between a miner and a pool (authenticate, reconnect, show message to the user, etc.), other commands are available to distribute mining tasks and collect the results.
+
+% TODO: this makes formatting better...
+\pagebreak
+
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{rlrr}
+		\toprule
+		\multicolumn{1}{c}{\#} & \multicolumn{1}{l}{Pool} & \multicolumn{1}{c}{Hashrate Share} \\
+		\midrule
+		\num{1}                & BTC.com                  & \num{20.2}                         \\
+		\num{2}                & AntPool                  & \num{13.8}                         \\
+		\num{3}                & ViaBTC                   & \num{11.9}                         \\
+		\num{4}                & BTC.TOP                  & \num{11.6}                         \\
+		\num{5}                & SlushPool                & \num{11.6}                         \\
+		\num{6}                & F2Pool                   & \num{8.0}                          \\
+		\num{7}                & Poolin                   & \num{4.8}                          \\
+		\num{8}                & DPOOL                    & \num{2.6}                          \\
+		\num{9}                & BitClub                  & \num{2.5}                          \\
+		\num{10}               & Bixin                    & \num{2.3}                          \\
+		\num{11}               & BWPool                   & \num{1.9}                          \\
+		\num{12}               & BitFury                  & \num{1.7}                          \\
+		\num{13}               & WAYI.CN                  & \num{1.6}                          \\
+		\num{14}               & BTCC                     & \num{1.5}                          \\
+		\num{15}               & Bitcoin.com              & \num{1.0}                          \\
+		\bottomrule
+	\end{tabular}
+	\caption[Estimation of the hashrate of the top largest mining pools]{Hashrates of the \num{15} largest mining pools estimated from the number of blocks published in the blockchain during the months of June, July and August \num{2018} \cite{stats_pools}.}
+	\label{tab:pools}
+\end{table}
+
+\begin{figure}[h!]
+	\centering
+	\vspace*{0.50cm}
+	\vspace*{0.25cm}
+	\includegraphics[width=0.9\columnwidth]{figures/pools}
+	\vspace*{0.25cm}
+	\caption[Estimation of the hashrate distribution amongst the largest mining pools]{
+		Estimation of the hashrate distribution amongst the largest mining pools
+		\footnotemark.
+	}
+	\label{fig:pools}
+\end{figure}
+\footnotetext{Image taken from \url{https://btc.com/stats/pool?pool_mode=month3}}

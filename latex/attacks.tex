@@ -6,6 +6,7 @@ This chapter starts from an overview of the most relevant ones.
 At the end, it describes in details the Balance attack, whose analysis is the main object of the simulations.
 
 \section{Double Spending}
+\label{sec:double-spending}
 Double-spending is the result of successfully spending some money more than once.
 The attack is the oldest known one against Bitcoin (it is even partially discussed in the original Bitcoin paper \cite{bitcoin_2009}).
 The attack has been analyzed many times in the literature \cite{double_spending_fast_payments, double_spending_two_for_one, double_spending_bitcoin_economics, double_spending_fast_analysis_2014} and has been reported to be quite easy to mount for fast payments \cite{double_spending_fast_payments}.
@@ -39,7 +40,7 @@ The attack is illustrated in \cref{fig:race-attack} and works as follows:
 	\vspace*{0.25cm}
 	\includegraphics[scale=0.75]{figures/race_attack}
 	\vspace*{0.25cm}
-	\caption[Illustration of the race attack, a variant of double-spending.]{
+	\caption[Illustration of the race attack, a variant of double-spending]{
 		Illustration of the race attack, a variant of double-spending.
 		The attacker (in red) owns some bitcoins in the address \texttt{0x11}.
 		It submits a transaction \texttt{tx-1} to move the money from its address \texttt{0x11} to the merchant's one \texttt{0x99} (in blue).
@@ -64,7 +65,7 @@ Waiting for \num{6} confirmations gives a good tradeoff between the time to wait
 	\vspace*{0.25cm}
 	\includegraphics[scale=1.1]{figures/orphaned_block}
 	\vspace*{0.25cm}
-	\caption[Illustration of an orphaned block.]{
+	\caption[Illustration of an orphaned block]{
 		Illustration of an orphaned block.
 		Blocks \texttt{9a} and \texttt{9b} have the same parent.
 		Since \texttt{9a} has a child \texttt{10a}, it is on the longest chain.
@@ -136,7 +137,7 @@ To be more precise, the system is not vulnerable to the majority attack as long 
 		}
 		\vspace*{0.25cm}
 	\end{subfigure}
-	\caption[Illustration of the different phases of a majority attack.]{
+	\caption[Illustration of the different phases of a majority attack]{
 		Illustration of the different phases of a majority attack, where an attacker takes control of the entire blockchain, starting from the genesis block.
 		The attacker is able to revert the history of all transactions stored in the blockchain.
 	}
@@ -210,7 +211,7 @@ The idea is illustrated in \cref{fig:selfish-mining}.
 		}
 		\vspace*{0.25cm}
 	\end{subfigure}
-	\caption{Illustration of the Selfish Mining strategy.}
+	\caption[Illustration of the Selfish Mining strategy]{Illustration of the Selfish Mining strategy.}
 	\label{fig:selfish-mining}
 \end{figure}
 
@@ -259,7 +260,7 @@ In the specific case of Bitcoin, the attacker can mount many different attacks a
 			the attacker can effectively eclipse the victim from the peer-to-peer network.
 		}
 	\end{subfigure}
-	\caption{Illustration of an Eclipse Attack.}
+	\caption[Illustration of an Eclipse Attack]{Illustration of an Eclipse Attack.}
 	\label{fig:eclipse}
 \end{figure}
 
@@ -293,7 +294,7 @@ since the attacker controls all of merchant's connections, the merchant might no
 
 
 \section{BGP Hijacking}
-\ac{BGP} is a standardized network protocol used to exchange routing information between \ac{AS} of different \ac{ISP} and organizations on the Internet \cite{rfc4271, bgp_wikipedia}.
+\ac{BGP} is a standardized network protocol used to exchange routing information between \ac{AS} \cite{autonomous_systems_wikipedia} of different \ac{ISP} and organizations on the Internet \cite{rfc4271, bgp_wikipedia}.
 The primary function of \ac{BGP} is to exchanges information about network reachability with other \ac{BGP} systems.
 The information collected and distributed by the protocol are used to construct a graph of connectivity between different \ac{AS}, which can be used to make optimal routing decisions among the networks of different parties.
 \ac{BGP} routing also depends on policies and rules configured by network administrators.
@@ -338,7 +339,7 @@ Attacks with a similar scale were also reported between October 2015 and April 2
 		}
 		\vspace*{0.25cm}
 	\end{subfigure}
-	\caption{Illustration of a BPG Hijacking attack against a Bitcoin miner.}
+	\caption[Illustration of a BPG Hijacking attack against a Bitcoin miner]{Illustration of a BPG Hijacking attack against a Bitcoin miner.}
 	\label{fig:bpg-hijacking}
 \end{figure}
 
@@ -372,3 +373,56 @@ Attackers controlling some networks can potentially:
 	\item perform double-spend attacks against merchants;
 	\item take control of a significant amount of computing power and attempt various kind of mining attacks (see \cref{sub:selfish}).
 \end{itemize}
+
+
+\section{Balance Attack}
+The Balance attack is a new attack proposed by Christopher Natoli and Vicent Gramoli first in \num{2016} in the technical report \cite{balance_attack_report_2016} and later in \num{2017} in their paper ``The Balance Attack or Why Forkable Blockchains Are Ill-Suited for Consortium'' \cite{balance_attack_2017}.
+The attack targets ``forkable'' blockchains, i.e. a blockchain that allow multiple branches at the same time.
+The most famous examples of systems using a forkable blockchains are Bitcoin \cite{bitcoin_2009} and Ethereum \cite{ethereum_2014}.
+
+\bigskip
+Forkable blockchains implement some strategy to solve conflicts:
+for example, Bitcoin always follows the longest chain if multiple branches exists.
+The rule guarantees that the system will eventually agree on the same longest chain, and thus on the same set of transactions stored in the blockchain.
+Unfortunately, blocks in branches different from the longest chain are ``wasted'', since their content is not recognized by the network.
+Wasted blocks are probably the biggest problem of forkable blockchains:
+they waste computational power of the network and facilitate double-spending attacks \cite{double_spending_fast_analysis_2014} (see \cref{sec:double-spending}).
+
+Except for attacks, network delays are the main cause of forks in the blockchain \cite{information_propagation_2013}.
+Honest miners immediately stop the mining process if they receive a new valid block that attaches to the longest chain and they start to mine the following block;
+the delay between a block discovery and its broadcast may allow other miners to complete and publish a conflicting block, effectively creating a fork in the blockchain.
+In practice, an attacker can increase the amount of wasted blocks in the system and slow down the growth of the longest chain by simply delaying the propagation of new blocks \cite{balance_attack_2017}.
+
+\bigskip
+The Balance attack takes advantage of this idea.
+The attacker partitions the Bitcoin nodes by disrupting communications between different subgroups:
+the messages containing new blocks are delayed or possibly dropped completely.
+The paper suggests to select groups of similar computing power to maximize the probability of success of the attack.
+\cref{fig:balance} shows an example of Balance attack, where the attacker controls one router and is able to filter and manipulate traffic for the nodes connected to Internet through that router.
+Multiple results recently demonstrated how simply a motivated attacker can perform networking attacks on the Internet and thus delaying messages in blockchain networks \cite{bgp_hijacking_secureworks, eclipse_attack_2015, hijacking_bitcoin_2017}.
+
+\begin{figure}[h]
+	\centering
+	\vspace*{0.25cm}
+	\includegraphics[scale=0.8]{figures/balance}
+	\vspace*{0.25cm}
+	\caption[Illustration of a network partitioning caused by a Balance Attack]{
+		Illustration of a network partitioning caused by a Balance Attack.
+		The attacker controls the bottom-left router (in red) and delays all communications between pair of nodes $(a, b)$ where $a \in \{7,8,9\}$ and $b \not \in \{7, 8, 9\}$:
+		nodes inside the same partition can communicate with each other without any delay.
+	}
+	\label{fig:balance}
+\end{figure}
+
+In details, the attack works as follows:
+\begin{itemize}
+	\item the attacker identifies subgroups of miners with a similar mining power; different works in the literature \cite{deanonymization_2014, discovering_influential_nodes_2014} describe techniques to learn the network topology and identify influential nodes;
+	\item the attacker identifies the routes of Bitcoin messages between different subgroups over Internet; let us assume the miner finds a partitions of nodes into \num{2} groups \texttt{G1} and \texttt{G2};
+	\item the attacker runs some networking attack (man-in-the-middle, BGP hijacking \cite{bgp_hijacking_secureworks}) to take control of the communications links between groups and delays the Bitcoin traffic;
+	\item because of the delay, transactions and blocks are not immediately propagated to the entire network, so \texttt{G1} and \texttt{G2} are very likely to have different views of the blockchain and to mine conflicting blocks;
+	\item the attacker takes advantage of these inconsistencies and performs double-spending attacks.
+\end{itemize}
+
+The authors implemented and tested the attack against a private Ethereum test network with characteristics similar to \texttt{R3}, a consortium of more than \num{70} word-wide financial institutions.
+The testnet consisted of \num{18} machines running Ethereum and mining blocks (the mining process in Ethereum is based on \ac{PoW} and is similar to the one of Bitcoin, at least for the matter of the Balance attack).
+The authors report that a single machine needs to delay messages for \num{20} minutes to double spend, while an attacker controlling a third of the mining power only needs a delay of \num{4} minutes to achieve \num{94}\% of attack success rate.
