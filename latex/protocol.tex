@@ -120,10 +120,11 @@ The actual transmission of the scheduled \texttt{ADDR} messages does not happen 
 The messages are divided in queues for different peers.
 Every \num{100} milliseconds, the node randomly selects one of the queues and flushes all the present messages.
 The node selected in the current round is the \textit{trickle node} \cite{deanonymisation_2014}; the whole procedure is called \textit{trickling} and is illustrated in \cref{fig:trickling}.
-A Bitcoin node remembers the messages forwarded to each connected peer:
-before forwarding an address, a node first checks if the address was already sent over the same connection and avoids sending it again.
+To prevent stale \texttt{ADDR} messages from endlessly propagating, each Bitcoin node remembers the messages forwarded to each connected peer:
+before forwarding an address, the node checks if the address was already sent over the same connection and avoids sending it again \cite{eclipse_attack_2015}.
+The lists of messages are flushed daily.
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 	\begin{subfigure}{.4\textwidth}
 		\vspace*{0.25cm}
 		\includegraphics[width=\columnwidth]{figures/trickling_1}
@@ -149,16 +150,19 @@ before forwarding an address, a node first checks if the address was already sen
 		Illustration of the trickling procedure of \texttt{ADDR} messages.
 		\texttt{node-0} (in blue) gets an \texttt{ADDR} message and select \texttt{node-3} and \texttt{node-2} for forwarding.
 		An \texttt{ADDR} message is added to the queues of both nodes, that count respectively \num{1} and \num{3} messages.
-		\texttt{node-3} is chosen in round \num{1} and its queue is flushed:
+		\texttt{node-3} is chosen at round \num{1} and its queue is flushed:
 		the scheduled \texttt{ADDR} message is sent.
-		\texttt{node-2} is chosen in round \num{2}:
+		\texttt{node-2} is chosen at round \num{2}:
 		all \num{3} messages in queue are sent together to the destination.
 	}
 	\label{fig:trickling}
 \end{figure}
 
 \subsection{Peers cleanup}
-TODO
+Bitcoin nodes exchange control messages to verify that remote peers are still connected and working correctly.
+Every \num{2} minutes, each node sends a \texttt{PING} message to all connected peers \cite{bitcoin_ping_pong}:
+upon receiving a \texttt{PING} message, the node immediately replies with a \texttt{PONG}.
+If a node does not receive any \texttt{PONG} message from a peer for \num{20} minutes, it assumes the peer to be not working and drops the connection.
 
 \subsection{Messages}
 TODO
@@ -186,5 +190,5 @@ TODO
 \section{Core}
 The core layer uses the underlying overlay network created by the topology layer to propagate blocks and transactions to all Bitcoin nodes.
 
-% \subsection{Messages}
-% TODO
+\subsection{Messages}
+TODO
