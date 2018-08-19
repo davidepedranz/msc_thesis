@@ -267,7 +267,7 @@ In the specific case of Bitcoin, the attacker can mount many different attacks a
 \bigskip
 Each Bitcoin node maintains \num{2} tables of addresses \cite{eclipse_attack_2015}:
 the \texttt{tried} table contains addresses of peers that were successful connected with the current node at least one in the past;
-the \texttt{new} table contains addresses discovered through any of the peers-discovery strategies used by Bitcoin (see \cref{sec:discovery}) to whom the node has not yet initiated a successful connection.
+the \texttt{new} table contains addresses discovered through any of the peers-discovery strategies used by Bitcoin (see \cref{sub:discovery}) to whom the node has not yet initiated a successful connection.
 
 A Bitcoin running the original client \cite{bitcoin_github} with the default settings can have up to \num{8} outgoing and up to \num{117} unsolicited incoming connections, for a total of \num{125} \cite{deanonymisation_2014, eclipse_attack_2015} (see \cref{chapter:protocol} for the details).
 Connections are long-lived, i.e. they are interrupted only if either one of the \num{2} nodes goes down or in case of networking problems.

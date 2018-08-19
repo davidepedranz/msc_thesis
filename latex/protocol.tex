@@ -3,10 +3,13 @@
 This chapter focuses on the low-level peer-to-peer protocol that runs Bitcoin.
 Unfortunately, the Bitcoin protocol has never been documented properly:
 the original paper \cite{bitcoin_2009} does not describe the details of the protocol and no official and complete description is available.
+Some unofficial documentation exist, but it is often incomplete and outdated.
 The single point of truth available is the open-source original Bitcoin client, \texttt{bitcoind} \cite{bitcoin_github}:
 at the time of writing, around \num{95}\% of nodes in the network run some version of this client \cite{bitnodes}.
 Unfortunately, the source code is quite hard to understand and contains almost no comment.
-The content of this chapter is based primarily on academical papers \cite{eclipse_attack_2015, deanonymization_2014}, on some online references \cite{bitcoin_reference, bitcoin_guide} and only marginally on the source code itself.
+The content of this chapter is thus primarily based on academical papers \cite{eclipse_attack_2015, deanonymization_2014}, on some online references \cite{bitcoin_reference, bitcoin_guide} and partially on the source code itself.
+Please note that the content of this chapter refers to \texttt{bitcoind}:
+other clients may choose different settings or strategies in some cases.
 
 \bigskip
 Peers in the Bitcoin network are identified by their IP address.
@@ -17,30 +20,89 @@ At the moment of writing, there are about \num{9000} reachable server, while the
 Nodes can also connect to the network via Tor \cite{bicoin_tor}.
 
 \bigskip
-We divide the description of the protocol in \num{2} parts: topology and core.
-The former is responsible to create and maintain a peer-to-peer overlay network between Bitcoin nodes;
-the latter uses the underlying overlay network to propagate blocks and transactions.
+We divide the description of the protocol in \num{2} layers: topology and core.
+Both layers use an epidemic (or gossip) paradigm \cite{gossip_1987} to achieve a fast information propagation and be tolerant to failures.
 
 \section{Topology}
-TODO
+The topology layer is responsible to create and maintain the a peer-to-peer overlay network between Bitcoin nodes.
+Its main responsibilities are:
+\begin{itemize}
+	\item discover new peers;
+	\item propagate the IP addresses of nodes in the network;
+	\item detect and remove old peers that left the network or are offline for a long period of time;
+	\item form an overlay network that can be used to efficiently broadcast blocks and transactions to all peers in the network.
+\end{itemize}
 
-\subsection{Peers Discovery}
-\label{sec:discovery}
+\subsection{Peer Discovery}
+\label{sub:discovery}
+The peer discovery phase is crucial for the bootstrap of the network:
+at the first startup, a Bitcoin node does not know any other peer.
+Once a node connects to the first peer, it can start the Bitcoin protocol to gather information about other connected peers.
+Bitcoin nodes use different strategies to discover the first peers to achieve a higher failure resistance and security (an attacker might be able to interfere with some of the strategies, but it is less unlikely that it might interfere with all of them) \cite{bitcoin_peer_discovery}.
 
-\subsection{Bootstrap}
-TODO
+\subsubsection{IP discovery}
+The first step in peer discovery is to get its own IP address.
+After the startup, a Bitcoin node issues a HTTP \texttt{GET} request to \num{2} hard-coded websites, which reply with the IP address assigned by the \ac{ISP}:
+the client reads the HTTP response and parses the IP address \cite{bitcoin_peer_discovery}.
+It is possible that the node discovers more than one IP address:
+in that case, public IP addresses are preferred over private ones \cite{deanonymisation_2014}.
+When a client establishes an outgoing connection to a remote peer, it first sends a \texttt{VERSION} message to advertize the chosen address (see \cref{par:version}).
+
+\subsubsection{Callback address}
+When a node receives an incoming connection, the remote node sends a \texttt{VERSION} message containing its IP address.
+After sending its own address, it sends a \texttt{GET-ADDR} request message to the remote node to learn about more addresses.
+
+\subsubsection{DNS seeders}
+A DNS seeder is a server that responds to \ac{DNS} queries from Bitcoin nodes with a list of IP addresses of other nodes.
+The seeder obtains these addresses by periodically crawling the network, looking for active peers.
+At the time of writing, the Bitcoin network has \num{7} seeder and their hosts are hard-coded in the client source code \cite{bitcoin_dns}.
+The number of addresses in the query response in limited by the \ac{DNS} constraints:
+a typical \ac{DNS} packet over UDP contains up to \num{25} addresses \cite{dns_stackoverflow};
+if used over TCP, a \ac{DNS} answer can contain up to \num{4000} addresses \cite{dns_4000}.
+Please note that the list of addresses is not cryptographically-authenticated and could be easily compromised by an attacker with control of the victim's network (for example, mounting a man-in-the-middle attack).
+The DNS seeders are queried only in the following \num{2} cases:
+\begin{enumerate}
+	\item a new node joins the network for the first time;
+	\item an existing node restarts and fails to reconnect to the old peers; the seeded is queried only after \num{11} seconds since the initial connection attempt and the node has less than \num{2} outgoing connections.
+\end{enumerate}
+
+\subsubsection{ADDR messagges}
+% ------------------------------------------
+% ------------------------------------------
+% ------------------------------------------
+TODO!!!
+% ------------------------------------------
+% ------------------------------------------
+% ------------------------------------------
+
+\subsubsection{Database of known addresses}
+All peers discovered with various strategies are stored in a database of known IP addresses locally to the node.
+When the node restarts, if can use the database to randomly select some nodes to connect to.
+The idea is behind this strategy is that Bitcoin nodes can change IP address over time, but it is unlikely that all of them change address at the same time:
+after a restart, the node is likely to be able to connect to some of the old peers.
+
+\subsubsection{Hard-coded seed addresses}
+The client contains hard coded IP addresses that represent bitcoin nodes:
+at the moment, the list contains about \num{1250} IP addresses \cite{bitcoin_seeds}.
+The list is regularly updated by the Bitcoin contributors, so that clients running the latest versions of \texttt{bitcoind} have good chances to find some Bitcoin nodes willing to accept incoming connections.
+These addresses are only used as a last resort, if no other method has produced any address at all.
+
+\subsubsection{Configuration}
+Finally, a user can specify peer addresses in the software configuration, either with command line options or providing a text file of addresses.
+These addresses are not advertized in response of a \texttt{GET-ADDR} message \cite{bitcoin_peer_discovery}.
+The user can also specify the first peer to connect to.
+
+\subsection{Address Propagation}
+
+\subsection{Peers Cleanup}
 
 \subsection{Messages}
-TODO
 
-\paragraph{getAddr}
-TODO
-
-\paragraph{addr}
-TODO
+\subsubsection{VERSION}
+\label{par:version}
 
 \section{Core}
-TODO
+The core layer uses the underlying overlay network created by the topology layer to propagate blocks and transactions to all Bitcoin nodes.
 
-\subsection{Messages}
-TODO
+% \subsection{Messages}
+% TODO
