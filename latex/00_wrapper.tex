@@ -18,7 +18,7 @@
 \renewcommand{\UrlFont}{\small\tt}
 
 % units and nice numbers
-\usepackage{siunitx}
+\usepackage[group-separator={,}]{siunitx}
 
 % images
 \usepackage{graphicx}
@@ -27,6 +27,10 @@
 
 % tables
 \usepackage{booktabs}
+
+% footnotes: do not reset counts between chapters
+\usepackage{chngcntr}
+\counterwithout{footnote}{chapter}
 
 % cref command
 \usepackage[noabbrev,capitalise]{cleveref}
@@ -56,18 +60,18 @@
 
 \begin{document}
 
-% \begin{titlepage}
-% 	\maketitle
-% \end{titlepage}
+\begin{titlepage}
+	\maketitle
+\end{titlepage}
 
-% \tableofcontents
-% \listoffigures
-% \listoftables
+\tableofcontents
+\listoffigures
+\listoftables
 
-% \input{bitcoin.tex}
+\input{bitcoin.tex}
 \input{protocol.tex}
-% \input{attacks.tex}
+\input{attacks.tex}
 
-% \printbibliography
+\printbibliography
 
 \end{document}

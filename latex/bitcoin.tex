@@ -15,7 +15,7 @@ The blockchain is a decentralized, distributed, public digital ledger that recor
 It is implemented as a chain of blocks, connected to each other using linked timestamping \cite{bitcoin_book_narayanan_2016, hash_function_wikipedia}:
 each block stores the cryptographic hash of the previous one (\cref{fig:blockchain}).
 This technique guarantees that the transactions stored in the ledger can not be changed easily, since a single modification would break the hashes of each following block in the chain.
-The first block is called ``genesis'' and it is hard-coded in the software implementation.
+The first block is called \textit{genesis} and it is hard-coded in the software implementation.
 
 Nodes that participate in the Bitcoin protocol run a consensus algorithm to agree on the order of blocks in the ledger:
 in particular, it is enough to agree on the last block in the chain, thanks to the guarantees given by the linked timestamps.
@@ -80,8 +80,8 @@ It is only important to outline that:
 \section{Addresses}
 \label{sec:addresses}
 A Bitcoin address corresponds to a pair of public and private key: the hash of the public key is the actual Bitcoin address, while the private key is needed to make payments using the bitcoins stored in the address.
-Each address can store some bitcoins, which are the result of some transaction stored in the blockchain.
-The owner of the private key associated to the address is able to create valid transactions to move the stored bitcoins to other addresses, or to create a new contract.
+Each address can store some bitcoins, which are the result of transactions stored in the blockchain.
+The owner of the private key associated with the address is able to create valid transactions to move the stored bitcoins to other addresses, or to create a new contract.
 
 A Bitcoin address can be compared to the concept a bank account:
 it stores an amount of money (bitcoins in this case) and its identifier is the only information required to make a payment to someone;
@@ -93,11 +93,11 @@ since all transactions are publicly stored in the blockchain, it is trivial to t
 A wallet is a convenient way to manage Bitcoin addresses.
 Bitcoin wallets are able to create public keys (i.e. addresses) where to receive bitcoins and use the corresponding private keys to spend the bitcoins in the addresses.
 They can simultaneously manage multiple addresses and provide a nice user interface to facilitate different tasks, such as buying something in a shop or making an online payment.
-A wallet also solves the problem or ``rotating'' addresses at each transaction in order to make the user more difficult to track, without need of human intervention.
+A wallet also solves the problem of rotating addresses at each transaction in order to make the user more difficult to track, without need of human intervention.
 
 Wallets can be either a software or a physical device.
 Software wallets are usually easier to use, since they can simply use the available internet connection to interact with the peer-to-peer network to get information from the blockchain and broadcast new transactions.
-On the other hand, software wallets are more vulnerable to attacks, since an attacker only needs to compromise the user's device running the software to steal the private keys stored in the wallet and take control of the bitcoins stored in the corresponding addresses.
+On the other hand, software wallets are more vulnerable to attacks, since an attacker only needs to compromise the user's device running it to steal the private keys stored in the wallet and take control of the bitcoins stored in the corresponding addresses.
 Hardware wallets are physical devices able to manage Bitcoin addresses and store the private keys securely in a dedicated hardware module.
 
 \section{Forks}
@@ -116,70 +116,71 @@ Bitcoin nodes should follow the longest chain, i.e. the chain whose last block h
 		Schematic representation of a blockchain with \num{3} branches.
 		The red block \texttt{2b} and the yellow blocks \texttt{5c} and \texttt{6c} are forks of the main chain that originate respectively at blocks \texttt{1} and \texttt{4}.
 		Green blocks are on the longest chain, since block \texttt{7} is the one with the highest number of preceding blocks.
-		The blue block represents represents the ``genesis''.
+		The blue block \texttt{0} represents represents the genesis.
 	}
 	\label{fig:forks}
 \end{figure}
 
 Forks are probably the biggest problem in Bitcoin, since they allow an attacker to try to spend the money twice by creating two contrasting transactions that get stored in blocks published on different branches of the blockchain.
-We will cover the ``double-spend'' attack in greater detail in \cref{chapter:attacks}.
+We will cover the \textit{double-spend} attack in greater detail in \cref{sec:double-spending}.
 
 \section{Mining \& Proof of Work}
 \label{sec:mining}
-The usage of modern cryptography in Bitcoin addresses and transactions guarantees that only the owner of some money can actually spend it (at least until the private key associated to the address is carefully protected).
-Also, since all transactions are recorded and stored in the blockchain, the blockchain uses cryptographic hashes to detect tampering and it is replicated around many computer and devices around the world, it is very difficult or even impossible to remove old transactions from the past (i.e. revert payments).
+The usage of modern cryptography in Bitcoin addresses and transactions guarantees that only the owner of some money can actually spend it (at least until the private key associated with the address is carefully protected).
+Also, since all transactions are recorded and stored in the blockchain, the blockchain uses cryptographic hashes to detect tampering and it is replicated around many computer and devices around the world, it is very difficult or even impossible to remove old transactions from the past under normal conditions (i.e. revert payments).
 However, there is so far no mechanism that prevents an attacker to create a big number of forks by simply forging new blocks.
 
 \bigskip
 Bitcoin uses \ac{PoW} \cite{pow_2002} to reduce the feasibility of such an attack.
-It requires to solve a cryptographic puzzle and include its solution to create a valid block.
+It requires to solve a cryptographic puzzle and publish its solution to create a valid block.
 The difficulty of the puzzle is agreed by the network and depends on the total computational power available.
 The puzzle consists in finding a nonce to include in the block such that the cryptographic hash of the serialized block is less than a target number, i.e. it starts with a certain number of zeros.
+The maximum value of a block's hash that successfully solves the challenge is commonly known as \textit{target} \cite{target}.
 Thanks to the properties of cryptographic hash functions, the only way to solve the puzzle is a brute-force approach, which requires time and resources (in terms of both computation power and energy).
 This mechanism prevents an attacker to forge too many blocks, since it would require too many resources and time.
 
 \bigskip
-People that manage to create a new block (miners) get a reward in bitcoins when the block is stored in the main chain;
+Miners that manage to create a new block get a reward in bitcoins when the block is stored in the main chain;
 also, they get the fees of all transactions stored in the block.
 The address of the miner is stored in the header of the block, so the other nodes that run the Bitcoin protocol know who to acknowledge for both rewards.
-It is important to notice that a miner is able to spend the reward obtained only if the corresponding block is stored in the main chain:
+It is important to underline that a miner is able to spend the reward obtained only if the corresponding block is stored in the main chain:
 blocks in different branches of the blockchain are not recognized, since all correct nodes will only consider the longest (main) chain as valid.
 Bitcoin rules try to encourage miners to behave correctly:
-if a miner has a block stored in the blockchain, it is its interest to keep mining on the longest chain, in order to make more difficult or impossible for an attacker to create a branch which gets longer than the main chain, since this might ``cancel'' the rewards of the miner.
+if a miner has a block stored in the blockchain, it is its interest to keep mining on the longest chain, in order to make more difficult or impossible for an attacker to create a branch which gets longer than the main chain, since this might cancel the miner's rewards.
 
 \bigskip
-The process of mining in Bitcoin can be seen as a competition between miners.
+The Bitcoin mining process can be seen as a competition between miners.
 As soon as a new block is created, it is published and appended to the longest branch in the blockchain.
 Then, miners move the next block:
-they choose the transactions to include from the one not yet processed, create the block by including the current timestamp, their address and the other information required and start to look for a nonce value that solves new the cryptographic puzzle.
+they choose the transactions to include from the ones not yet processed, create the block by including the current timestamp, their address and the other information required and start to look for a nonce value that solves the new cryptographic puzzle.
 When a miner finishes a block, all the others stop and start again from the longest branch:
-it would make no sense to complete the current block \footnote{At least for honest miners (those that does not deviate from the Bitcoin protocol); malicious miners might have an advantage to choose a different strategy, as explained in \cref{chapter:attacks}}, since it would be in conflict with the current longest chain and would probably be ignored by the other nodes in the network.
+it would make no sense to complete the current block \footnote{At least for honest miners (those that does not deviate from the Bitcoin protocol); malicious miners might have an advantage to choose a different strategy, as explained in \cref{sec:selfish}.}, since it would be in conflict with the current longest chain and would probably be ignored by the other nodes in the network.
 The idea behind this strategy - which is the one implemented in official Bitcoin implementation originally created by Satoshi Nakamoto \cite{bitcoin_github} - is to waste as little computational power as possible:
-when a block is attached to the longest chain, it would be a waste to complete another block that should be put in the same place as the first one.
+when a block is attached to the longest chain, it would be a waste to complete another block that would go to the same place as the first one.
 
 \section{Mining Pools}
 It is important to notice that the cryptographic puzzle used by Bitcoin is highly parallelizable, both on a single computer with a multi-core \ac{CPU} and as a distributed algorithms in a cluster of machines.
-The only known way to solve the puzzle is a brute-force approach, which means trying all possible values for the nonce until a good nonce is found.
+The only known way to solve the puzzle is a brute-force approach, which means trying all possible values for the nonce until a good one is found.
 Also, since the nonce has a binary representation on a finite number of bits, it is trivial to partition the set of all possible values in ranges.
 Each range can be assigned to a different core of the \ac{CPU} or distributed to a different machine in a cluster;
 each core or machine reports the good nonces to some central coordinator, which it responsible to publish the block to the network and distribute new tasks to perform.
 
 Because of the properties of cryptographic hash functions, the expected number of trials required to find a good nonce is $2^{b - 1}$, where $b$ is the number of bits in the binary representation of the nonce in a block header.
-To verify if a nonce is good for a block, a miner only needs to put the nonce in the correct location in the block header and compute the hash function on the complete block.
+To check if a nonce is good for a block, a miner only needs to put the nonce in the correct location in the block header and compute the hash function on the complete block.
 The expected time to complete a block is thus proportional to the speed of the miner in computing an hash function.
-This value is usually called ``Hashrate'' in the Bitcoin vocabulary \cite{bitcoin_vocabulary}.
+This value is usually called \textit{hashrate} in the Bitcoin vocabulary \cite{bitcoin_vocabulary}.
 
 Miners are in competition with each other:
 after a new block is published, honest miners start to work on the next block.
 The probability of a miner to be the first one to complete a block is proportional to its hashrate.
 Miners with small hashrates (e.g. those that use a general-purpose computer) are statistically very unlikely to ever find a block, and thus to earn a reward.
-For this reason, miners to cooperate with each other in groups and create the so-called ``Mining Pools''.
+For this reason, miners to cooperate with each other in groups and create the so-called \textit{mining pools}.
 
 \bigskip
-A mining pool is a set of miners that share their computational power in the mining process.
+A mining pool is a group of miners that share their computational power in the mining process.
 Each pool has a coordinator that participates in the normal Bitcoin protocol:
 it collects pending transactions, distribute blocks etc.
-In addition, the coordinator creates ranges of nonces values and distributes them to the pool (as described above);
+In addition, the coordinator creates ranges of nonces values and distributes them to the pool;
 when a node finds a good nonce, it reports it to the coordinator, which completes and distributes the block to the rest of the Bitcoin network.
 The same process is repeated for the next blocks.
 The coordinator is also responsible for sharing the rewards among the nodes in the pool:
@@ -239,9 +240,9 @@ some commands are used to establish the initial connection between a miner and a
 	\includegraphics[width=0.9\columnwidth]{figures/pools}
 	\vspace*{0.25cm}
 	\caption[Estimation of the hashrate distribution amongst the largest mining pools]{
-		Estimation of the hashrate distribution amongst the largest mining pools
+		Estimation of the hashrate distribution amongst the largest mining pools in the months of June, July and August \num{2018} \cite{stats_pools}
 		\footnotemark.
 	}
 	\label{fig:pools}
 \end{figure}
-\footnotetext{Image taken from \url{https://btc.com/stats/pool?pool_mode=month3}}
+\footnotetext{Image taken from \url{https://btc.com/stats/pool?pool_mode=month3} on August 18, 2018.}

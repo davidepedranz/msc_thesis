@@ -1,15 +1,15 @@
 \chapter{Protocol}
 \label{chapter:protocol}
-This chapter focuses on the low-level peer-to-peer protocol that runs Bitcoin.
+This chapter describes the low-level peer-to-peer protocol that runs Bitcoin.
 Unfortunately, the Bitcoin protocol has never been documented properly:
 the original paper \cite{bitcoin_2009} does not describe the details of the protocol and no official and complete description is available.
-Some unofficial documentation exist, but it is often incomplete and outdated.
+Some unofficial documentation does exist, but it is often incomplete and outdated.
 The single point of truth available is the open-source original Bitcoin client, \texttt{bitcoind} \cite{bitcoin_github}:
 at the time of writing, around \num{95}\% of nodes in the network run some version of this client \cite{bitnodes}.
 Unfortunately, the source code is quite hard to understand and contains almost no comment.
 The content of this chapter is thus primarily based on academical papers \cite{eclipse_attack_2015, deanonymization_2014}, on some online references \cite{bitcoin_reference, bitcoin_guide} and partially on the source code itself.
 Please note that the content of this chapter refers to \texttt{bitcoind}:
-other clients may choose different settings or strategies in some cases.
+other clients may choose different settings or strategies and behave slightly differently in some cases.
 
 \bigskip
 Peers in the Bitcoin network are identified by their IP address.
@@ -25,25 +25,27 @@ Both layers use an epidemic (or gossip) paradigm \cite{gossip_1987} to achieve a
 
 
 \section{Topology}
+\label{sec:topology}
 The topology layer is responsible to create and maintain the a peer-to-peer overlay network between Bitcoin nodes.
-Its main responsibilities are:
+Its main functions are:
 \begin{itemize}
-	\item discover new peers;
+	\item discover new peers in the Bitcoin network;
 	\item propagate the IP addresses of nodes in the network;
-	\item detect and remove old peers that left the network or are offline for a long period of time;
-	\item form an overlay network that can be used to efficiently broadcast blocks and transactions to all peers in the network.
+	\item detect and remove peers that left the network or are offline for a long period of time;
+	\item form an overlay network that can be used to efficiently broadcast blocks and transactions to all peers in the network (see \cref{sec:core}).
 \end{itemize}
 
 \subsection{Peer discovery}
 \label{sub:discovery}
 The peer discovery phase is crucial for the bootstrap of the network:
-at the first startup, a Bitcoin node does not know any other peer.
-Bitcoin nodes use different strategies to discover the first peers to achieve a higher failure resistance and security (an attacker might be able to interfere with some of the strategies, but it is less unlikely that it might interfere with all of them) \cite{bitcoin_peer_discovery}.
+at the first startup, a Bitcoin node does not know anything about the other peers.
+Bitcoin nodes use different strategies to discover the first peers to connect to:
+this allows to achieve a higher failure resistance and security, since an attacker might be able to interfere with some of the strategies, but it is less unlikely that it might interfere with all of them \cite{bitcoin_peer_discovery}.
 Once a node connects to the first peer, it can start to run the Bitcoin protocol to gather information about other connected peers.
 
 \subsubsection{IP discovery}
 The first step in peer discovery is to get its own IP address.
-After the startup, a Bitcoin node issues a HTTP \texttt{GET} request to \num{2} hard-coded websites, which reply with the IP address assigned by the \ac{ISP}:
+After the startup, a Bitcoin node issues a HTTP GET request to \num{2} hard-coded websites, which reply with the IP address assigned by the \ac{ISP}:
 the client reads the HTTP response and parses the IP address \cite{bitcoin_peer_discovery}.
 It is possible that the node discovers more than one IP address:
 in that case, public IP addresses are preferred over private ones \cite{deanonymisation_2014}.
@@ -65,7 +67,7 @@ Please note that the list of addresses is not cryptographically-authenticated an
 The DNS seeders are queried only in the following \num{2} cases:
 \begin{enumerate}
 	\item a new node joins the network for the first time;
-	\item an existing node restarts and fails to reconnect to the old peers; the seeded is queried only after \num{11} seconds since the initial connection attempt and the node has less than \num{2} outgoing connections.
+	\item an existing node restarts and fails to reconnect to the old peers; the seeders are queried only if the node has less than \num{2} outgoing connections and after \num{11} seconds since the initial connection attempt.
 \end{enumerate}
 
 \subsubsection{Addr messagges}
@@ -158,7 +160,7 @@ The lists of messages are flushed daily.
 	\label{fig:trickling}
 \end{figure}
 
-\subsection{Peers cleanup}
+\subsection{Peer cleanup}
 Bitcoin nodes exchange control messages to verify that remote peers are still connected and working correctly.
 Every \num{2} minutes, each node sends a \texttt{Ping} message to all connected peers \cite{bitcoin_ping_pong}:
 upon receiving a \texttt{Ping} message, the node immediately replies with a \texttt{Pong}.
@@ -166,7 +168,7 @@ If a node does not receive any \texttt{Pong} message from a peer for \num{20} mi
 
 \subsection{Control messages}
 Bitcoin nodes exchange information in messages, sent over the persistent TCP connections.
-Messages have an header and a body:
+Messages have a header and a body:
 the header always contains a fixed start string that delimits the message start, the name of the command, the size of the body and a checksum;
 the body changes depending on the specific message and can be empty in some cases.
 None of the control messages are authenticated in any way:
@@ -184,11 +186,11 @@ they could potentially contain incorrect or intentionally harmful information.
 	\label{fig:control-messages}
 \end{figure}
 
-Some messages are related to each other, as illustrated in \cref{fig:control-messages}:
+Some messages are related to each other \cite{bitcoin_reference}, as illustrated in \cref{fig:control-messages}:
 one is usually the reply to the other (for example, \texttt{Version} and \texttt{VerAck});
 in some cases, one message can be both the reply of another one and be used alone (for example, \texttt{Addr}).
 Many of the control messages have been touched already in the description of the protocol:
-this section will give an overview of the main ones \cite{bitcoin_reference}.
+this section will give an overview of the main ones.
 
 \subsubsection{Version}
 \label{par:version}
@@ -234,7 +236,8 @@ Examples of rejection reasons are a malformed block or a peer running an obsolet
 
 
 \section{Core}
+\label{sec:core}
 The core layer uses the underlying overlay network created by the topology layer to propagate blocks and transactions to all Bitcoin nodes.
 
-\subsection{Messages}
-TODO
+% \subsection{Messages}
+% TODO
