@@ -6,7 +6,7 @@ Since its release, Bitcoin has gained popularity and attention of the media, esp
 Nowadays, Bitcoin is the most used and valuable cryptocurrency available on the market, with a price of over \SI{8000}{\$ \per BTC} and a market cap of about \num{141} billion \$ \cite{bitcoin_usage_study_2017, stats_coinmarketcap, stats_coinranking, stats_cryptocompare, stats_coincheckup, stats_moonstats}.
 Bitcoin can be used for both online and in-shop payments, fast and low-cost money transfer, and pseudonymous money spending.
 
-\bigskip
+\medskip
 Bitcoin is a complex technology that takes advantage of modern cryptography and distributed algorithms to solve the complex Byzantine Consensus problem \cite{byzantin_generals_1982}.
 This section covers the main building blocks and concepts and gives an overview of the overall working of Bitcoin.
 
@@ -112,7 +112,7 @@ Bitcoin nodes should follow the longest chain, i.e. the chain whose last block h
 	\vspace*{0.25cm}
 	\includegraphics[scale=0.9]{figures/forks}
 	\vspace*{0.25cm}
-	\caption[Schematic representation of a blockchain with \num{3} branches]{
+	\caption[Schematic representation of a blockchain different branches]{
 		Schematic representation of a blockchain with \num{3} branches.
 		The red block \texttt{2b} and the yellow blocks \texttt{5c} and \texttt{6c} are forks of the main chain that originate respectively at blocks \texttt{1} and \texttt{4}.
 		Green blocks are on the longest chain, since block \texttt{7} is the one with the highest number of preceding blocks.
@@ -130,7 +130,7 @@ The usage of modern cryptography in Bitcoin addresses and transactions guarantee
 Also, since all transactions are recorded and stored in the blockchain, the blockchain uses cryptographic hashes to detect tampering and it is replicated around many computer and devices around the world, it is very difficult or even impossible to remove old transactions from the past under normal conditions (i.e. revert payments).
 However, there is so far no mechanism that prevents an attacker to create a big number of forks by simply forging new blocks.
 
-\bigskip
+\medskip
 Bitcoin uses \ac{PoW} \cite{pow_2002} to reduce the feasibility of such an attack.
 It requires to solve a cryptographic puzzle and publish its solution to create a valid block.
 The difficulty of the puzzle is agreed by the network and depends on the total computational power available.
@@ -139,7 +139,7 @@ The maximum value of a block's hash that successfully solves the challenge is co
 Thanks to the properties of cryptographic hash functions, the only way to solve the puzzle is a brute-force approach, which requires time and resources (in terms of both computation power and energy).
 This mechanism prevents an attacker to forge too many blocks, since it would require too many resources and time.
 
-\bigskip
+\medskip
 Miners that manage to create a new block get a reward in bitcoins when the block is stored in the main chain;
 also, they get the fees of all transactions stored in the block.
 The address of the miner is stored in the header of the block, so the other nodes that run the Bitcoin protocol know who to acknowledge for both rewards.
@@ -148,13 +148,14 @@ blocks in different branches of the blockchain are not recognized, since all cor
 Bitcoin rules try to encourage miners to behave correctly:
 if a miner has a block stored in the blockchain, it is its interest to keep mining on the longest chain, in order to make more difficult or impossible for an attacker to create a branch which gets longer than the main chain, since this might cancel the miner's rewards.
 
-\bigskip
+\medskip
 The Bitcoin mining process can be seen as a competition between miners.
 As soon as a new block is created, it is published and appended to the longest branch in the blockchain.
 Then, miners move the next block:
 they choose the transactions to include from the ones not yet processed, create the block by including the current timestamp, their address and the other information required and start to look for a nonce value that solves the new cryptographic puzzle.
 When a miner finishes a block, all the others stop and start again from the longest branch:
 it would make no sense to complete the current block \footnote{At least for honest miners (those that does not deviate from the Bitcoin protocol); malicious miners might have an advantage to choose a different strategy, as explained in \cref{sec:selfish}.}, since it would be in conflict with the current longest chain and would probably be ignored by the other nodes in the network.
+
 The idea behind this strategy - which is the one implemented in official Bitcoin implementation originally created by Satoshi Nakamoto \cite{bitcoin_github} - is to waste as little computational power as possible:
 when a block is attached to the longest chain, it would be a waste to complete another block that would go to the same place as the first one.
 
@@ -176,7 +177,7 @@ The probability of a miner to be the first one to complete a block is proportion
 Miners with small hashrates (e.g. those that use a general-purpose computer) are statistically very unlikely to ever find a block, and thus to earn a reward.
 For this reason, miners to cooperate with each other in groups and create the so-called \textit{mining pools}.
 
-\bigskip
+\medskip
 A mining pool is a group of miners that share their computational power in the mining process.
 Each pool has a coordinator that participates in the normal Bitcoin protocol:
 it collects pending transactions, distribute blocks etc.
@@ -186,7 +187,7 @@ The same process is repeated for the next blocks.
 The coordinator is also responsible for sharing the rewards among the nodes in the pool:
 all blocks are created using the address of the coordinator, which collects all rewards, and periodically pays each node based on its contribution to the mining process.
 
-\bigskip
+\medskip
 Mining pools are a way to minimize the risk.
 If the pool has a sufficient hashrate, it is likely to complete blocks before other miners and get the reward;
 even small miners can contribute to a pool and get a small reward.
@@ -196,7 +197,7 @@ the top \num{5} pools control about \num{65}\% of the total hashrate;
 the top \num{10} pools count for about \num{90}\% and the remaining \num{10}\% is shared among small pools and alone miners.
 For convenience, the same information is shown in \cref{fig:pools} as a pie chart.
 
-\bigskip
+\medskip
 Mining pools use Stratum \cite{stratum}, a protocol introduces in \num{2012} to coordinate the mining process.
 The protocol is based on plain HTTP \cite{stratum_manual}:
 miners authenticate against the pools, but there is no verification of the pool's identity and the network traffic is in clear.

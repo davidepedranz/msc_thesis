@@ -223,7 +223,7 @@ overall, the rewards share for the selfish miners is higher than the proportion 
 In practice, this gives the selfish miners an advantage over the others and encourages rational miners to join the group of selfish miners.
 According to the paper, relatively small group of miners can adopt the selfish strategy and attract many other miners, with the risk of gaining the majority of the mining power (see \cref{sec:majority-attack}).
 
-\bigskip
+\medskip
 Some work has been done in academics to investigate alternative mining strategy \cite{other_mining_strategies_2014, block_hiding_strategies_2014}.
 
 Nayak Kartik et at. have proposed Stubborn Mining \cite{stubborn_mining_2016}, a strategy heavily inspired by Selfish Mining, but that accepts some more risk (e.g. keep mining on chains shorter than the longest one) in return to a higher expected revenue.
@@ -266,7 +266,7 @@ In the specific case of Bitcoin, the attacker can mount many different attacks a
 	\label{fig:eclipse}
 \end{figure}
 
-\bigskip
+\medskip
 Each Bitcoin node maintains \num{2} tables of addresses \cite{eclipse_attack_2015}:
 the \texttt{tried} table contains addresses of peers that were successful connected with the current node at least one in the past;
 the \texttt{new} table contains addresses discovered through any of the peers-discovery strategies used by Bitcoin (see \cref{sub:discovery}) to whom the node has not yet initiated a successful connection.
@@ -277,7 +277,7 @@ Each Bitcoin node always tries to have exactly \num{8} outgoing connections, in 
 If the number of outgoing connections gets less than \num{8}, the node randomly chooses a new IP address from the \texttt{new} table and tries to connect to the corresponding node:
 if the connection is not successful, the node tries with the next address.
 
-\bigskip
+\medskip
 An Eclipse Attack against Bitcoin \cite{eclipse_attack_2015} is illustrated in \cref{fig:eclipse} and works as follows:
 \begin{itemize}
 	\item the attacker rapidly and repeatedly opens new unsolicited connections to the victim from a set of malicious nodes under its control; when a new connection is establishes, the attacker also sends unsolicited \texttt{Addr} messages containing a list of up to \num{1000} ``trash'' addresses (IPs of host that do not run Bitcoin or addresses under the control of the attacker);
@@ -301,7 +301,7 @@ The primary function of \ac{BGP} is to exchanges information about network reach
 The information collected and distributed by the protocol are used to construct a graph of connectivity between different \ac{AS}, which can be used to make optimal routing decisions among the networks of different parties.
 \ac{BGP} routing also depends on policies and rules configured by network administrators.
 
-\bigskip
+\medskip
 While not directly related to Bitcoin, \ac{BGP} is fundamental for the working of Internet, and thus for each distributed systems build on top of that.
 Under some conditions, attacks against \ac{BGP} can affect Bitcoin and mine some of the guarantees given by the protocol.
 Researchers at Dell SecureWorks Counter Threat Unit discovered an attacker that repeatedly hijacked traffic destined to networks belonging to Amazon, Digital Ocean, OVH, and other large hosting companies between February and May 2014 \cite{bgp_hijacking_secureworks}:
@@ -352,7 +352,7 @@ If the attack is successful, some Internet traffic destined to the hijacked netw
 Since all the Bitcoin traffic is in clear and there in no authentication between different peers, Bitcoin is vulnerable to hijacking \cite{hijacking_bitcoin_2017}.
 Similarly, traffic of the Stratum protocol used in by mining pools is vulnerable to routing attacks.
 
-\bigskip
+\medskip
 \cref{fig:bpg-hijacking} shows an example of \ac{BGP} hijacking used against a Bitcoin miner running the Stratum protocol.
 The attack works as follows:
 \begin{itemize}
@@ -365,7 +365,7 @@ The attack works as follows:
 	\item the miner performs the assigned tasks correctly, but does not get any revenue from the malicious pool, effectively wasting its computing power for free.
 \end{itemize}
 
-\bigskip
+\medskip
 In the paper ``Hijacking Bitcoin: Routing Attacks on Cryptocurrencies'', Maria Apostolaki et at. show that large scale networks attack against Bitcoin are possible and have been already done in the past.
 They claim that anyone with access to a BGP-enabled network and able to hijack less than \num{900} prefixes (about \num{0.15}\% of the total) can perform attacks commonly believed to be hard, such as isolating \num{50}\% of the mining power.
 Attackers controlling some networks can potentially:
@@ -382,7 +382,7 @@ The Balance attack is a new attack proposed by Christopher Natoli and Vicent Gra
 The attack targets \textit{forkable} blockchains, i.e. a blockchain that allow multiple branches at the same time.
 The most famous examples of systems using a forkable blockchains are Bitcoin \cite{bitcoin_2009} and Ethereum \cite{ethereum_2014}.
 
-\bigskip
+\medskip
 Forkable blockchains implement some strategy to solve conflicts:
 for example, Bitcoin always follows the longest chain if multiple branches exists.
 The rule guarantees that the system will eventually agree on the same longest chain, and thus on the same set of transactions stored in the blockchain.
@@ -395,7 +395,7 @@ Honest miners immediately stop the mining process if they receive a new valid bl
 the delay between a block discovery and its broadcast may allow other miners to complete and publish a conflicting block, effectively creating a fork in the blockchain.
 In practice, an attacker can increase the amount of wasted blocks in the system and slow down the growth of the longest chain by simply delaying the propagation of new blocks \cite{balance_attack_2017}.
 
-\bigskip
+\medskip
 The Balance attack takes advantage of this idea.
 The attacker partitions the Bitcoin nodes by disrupting communications between different subgroups:
 the messages containing new blocks are delayed or possibly dropped completely.

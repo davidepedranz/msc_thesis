@@ -11,7 +11,7 @@ The content of this chapter is thus primarily based on academical papers \cite{e
 Please note that the content of this chapter refers to \texttt{bitcoind}:
 other clients may choose different settings or strategies and behave slightly differently in some cases.
 
-\bigskip
+\medskip
 Peers in the Bitcoin network are identified by their IP address.
 Each node can initiate up \num{8} outgoing connections with other nodes, and accept up to \num{117} incoming connections, for a total of \num{125} \footnote{With the default settings (it is possible to configure custom values if necessary). Measures show that the majority of nodes have at most \num{8} outgoing connections and never reach the maximum number of incoming ones \cite{discovering_influential_nodes_2014}.}.
 All connections use unencrypted TCP channels.
@@ -19,7 +19,7 @@ Nodes propagate and store only public IP addresses.
 At the moment of writing, there are about \num{9000} reachable server, while the number of clients is estimated to be between \num{100000} and \num{200000}.
 Nodes can also connect to the network via Tor \cite{bicoin_tor}.
 
-\bigskip
+\medskip
 We divide the description of the protocol in \num{2} layers: topology and core.
 Both layers use an epidemic (or gossip) paradigm \cite{gossip_1987} to achieve a fast information propagation and be tolerant to failures.
 
@@ -32,7 +32,8 @@ Its main functions are:
 	\item discover new peers in the Bitcoin network;
 	\item propagate the IP addresses of nodes in the network;
 	\item detect and remove peers that left the network or are offline for a long period of time;
-	\item form an overlay network that can be used to efficiently broadcast blocks and transactions to all peers in the network (see \cref{sec:core}).
+	\item form an overlay network that can be used to efficiently broadcast blocks and transactions to all peers in the network (see \cref{sec:core});
+	\item detect misbehaving peers and ban them if necessary.
 \end{itemize}
 
 \subsection{Peer discovery}
@@ -166,6 +167,13 @@ Every \num{2} minutes, each node sends a \texttt{Ping} message to all connected 
 upon receiving a \texttt{Ping} message, the node immediately replies with a \texttt{Pong}.
 If a node does not receive any \texttt{Pong} message from a peer for \num{20} minutes, it assumes the peer to be not working and drops the connection.
 
+\subsection{Misbehaving peers}
+Bitcoin implements a reputation-based protocol.
+Each connection is associated with a penalty score:
+whenever the node receives a malformed messages, it increases the penalty score for the sender;
+if the score reaches a threshold, the IP address of the corresponding peer is banned for \num{24} hours \cite{deanonymisation_2014}.
+This mechanism helps Bitcoin to detect and attenuate denial-of-service attacks.
+
 \subsection{Control messages}
 Bitcoin nodes exchange information in messages, sent over the persistent TCP connections.
 Messages have a header and a body:
@@ -174,10 +182,10 @@ the body changes depending on the specific message and can be empty in some case
 None of the control messages are authenticated in any way:
 they could potentially contain incorrect or intentionally harmful information.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering
 	\vspace*{0.25cm}
-	\includegraphics[scale=0.9]{figures/control_messages}
+	\includegraphics[scale=0.85]{figures/control_messages}
 	\vspace*{0.25cm}
 	\caption[Overview of the Bitcoin control messages]{
 		Overview of the Bitcoin control messages:
@@ -190,7 +198,7 @@ Some messages are related to each other \cite{bitcoin_reference}, as illustrated
 one is usually the reply to the other (for example, \texttt{Version} and \texttt{VerAck});
 in some cases, one message can be both the reply of another one and be used alone (for example, \texttt{Addr}).
 Many of the control messages have been touched already in the description of the protocol:
-this section will give an overview of the main ones.
+this section gives an overview of the main ones.
 
 \subsubsection{Version}
 \label{par:version}
@@ -238,6 +246,120 @@ Examples of rejection reasons are a malformed block or a peer running an obsolet
 \section{Core}
 \label{sec:core}
 The core layer uses the underlying overlay network created by the topology layer to propagate blocks and transactions to all Bitcoin nodes.
+Its main functions are:
+\begin{itemize}
+	\item quickly propagate transactions to a big portion of the network, so they can be included in some block in a short time;
+	\item propagate blocks as fast as possible to minimize the work wasted on orphan blocks.
+\end{itemize}
 
-% \subsection{Messages}
-% TODO
+\subsection{Transaction propagation}
+Transactions are propagated using \texttt{Tx} messages:
+when a client generates a new transaction, it packages it in a \texttt{Tx} message and relays it to some Bitcoin node \cite{bitcoin_reference}.
+Similarly to \texttt{Addr} messages, \texttt{Tx} messages are not always immediately forwarded to all peers \cite{deanonymisation_2014}:
+there are immediately sent with a probability of \num{0.25};
+otherwise, they are put in the queue of the corresponding peer and flushed with the peer becomes the trickle node (see \cref{sub:address-propagation}).
+
+The transaction is then propagated to the entire network.
+Forwarding a transaction from one peer to another involves several steps:
+\begin{itemize}
+	\item the sender node transmits an \texttt{Inv} message of type ``transaction'' containing the hash of the new transactions;
+	\item the receiver checks if it knows already the hashes; if it is the case, no further step is performed;
+	\item if the hashes are new, the receiver sends a \texttt{GetData} message to request the transmission of the full transactions;
+	\item the sender transmits one \texttt{Tx} message for each requested transaction;
+	\item when the receiver gets the transactions, it advertizes them to its peers with an \texttt{Inv} message.
+\end{itemize}
+
+As with \texttt{Addr} messages, each Bitcoin node maintains a list of forwarded transactions for each peer and avoids to forward the same transaction to the same peer twice.
+Each node keeps the list of all received transactions in its memory pool.
+If it receives a transaction with the same hash as one in the pool or in a block in the main chain, the received transaction is rejected.
+Each node also keeps track of the transactions already included in the main chain and avoids to include them in new blocks.
+On the other hand, if a block is orphaned, the transactions which are not already in another block on the main chain are again available for the next blocks.
+
+\subsection{Block propagation}
+Blocks are propagated in a similar way as transactions.
+When a new block is generated, the miner sends a \texttt{Block} message to all its peers.
+When a node receives a block, it checks its validity and then forwards it to all connected peers.
+To avoid broadcasting the block too many times, nodes maintain a list of already sent blocks:
+each time they receive a block, they first check if that block was already forwarded;
+only if the answer is negative, the node sends it to its peers.
+
+\medskip
+Blocks can also be requested an need with a \texttt{GetBlock} message:
+this mechanism is used when a node receives a block with an unknown parent (in case \num{2} subsequent blocks are mined, it is possible for some nodes in the network to receives the second before the first one), or for the bootstrap of a new node, as explained in the next section.
+
+\subsection{Initial block download}
+New miners do not have any information about the current status of the blockchain.
+Once they successfully connect to some peers in the network, they need to download the entire blockchain to be able to verify the new transactions and mine new blocks.
+This procedure is called \textit{initial block download} and works as follows:
+\begin{itemize}
+	\item the new miner selects one of the connected peers, called the \textit{sync node}, and sends it a \texttt{GetBlocks} message, requesting all blocks after the genesis (the only known block, since it is hard-coded in the software);
+	\item upon receipt of the \texttt{GetBlocks} message, the sync node searches its local longest chain, starting from the genesis; it then replies with an \texttt{Inv} message containing the hashes for the first \num{500} blocks after the genesis (the maximum allowed for a single response);
+	\item the miner replies with a \texttt{GetData} message and requires the transmission of the complete missing blocks;
+	\item upon receipt of the \texttt{GetData} message, the sync node replies with a \texttt{Block} message for each requested block;
+	\item the miner validated each received blocks; the miner then sends a new \texttt{GetBlocks} message to request the next blocks;
+	\item the process is repeated until all blocks in the longest chain has been transmitted.
+\end{itemize}
+The same procedure can be used if a miner goes offline for some period of time and wants to fast get up-to-date with the current state of the blockchain.
+
+\subsection{Data messages}
+Similarly to the control messages, data messages have header and body, and are sometimes correlated to each other.
+Serialized messages and are not authenticated in any way, but both transactions and blocks can be easily verified:
+a transaction is valid only if correctly signed with the private key of the sender address, while blocks are valid only if their hash is less or equal to the current target.
+
+\medskip
+\cref{fig:data-messages} illustrates the main data messages used by the core layer of the Bitcoin protocol;
+each message in explained in detail in a dedicated section.
+
+\begin{figure}[ht]
+	\centering
+	\vspace*{0.25cm}
+	\includegraphics[scale=0.85]{figures/data_messages}
+	\vspace*{0.25cm}
+	\caption[Overview of the Bitcoin data messages]{
+		Overview of the Bitcoin data messages:
+		lines between boxes indicate that the corresponding messages are correlated.
+	}
+	\label{fig:data-messages}
+\end{figure}
+
+\subsubsection{GetBlocks}
+The \texttt{GetBlocks} message requests an \texttt{Inv} message that provides the hashes of blocks starting from a particular point in the block chain.
+It allows a peer which has just joined the network for the first time or has been disconnected or started for a while to get information about the current state of the blockchain and later request unseen blocks.
+Note that the receiving peer may respond with an \texttt{Inv} message containing hashed of orphaned blocks:
+it is responsibility of the requesting node to poll all its peers to find the longest chain.
+
+\subsubsection{MemPool}
+The \texttt{MemPool} message requests the hashes of valid transactions that has not yet been stored in a block in the longest chain.
+That is, transactions which are in the receiving node’s memory pool.
+The response to the \texttt{MemPool} message are one or more \texttt{Inv} messages containing the hashes of all transactions in the memory pool.
+The message is particularly useful for new miners that just joined the network to get quickly up-to-date with the list of transactions available for the next block.
+It is also used by non-miner clients that quickly want to check the state of a new transaction just submitted to the network.
+The \texttt{MemPool} message has no body.
+
+\subsubsection{Inv}
+The \texttt{Inv} message transmits one or more inventories (hashes, used as unique identifiers) of objects (blocks or transactions) known to the transmitting peer.
+It can be sent unsolicited to announce new transactions or blocks, or it can be the reply to a \texttt{GetBlocks} message or \texttt{MemPool} message.
+The receiving peer can compare the inventories contained in an \texttt{Inv} message to determine the unseen object and require them using a \texttt{GetData} message.
+An \texttt{Inv} message must contain all objects of the same type.
+
+\subsubsection{GetData}
+The \texttt{GetData} message requests one or more objects from another node.
+The objects are requested by their hashes (inventories), which the requesting node usually discovers from \texttt{Inv} messages.
+The response to a \texttt{GetData} message depends on the requested object and can be a \texttt{Tx} message, \texttt{Block} message, a \texttt{NotFound} message, or other special messages not described in this text.
+
+\subsubsection{Tx}
+The \texttt{Tx} message transmits a single transaction.
+It can be sent either unsolicited, for new transactions generated by the node, or in response to a \texttt{GetData} message.
+The body of a \texttt{Tx} message contains a single serialized transaction.
+
+\subsubsection{Block}
+The \texttt{Block} message transmits a single block.
+It can be sent for \num{2} different reasons:
+\begin{enumerate}
+	\item solicited, in response to a \texttt{GetData} message that requests block objects;
+	\item unsolicited, broadcasting a newly-mined blocks to all of nodes in the network.
+\end{enumerate}
+
+\subsubsection{NotFound}
+The \texttt{NotFound} message is a reply to a \texttt{GetData} message which requested an object unknown or not available to relay (for example, Bitcoin nodes does not need to relay historic transactions that are already been included in the blockchain).
+The body includes the hashes of object that were not found on the receiving node.
