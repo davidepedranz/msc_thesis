@@ -70,11 +70,12 @@ Discrete event simulators take advantage of pseudorandom number generators to em
 whenever an event is influenced by some random factor external to the system (e.g. latency of a TCP connection over the Internet), the simulator extracts a random variable from some distribution using the random number generators.
 The simulation stops when a certain condition is reached (for example, a target simulation time is reached), or when the queue of events is empty.
 
+
 \section{PeerSim}
 PeerSim \cite{peersim_2009} is an open source peer-to-peer systems simulator engine developed at the University of Bologna and the University of Trento.
 It is written in Java and aim is to help the research and evaluation of large peer-to-peer.
 It has been developed with high scalability in mind, in order to support simulations with up to \num{1} million nodes.
-It is released under the GPL open source license and is available for download on SourceForce \footnote{\url{http://peersim.sourceforge.net/}}.
+It is released under the GPL open source license and is available for download on SourceForce \cite{peersim_site}.
 
 \smallskip
 PeerSim is composed of two simulation engines, a simplified (cycle-based) one and an event-driven one.
@@ -84,3 +85,67 @@ The event-based engine is less efficient but more realistic and allows to easily
 it has been used for simulation of up to \num{250000} nodes \cite{peersim_intro_2018}.
 Both engines support many simple and extendable, with are plugged together through a flexible configuration mechanism.
 Since our simulator is event driven, this chapter focuses on the event-based engine only.
+
+\subsection{Components}
+Each component in PeerSim is created as a simple Java object that implements some interfaces defined by the engine.
+This section illustrates the main components of PeerSim.
+
+\subsubsection{EDSimulator (class)}
+The \texttt{EDSimulator} is a static singleton that implements the event-driven simulator engine.
+It is responsible to manage the entire life-cycle of a simulation:
+load the configuration, bootstrap the network, run the initializers, keep the queue of events, schedule controls, and run the simulation loop.
+It also provides a method that can be used by any component to add new events to the queue.
+
+\subsubsection{Events}
+PeerSim does not have any class or interface to model an event.
+Events are simply represented as plain Java objects.
+
+\subsubsection{Network (class)}
+The \texttt{Network} class is a static singleton that keeps track of all nodes in the simulation.
+It is used by all components that need to access a specific node or iterate over the available nodes.
+
+\subsubsection{Node (interface)}
+The network is composed of nodes.
+A node is a container of protocols (each simulation can have \num{1} or more protocols).
+The \texttt{Node} interface provides access to the protocols it holds, and to a fixed unique identifier of the node.
+The behavior of a node is defined in each of the attached protocols.
+
+\subsubsection{EDProtocol (interface)}
+The \texttt{EDProtocol} interface defines a protocol that implements an event-driven behavior.
+It has only the method \texttt{processEvent}, which is invoked by the scheduler to deliver events to the protocol.
+A class implementing this interface will have \num{1} instance for each node in the network.
+Protocols can be stacked on each other to build more and more complex behaviors:
+for example, an implementation of \texttt{EDProtocol} might be responsible to build and maintain a topology, while a second implementation may simulate some higher level functions, such as broadcasting some objects to the entire network in a gossip style using the underlying topology.
+
+\subsubsection{Linkable (interface)}
+The \texttt{Linkable} interface provides a service to other protocols to access a set of neighbor nodes.
+The instances of the same linkable protocol class define an overlay network:
+each instance has a list neighbors nodes.
+Links do not need to be symmetric:
+in some cases it could make sense to work with a directed graph.
+The \texttt{Linkable} interface is usually implemented by protocols that exchanges messages over the network to build a topology.
+
+\subsubsection{Transport (interface)}
+The \texttt{Transport} interface models a transport layer in the OSI model \cite{wikipedia_osi}:
+it is used to send messages through the underlying network.
+Implementations of the \texttt{Transport} interface use the \texttt{EDSimulator} class to schedule the delivery of messages with some appropriate delay.
+They can also model packet loss of packets and other failures.
+Different transports can be stack on top of each other to model complex behaviors of the network.
+
+\subsubsection{Control (interface)}
+Classes implementing the \texttt{Control} interface can be scheduled for execution at certain points during the simulation.
+These classes have \num{3} main usages:
+\begin{itemize}
+	\item bootstrap the simulation, i.e. schedule the first events;
+	\item observe the simulation, i.e. periodically measure some metrics;
+	\item modify the simulation in some way, for example by creating a failure on the network or introducing an extra delay for messages.
+\end{itemize}
+
+
+\section{Simulator design}
+
+\subsection{Simplifications}
+
+\subsection{Code structure}
+
+\subsection{Metrics}
