@@ -32,15 +32,15 @@
 \usepackage{chngcntr}
 \counterwithout{footnote}{chapter}
 
-% cref command
-\usepackage[noabbrev,capitalise]{cleveref}
-
 % special symbols, eg. <, >
 \usepackage{textcomp}
 
-% pseudo code
-\usepackage{algorithm}
-\usepackage{algpseudocode}
+% pseudo code (NB: to load BEFORE cleveref)
+\usepackage{setspace}
+\usepackage[algoruled]{algorithm2e}
+
+% cref command
+\usepackage[noabbrev,capitalise]{cleveref}
 
 % TODO: use only for draft versions
 % \renewcommand{\baselinestretch}{1.5}
@@ -64,17 +64,17 @@
 
 \begin{document}
 
-\begin{titlepage}
-	\maketitle
-\end{titlepage}
+% \begin{titlepage}
+% 	\maketitle
+% \end{titlepage}
 
-\tableofcontents
-\listoffigures
-\listoftables
+% \tableofcontents
+% \listoffigures
+% \listoftables
 
-\input{bitcoin.tex}
-\input{protocol.tex}
-\input{attacks.tex}
+% \input{bitcoin.tex}
+% \input{protocol.tex}
+% \input{attacks.tex}
 \input{simulator.tex}
 
 \printbibliography

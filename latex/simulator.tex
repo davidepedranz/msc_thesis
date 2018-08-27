@@ -3,23 +3,23 @@
 
 Testing and evaluating a peer-to-peer protocol with thousands of nodes in a real environment is very difficult, expensive and time consuming, especially if the goal is to evaluate the effects of large-scale network attacks.
 For this reason, we decided to implement a simulator to measure the performances of the Bitcoin protocol under the different situations, at rest and under attack.
-This allowed us to simulate up to \num{8000} Bitcoin nodes on a single general-purpose computer in a short time and evaluate the behavior of the protocol under different attacks scenarios.
+This allowed us to simulate up to \num{8000} Bitcoin nodes on a single general-purpose computer in a short time and evaluate the behavior of the protocol under different attack scenarios.
 
 \medskip
 This chapter describes the implementation of the simulator.
-It covers the main concepts of discrete event simulation, the basics of PeerSim, the design and of the simulator source code, the simplifications with respect to the complete Bitcoin protocol, and the metrics used to measure and evaluate the overall performances.
+It covers the main concepts of discrete event simulation, the basics of PeerSim, the design of the simulator, the simplifications with respect to the complete Bitcoin protocol, and the metrics used to measure and evaluate the overall performances.
 
 
 \section{Simulation}
 According to Robert E. Shannon, \textit{simulation} is ``the process of designing a model of a real system and conducting experiments with this model for the purpose of understanding the behavior of the system and / or evaluating various strategies for the operation of the system'' \cite{simulation_shannon_1998}.
-By \textit{model}, help means an abstract representation of an entity of group of objects, and by \textit{system} a collection of elements that interact with each other to accomplish some objective.
+By \textit{model}, he means an abstract representation of an entity of group of objects, and by \textit{system} a collection of elements that interact with each other to accomplish some objective.
 According to Shannon, simulation has a number of advantages \cite{simulation_shannon_1998}:
 \begin{itemize}
 	\item it is often easier to understand than analytical or mathematical models;
-	\item it is usually more credible than models, since it requires less simplifying assumptions and is thus able to represent the system more accurately;
+	\item it is usually more credible than models, since it requires less simplifying assumptions and represents the system more accurately;
 	\item it allows to test new designs, systems or protocols before implementing them;
-	\item it allows to test hypothesis and measure their effects on the systems;
-	\item it allows to better understand how the modeled system works and which variables are the most important with respect to the performances;
+	\item it allows to verify hypothesis by measuring their effects on the systems;
+	\item it helps to understand better how the modeled system works and which variables are the most important with respect to the performances;
 	\item it allows to changes the initial situation and test the system in different settings.
 \end{itemize}
 
@@ -32,34 +32,64 @@ We focus on discrete event simulation, used by our simulator.
 \section{Discrete event simulation}
 A discrete event simulation models the system behavior as a discrete sequence of events in time.
 An event can represent anything, for example the arrival of a message to a node in the system or a network timeout.
-Each event occurs at a particular instant of time and possibly causes some change in the state of the system.
-No event occurs between two consecutive events, so the simulation can simply jump from one event to the next.
-The results of the simulation can be evaluated with some metrics:
+Each event occurs at a particular instant of time and can cause changes in the state of the system.
+No event occurs between \num{2} consecutive events, so the simulation can simply jump from one event to the next.
+The results of the simulation can be evaluated with measurements:
 the metrics can be computed either online during the simulation run, or computed offline from the simulation logs.
 
 \medskip
-\begin{algorithm}
+\begin{algorithm}[h]
+	\setstretch{1.15}
+	\DontPrintSemicolon
+
+	\SetKw{New}{new}
+	\SetKwData{State}{state}
+	\SetKwData{Events}{events}
+	\SetKwData{Queue}{queue}
+	\SetKwData{Event}{event}
+	\SetKwData{NewState}{newState}
+	\SetKwData{NewEvents}{newEvents}
+	\SetKwFunction{InitializeState}{initializeState}
+	\SetKwFunction{InitializeEvents}{initializeEvents}
+	\SetKwFunction{PriorityQueue}{PriorityQueue}
+	\SetKwFunction{IsEmpty}{isEmpty}
+	\SetKwFunction{DeleteMin}{deleteMin}
+	\SetKwFunction{InsertAll}{insertAll}
+	\SetKwFunction{ProcessEvent}{processEvent}
+	\SetKwFunction{ExitConditionReached}{exitConditionReached}
+
+	\BlankLine
+	\CommentSty{// initialization} \;
+	\State $\leftarrow$ \InitializeState{} \;
+	\Events $\leftarrow$ \InitializeEvents{} \;
+	\Queue $\leftarrow$ \New \PriorityQueue{\Events} \;
+
+	\BlankLine
+	\BlankLine
+	\CommentSty{// simulation loop} \;
+	\While{$\neg$ \Queue.\IsEmpty{} or \ExitConditionReached{\State}}{
+
+		\BlankLine
+		\CommentSty{// process the next event} \;
+		\Event $\leftarrow$ \Queue.\DeleteMin{} \;
+		\NewState, \NewEvents $\leftarrow$ \ProcessEvent{\Event} \;
+
+		\BlankLine
+		\BlankLine
+		\CommentSty{// update the system status} \;
+		\State $\leftarrow$ \NewState \;
+		\Queue.\InsertAll{\NewEvents} \;
+
+		\BlankLine
+	}
+	\BlankLine
+
 	\caption{Discrete Event Simulator}
 	\label{alg:des}
-	\begin{algorithmic}
-		\State $state \leftarrow \Call{initializeState()}{}$
-		\State $events \leftarrow \Call{initializeEvents()}{}$
-		\State $queue \leftarrow \Call{PriorityQueue()}{}$
-		\State $queue.\Call{add}{events}$
-
-		% ------------------------------------------------------
-		% TODO!!!
-		% ------------------------------------------------------
-
-		\State $state \leftarrow \Call{initializeState()}{}$
-		\State $events \leftarrow \Call{initializeEvents()}{}$
-		\State $queue \leftarrow \Call{PriorityQueue()}{}$
-		\State $queue.\Call{add}{events}$
-	\end{algorithmic}
 \end{algorithm}
 \smallskip
 
-\cref{alg:des} illustrate the working of a discrete event simulation engine.
+\cref{alg:des} illustrates the working of a discrete event simulation engine.
 The simulation has some starting state that represents the initial condition of the system.
 All events are stored in a priority queue sorted by event time.
 The queue is initialized with some events.
@@ -83,64 +113,128 @@ The cycle-based engine uses some simplifying assumptions to achieve better perfo
 it has been tested up to \num{1} million nodes \cite{peersim_intro_2018}.
 The event-based engine is less efficient but more realistic and allows to easily simulate the entire network stack;
 it has been used for simulation of up to \num{250000} nodes \cite{peersim_intro_2018}.
-Both engines support many simple and extendable, with are plugged together through a flexible configuration mechanism.
+Both engines support many simple and extendable components, which are plugged together through a flexible configuration mechanism.
 Since our simulator is event driven, this chapter focuses on the event-based engine only.
 
 \subsection{Components}
 Each component in PeerSim is created as a simple Java object that implements some interfaces defined by the engine.
-This section illustrates the main components of PeerSim.
+\cref{fig:peersim} gives an overview of the main components of a PeerSim simulation.
 
-\subsubsection{EDSimulator (class)}
+\begin{figure}[ht]
+	\centering
+	\vspace*{0.25cm}
+	\includegraphics[scale=0.85]{figures/peersim}
+	\vspace*{0.25cm}
+	\caption[Illustration of the main components of a PeerSim simulation]{Illustration of the main components of a PeerSim simulation.}
+	\label{fig:peersim}
+\end{figure}
+
+\subsubsection{EDSimulator}
 The \texttt{EDSimulator} is a static singleton that implements the event-driven simulator engine.
-It is responsible to manage the entire life-cycle of a simulation:
+It is the entry point of each simulation and it is responsible to manage its entire life-cycle:
 load the configuration, bootstrap the network, run the initializers, keep the queue of events, schedule controls, and run the simulation loop.
-It also provides a method that can be used by any component to add new events to the queue.
+It provides a method that can be used by any component to add new events to the queue.
+The class is also able to run the same simulation multiple times using different seeds for the random number generators, in order to achieve a higher statistical significance.
 
-\subsubsection{Events}
+\subsubsection{Event}
 PeerSim does not have any class or interface to model an event.
-Events are simply represented as plain Java objects.
+Events are simply represented as plain Java objects, which are passed by reference to the simulator engine and to the target components.
 
-\subsubsection{Network (class)}
+\subsubsection{Network}
 The \texttt{Network} class is a static singleton that keeps track of all nodes in the simulation.
+Nodes are internally stored in an array and can be accessed by ID (their position in the array).
+Information about neighbors of a node is stored in a special protocol \texttt{Linkable}.
 It is used by all components that need to access a specific node or iterate over the available nodes.
 
-\subsubsection{Node (interface)}
+\subsubsection{Node}
 The network is composed of nodes.
 A node is a container of protocols (each simulation can have \num{1} or more protocols).
 The \texttt{Node} interface provides access to the protocols it holds, and to a fixed unique identifier of the node.
 The behavior of a node is defined in each of the attached protocols.
 
-\subsubsection{EDProtocol (interface)}
+\subsubsection{EDProtocol}
 The \texttt{EDProtocol} interface defines a protocol that implements an event-driven behavior.
-It has only the method \texttt{processEvent}, which is invoked by the scheduler to deliver events to the protocol.
-A class implementing this interface will have \num{1} instance for each node in the network.
+Protocols define the actions each node will perform during the simulation.
+The interface has only the method \texttt{processEvent}, which is invoked by the scheduler to deliver events to the protocol.
+Each node stores an array or protocols;
+a class implementing this interface will have \num{1} instance for each node in the network.
 Protocols can be stacked on each other to build more and more complex behaviors:
 for example, an implementation of \texttt{EDProtocol} might be responsible to build and maintain a topology, while a second implementation may simulate some higher level functions, such as broadcasting some objects to the entire network in a gossip style using the underlying topology.
+The simulation settings are specified with a configuration file;
+some settings can be overridden with command line parameters.
 
-\subsubsection{Linkable (interface)}
+\subsubsection{Linkable}
 The \texttt{Linkable} interface provides a service to other protocols to access a set of neighbor nodes.
-The instances of the same linkable protocol class define an overlay network:
+The instances of the same linkable class define an overlay network:
 each instance has a list neighbors nodes.
 Links do not need to be symmetric:
 in some cases it could make sense to work with a directed graph.
 The \texttt{Linkable} interface is usually implemented by protocols that exchanges messages over the network to build a topology.
 
-\subsubsection{Transport (interface)}
+\subsubsection{Transport}
 The \texttt{Transport} interface models a transport layer in the OSI model \cite{wikipedia_osi}:
 it is used to send messages through the underlying network.
 Implementations of the \texttt{Transport} interface use the \texttt{EDSimulator} class to schedule the delivery of messages with some appropriate delay.
 They can also model packet loss of packets and other failures.
 Different transports can be stack on top of each other to model complex behaviors of the network.
 
-\subsubsection{Control (interface)}
-Classes implementing the \texttt{Control} interface can be scheduled for execution at certain points during the simulation.
-These classes have \num{3} main usages:
-\begin{itemize}
-	\item bootstrap the simulation, i.e. schedule the first events;
-	\item observe the simulation, i.e. periodically measure some metrics;
-	\item modify the simulation in some way, for example by creating a failure on the network or introducing an extra delay for messages.
-\end{itemize}
+\subsubsection{Control}
+Classes implementing \texttt{Control} are used to define operations that require global network knowledge and management.
+They can be scheduled for execution at certain points during the simulation, depending on their function.
 
+\paragraph{Initializers}
+Initializers are executed at the beginning of the simulation and are used to bootstrap the simulation.
+Examples include creating the initial network topology, set the initial nodes' states and schedule the first events.
+
+\paragraph{Dynamics}
+Dynamics are executed periodically during the simulation and are used to modify the simulation in some way.
+Examples include adding or removing nodes, creating a failure on the network, and introducing an extra delay for messages.
+
+\paragraph{Observers}
+Similar to dynamics, observers are executed periodically during the simulation.
+They are used to read aggregated valued from nodes, and compute and collect statistics and metrics.
+
+\subsubsection{Configuration}
+\texttt{Configuration} is a static singleton class that provides access to the configuration for the current simulation.
+It proxies all accesses to the configuration file and it allows to plug different strategies to load the configuration.
+The configuration is stored as \texttt{<name, value>} pairs.
+The class provides helper methods to perform common operations, such as reading values with type checking, resolving protocols by name, parsing mathematical expressions (that can be used in the configuration file), and resolving under-specified class-names.
+
+\subsubsection{CommonState}
+\texttt{CommonState} is a singleton static class that stores the state common to all components in the simulation.
+Its main purposes is to simplify the simulator structure and increase the efficiency by avoiding some parameters passing.
+It provides access to an instance of a pseudorandom number generator, already initialized with the provided seed and ready for use:
+all components should use this instance to guarantee reproducibility of results.
+Also, it stores the current time of the simulation.
+
+\subsubsection{RangeSimulator}
+The \texttt{RangeSimulator} is a utility class able to run simulations with ranges of parameters specified in the configuration file.
+A range is a collection of values to be assigned to a variable.
+If multiple ranges are specified, the class runs a simulation for all the possible combinations of values.
+\texttt{RangeSimulator} invokes the standard PeerSim simulator engine to run each single experiment.
+
+\subsection{Additional components}
+In addition to the default PeerSim components, we developed the following new utilities.
+
+\subsubsection{ParallelSimulator}
+The \texttt{ParallelSimulator} is a utility class able to handle ranges and generate the list of their combinations:
+parameters are read from the configuration file using the standard PeerSim mechanisms;
+the class computes their combination and print them a list of commands, ready to be executed from the command line.
+This class is particular useful when combined with the GNU Parallel, a shell tool for executing jobs in parallel using one or more computers \cite{gnu_parallel}.
+Discrete event driven simulations are very difficult to parallelize, since events have causal relationships which are usually not well known in advance and are influenced by random variables:
+in other words, they run on a single core do not exploit modern multi-core \ac{CPU}s.
+To reduce the total completion time of a simulation with range parameters, one can use \texttt{ParallelSimulator} to generate the list of jobs to execute, then take advantage of GNU Parallel to run them in parallel.
+
+\subsection{Simulation life cycle}
+Each PeerSim simulation has the following life cycle:
+\begin{itemize}
+	\item load and validate the configuration; the configuration file defines which components are used and how they interact;
+	\item run the initializers, in the order provided in the configuration file;
+	\item schedule dynamics and observers, according to the parameters specified in the configuration;
+	\item start the simulation loop and process one event at a time, until the maximum simulation time is reached, the queue of events is empty or some control terminates the simulation;
+	\item run the controls scheduled for execution after the simulation;
+	\item cleanup and schedule the next repetition of the experiment.
+\end{itemize}
 
 \section{Simulator design}
 
