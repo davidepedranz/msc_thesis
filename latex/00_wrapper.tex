@@ -42,6 +42,9 @@
 % cref command
 \usepackage[noabbrev,capitalise]{cleveref}
 
+% custom spacings
+\usepackage{setspace}
+
 % TODO: use only for draft versions
 % \renewcommand{\baselinestretch}{1.5}
 
@@ -49,7 +52,6 @@
 \RequirePackage[index=true]{acro}
 \NewDocumentCommand\acrodef{mO{#1}mG{}}{\DeclareAcronym{#1}{short={#2}, long={#3}, #4}}
 \NewDocumentCommand\acused{m}{\acuse{#1}}
-
 \acrodef{PoW}{Proof-of-Work}
 \acrodef{CPU}{central processing unit}
 \acrodef{GPU}{graphics processing unit}
@@ -58,15 +60,20 @@
 \acrodef{AS}{autonomous systems}
 \acrodef{DNS}{Domain Name System}
 
-\title{[draft]\\MSc. Thesis:\\Simulating large scale network attacks against Bitcoin}
+% TODO: remove DRAFT and change date
+\title{[DRAFT]\\Simulating large scale network attacks against Bitcoin}
 \author{Davide Pedranz}
 \date{\today}
 
 \begin{document}
 
+% TODO: remove this!
 \begin{titlepage}
 	\maketitle
 \end{titlepage}
+
+% TODO: set good margins for real print!
+\input{frontpage.tex}
 
 \tableofcontents
 \listoffigures
