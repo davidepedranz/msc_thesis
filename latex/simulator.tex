@@ -243,24 +243,25 @@ Since the final aim is to evaluate the effect of large scale network attacks aga
 the core layer (\cref{sec:core}) is a bit simplified and does not cover the advanced features of Bitcoin transactions.
 
 \smallskip
-The code is divided into \num{4} main parts: topology, core, utilities, and highly optimized data structures.
-Both the core and the topology parts define their own events, messages, initializers, observers and protocols.
+The code is divided into \num{4} main parts: topology, core, utilities, and optimized data structures.
+Topology and core have their own Java packages, which contain events, messages, initializers, and observers specific to the PeerSim protocol.
 
 \subsection{Topology}
-
-\subsubsection{Code structure}
+% \subsubsection{Code structure}
 The topology layer is implemented as a \texttt{EDProtocol} that implements the \texttt{Linkable} interface:
 it is responsible to build the overlay network that the core layer uses to propagate blocks and transactions.
 Its main functions are to bootstrap the network (when a new node join, it needs to discover some peer and connect to them) and to maintain the topology.
 
-\paragraph{Peer discovery}
+% \paragraph{Peer discovery}
+\medskip
+\noindent
 The discovery mechanism is simulated as follows:
 \begin{itemize}
 	\item nodes start with empty lists of incoming and outgoing connections;
 	\item an initializer simulates the DNS peer discovery mechanism by populating the list of known peers of each node with about \num{25} randomly selected nodes;
 	\item an initializer schedules a special event \texttt{StartEvent} to each node;
 	\item nodes start the protocol and begin to connect to some known nodes, in order to open up to \num{8} outgoing connections;
-	\item when a connection is established, nodes exchange \texttt{Addr} messages; at the same time, nodes start to exchange \texttt{Ping} and \texttt{Pong} messages to maintain the newly build topology, as described in \cref{sub:peer-cleanup};
+	\item when a connection is established, nodes exchange \texttt{Addr} messages; at the same time, nodes start to exchange \texttt{Ping} and \texttt{Pong} messages to maintain the newly build topology;
 	\item nodes propagate the \texttt{Addr} messages, as described in \cref{sub:address-propagation}.
 \end{itemize}
 The backup discovery mechanisms based on hard-coded seeds, database of known addresses and daemon configuration are not implemented.
@@ -277,17 +278,80 @@ In order to make the simulation faster to run and easier to understand, we simpl
 \end{itemize}
 
 \subsubsection{Metrics}
-Each node in the simulator records a number of metrics, which are periodically connected and aggregated by some observers:
+Each node in the simulator records a number of metrics, which are periodically collected and aggregated by the observers:
 \begin{itemize}
 	\item number of messages sent to other peers, grouped by type;
 	\item number of nodes removed because of timeouts;
-	\item overall distribution of the number of connections established by each node (both incoming and outgoing).
+	\item overall distribution of the number of connections established by each node.
 \end{itemize}
-The metrics are mainly to check if the implementation of the topology layer is correct, or, at least, its behavior is reasonable.
+The metrics are mainly to used check if the behavior of the topology layer is reasonable and thus to verify that the implementation is correct.
 
 \subsection{Core}
 \subsubsection{Code structure}
 \subsubsection{Simplifications}
 \subsubsection{Metrics}
 \subsection{Utilities}
+
 \subsection{Optimized data structures}
+The simulator uses some custom data structures optimized for a specific task.
+
+\subsubsection{CircularQueue}
+\texttt{CircularQueue} is an implementation of a queue based on an array.
+It allows to add elements to the queue, read or remove the oldest element, check if the queue is empty.
+The elements are stored in the array, starting from left to right;
+new elements are always added to the right size, old elements are removed from left.
+\num{2} pointers keep track of the first and last element in the array.
+The queue is able to automatically resize in the underlying array is full:
+when a new element is added and the queue in full, an array with double capacity is allocated and all elements are moved there.
+The cost of the enqueue operation in this scenario is $\mathcal{O}(n)$, where $n$ is the original capacity of the queue;
+since the operation is performed only once every $n$ inserts, the amortized cost of the operation is $\mathcal{O}(1)$.
+All other operations have always $\mathcal{O}(1)$ cost, since elements are stored in an array.
+
+\medskip
+\begin{algorithm}[h]
+	\setstretch{1.15}
+	\DontPrintSemicolon
+
+	\SetKw{New}{new}
+	\SetKw{Void}{void}
+	\SetKw{Boolean}{boolean}
+	\SetKw{Integer}{integer}
+	\SetKw{Object}{object}
+
+	\SetKwFunction{CircularQueue}{CircularQueue}
+	\SetKwFunction{Enqueue}{enqueue}
+	\SetKwFunction{Dequeue}{dequeue}
+	\SetKwFunction{Head}{head}
+	\SetKwFunction{IsEmpty}{isEmpty}
+
+	\BlankLine
+	\CommentSty{// constructor} \;
+	\textsc{CircularQueue} \CircularQueue{\Integer n} \;
+
+	\BlankLine
+	\CommentSty{// add an element to the queue} \;
+	\Void \Enqueue{\Object item} \;
+
+	\BlankLine
+	\CommentSty{// remove the oldest element from the queue} \;
+	\Object \Dequeue{} \;
+
+	\BlankLine
+	\CommentSty{// get without removing the oldest element from the queue} \;
+	\Object \Head{} \;
+
+	\BlankLine
+	\CommentSty{// check if the queue is empty} \;
+	\Boolean \IsEmpty{} \;
+
+	\caption{CircularQueue}
+	\label{alg:circular-queue}
+\end{algorithm}
+\smallskip
+
+The \texttt{CircularQueue} data structure is used in the implementation of the topology layer to handle the \texttt{Addr} messages propagation:
+\texttt{Addr} messages are usually not immediately sent to the target node:
+at each round, a random peer is selected and its queue of \texttt{Addr} messages is flushed (see the trickling procedure described in \cref{sub:address-propagation}).
+The queue for each peer is potentially unbounded, so the implementation needs to be dynamically resized when needed.
+The common operations are enqueue (to schedule a new \texttt{Addr} message) and dequeue (to flush the queue):
+all operations have $\mathcal{O}(1)$ cost.
