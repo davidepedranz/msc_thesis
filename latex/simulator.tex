@@ -213,18 +213,6 @@ A range is a collection of values to be assigned to a variable.
 If multiple ranges are specified, the class runs a simulation for all the possible combinations of values.
 \texttt{RangeSimulator} invokes the standard PeerSim simulator engine to run each single experiment.
 
-\subsection{Additional components}
-In addition to the default PeerSim components, we developed the following new utilities.
-
-\subsubsection{ParallelSimulator}
-The \texttt{ParallelSimulator} is a utility class able to handle ranges and generate the list of their combinations:
-parameters are read from the configuration file using the standard PeerSim mechanisms;
-the class computes their combination and print them a list of commands, ready to be executed from the command line.
-This class is particular useful when combined with the GNU Parallel, a shell tool for executing jobs in parallel using one or more computers \cite{gnu_parallel}.
-Discrete event driven simulations are very difficult to parallelize, since events have causal relationships which are usually not well known in advance and are influenced by random variables:
-in other words, they run on a single core do not exploit modern multi-core \ac{CPU}s.
-To reduce the total completion time of a simulation with range parameters, one can use \texttt{ParallelSimulator} to generate the list of jobs to execute, then take advantage of GNU Parallel to run them in parallel.
-
 \subsection{Simulation life cycle}
 Each PeerSim simulation has the following life cycle:
 \begin{itemize}
@@ -243,16 +231,14 @@ Since the final aim is to evaluate the effect of large scale network attacks aga
 the core layer (\cref{sec:core}) is a bit simplified and does not cover the advanced features of Bitcoin transactions.
 
 \smallskip
-The code is divided into \num{4} main parts: topology, core, utilities, and optimized data structures.
+The code is divided into \num{3} main parts: topology, core, optimized data structures and utilities.
 Topology and core have their own Java packages, which contain events, messages, initializers, and observers specific to the PeerSim protocol.
 
 \subsection{Topology}
-% \subsubsection{Code structure}
 The topology layer is implemented as a \texttt{EDProtocol} that implements the \texttt{Linkable} interface:
 it is responsible to build the overlay network that the core layer uses to propagate blocks and transactions.
 Its main functions are to bootstrap the network (when a new node join, it needs to discover some peer and connect to them) and to maintain the topology.
 
-% \paragraph{Peer discovery}
 \medskip
 \noindent
 The discovery mechanism is simulated as follows:
@@ -287,13 +273,56 @@ Each node in the simulator records a number of metrics, which are periodically c
 The metrics are mainly to used check if the behavior of the topology layer is reasonable and thus to verify that the implementation is correct.
 
 \subsection{Core}
-\subsubsection{Code structure}
-\subsubsection{Simplifications}
-\subsubsection{Metrics}
-\subsection{Utilities}
+The core layer is implemented as another \texttt{EDProtocol}, which uses the topology layer as a \texttt{Linkable} implementation.
+The main functions are to simulate discovery and propagation of blocks and gossip of transactions.
 
-\subsection{Optimized data structures}
-The simulator uses some custom data structures optimized for a specific task.
+\paragraph{Transactions}
+Transactions are scheduled by an initializer.
+Before the simulation, the initializer generates a list of transactions according to a Poisson process \cite{wikipedia_poisson_process}:
+each transaction is scheduled to a single node, chosen following a uniform probability distribution.
+During the simulation, each transaction is received as an event by a single node, which then sends it to its neighbors.
+Eventually, all nodes in the network receive the transaction.
+
+\paragraph{Blocks}
+Each block contains a series of transactions and must include the solution to computational puzzle to be valid.
+We assume that all nodes in the network mine blocks independently from each other (we do not model mining pools) and have the same computational power.
+To solve the challenge, each node uses a brute-force approach and tries difference nonces, until a valid value is found or another node completes the current block.
+We observe that:
+\begin{itemize}
+	\item the probability of success in a single nonce trial is negligible (Bitcoin regulates the target so that one block is published every \num{10} minutes on average);
+	\item each miner solves a different problem, since its address is included in the block;
+	\item peers compute the \ac{PoW} independently; as such, the probability that one of them succeeds does not depend on the progress of the other nodes;
+	\item the time spent on the previous block does not influence the time needed to find the next one;
+	\item miners stop the search and start from scratch with a new block frequently.
+\end{itemize}
+For these reasons, we model each single miner as a Poisson process:
+the time expected for a single miner to complete a block follows an exponential distribution.
+
+\medskip
+To simulate the mining process, each node $x$ extracts a random variable $\delta$ from an exponential distribution and schedules the discovery of the next block at time $t + \delta$, where $t$ is the current simulation time.
+If another node $y$ publishes a block in the time interval $[t, t + \delta]$, the node $x$ stop the process and schedules the next block from instant it receives the block from $y$;
+the block scheduled for time $t + \delta$ is cancelled.
+As soon as a node manages to finish a block, it broadcast it to all the neighbors and schedules the next one.
+
+\subsubsection{Simplifications}
+Since the focus of the simulation is to evaluate the performances of the protocol under different network conditions, we have a series of simplifications:
+\begin{itemize}
+	\item transactions are represented as simple tuples \texttt{\textlangle sender, amount, receiver\textrangle}, instead as a sequence of instructions written in a custom scripting language;
+	\item since all nodes join the network together, there is no need to implement the initial block download procedure;
+	\item all nodes behave correctly, so there is no need to verify the signature of transactions or the proof-of-work of blocks;
+	\item all nodes in the network perform some mining;
+	\item all miners have the same computational power.
+\end{itemize}
+
+\subsubsection{Metrics}
+The main metric used to measure the performances of the core layer is the number and length of forks in the blockchain.
+The simulator knows the global state of the simulation:
+it is easy to compute the longest chain, observe forks and their lengths in a any given moment.
+The metric considers all blocks known to the simulator, even if they have been just discovered and not yet known to all peers in the network.
+
+\subsection{Data structures and utilities}
+The simulator uses custom data structures optimized for some specific tasks.
+Other utilities include a class to run range simulations in parallel and the implementation of the exponential probability distribution.
 
 \subsubsection{CircularQueue}
 \texttt{CircularQueue} is an implementation of a queue based on an array.
@@ -355,3 +384,13 @@ at each round, a random peer is selected and its queue of \texttt{Addr} messages
 The queue for each peer is potentially unbounded, so the implementation needs to be dynamically resized when needed.
 The common operations are enqueue (to schedule a new \texttt{Addr} message) and dequeue (to flush the queue):
 all operations have $\mathcal{O}(1)$ cost.
+
+\subsubsection{ParallelSimulator}
+The \texttt{ParallelSimulator} is a utility class able to handle ranges and generate the list of their combinations:
+parameters are read from the configuration file using the standard PeerSim mechanisms;
+the class computes their combination and prints them as a list of commands, ready to be executed from the command line.
+This class is particular useful when combined with the GNU Parallel, a shell tool for executing jobs in parallel using one or more computers \cite{gnu_parallel}.
+Discrete event driven simulations are very difficult to parallelize, since events have causal relationships which are usually not well known in advance and are influenced by random variables:
+in other words, they run on a single core do not exploit modern multi-core \ac{CPU}s.
+If the memory footprint is not the bottleneck, is is possible to reduce the total completion time of a simulation with range parameters by running them in parallel, one per available core:
+\texttt{ParallelSimulator} generates the list of jobs to execute, which are then run by GNU Parallel in parallel.
