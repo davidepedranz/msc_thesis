@@ -162,6 +162,7 @@ The lists of messages are flushed daily.
 \end{figure}
 
 \subsection{Peer cleanup}
+\label{sub:peer-cleanup}
 Bitcoin nodes exchange control messages to verify that remote peers are still connected and working correctly.
 Every \num{2} minutes, each node sends a \texttt{Ping} message to all connected peers \cite{bitcoin_ping_pong}:
 upon receiving a \texttt{Ping} message, the node immediately replies with a \texttt{Pong}.

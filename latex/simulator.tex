@@ -236,10 +236,58 @@ Each PeerSim simulation has the following life cycle:
 	\item cleanup and schedule the next repetition of the experiment.
 \end{itemize}
 
+
 \section{Simulator design}
+Our simulator implements the Bitcoin protocol.
+Since the final aim is to evaluate the effect of large scale network attacks against the protocol, we put particular emphasis on the details of the topology layer described in \cref{sec:topology};
+the core layer (\cref{sec:core}) is a bit simplified and does not cover the advanced features of Bitcoin transactions.
 
-\subsection{Simplifications}
+\smallskip
+The code is divided into \num{4} main parts: topology, core, utilities, and highly optimized data structures.
+Both the core and the topology parts define their own events, messages, initializers, observers and protocols.
 
-\subsection{Code structure}
+\subsection{Topology}
 
-\subsection{Metrics}
+\subsubsection{Code structure}
+The topology layer is implemented as a \texttt{EDProtocol} that implements the \texttt{Linkable} interface:
+it is responsible to build the overlay network that the core layer uses to propagate blocks and transactions.
+Its main functions are to bootstrap the network (when a new node join, it needs to discover some peer and connect to them) and to maintain the topology.
+
+\paragraph{Peer discovery}
+The discovery mechanism is simulated as follows:
+\begin{itemize}
+	\item nodes start with empty lists of incoming and outgoing connections;
+	\item an initializer simulates the DNS peer discovery mechanism by populating the list of known peers of each node with about \num{25} randomly selected nodes;
+	\item an initializer schedules a special event \texttt{StartEvent} to each node;
+	\item nodes start the protocol and begin to connect to some known nodes, in order to open up to \num{8} outgoing connections;
+	\item when a connection is established, nodes exchange \texttt{Addr} messages; at the same time, nodes start to exchange \texttt{Ping} and \texttt{Pong} messages to maintain the newly build topology, as described in \cref{sub:peer-cleanup};
+	\item nodes propagate the \texttt{Addr} messages, as described in \cref{sub:address-propagation}.
+\end{itemize}
+The backup discovery mechanisms based on hard-coded seeds, database of known addresses and daemon configuration are not implemented.
+Our implementation covers the behavior of the protocol under normal conditions.
+
+\subsubsection{Simplifications}
+The implementation of the topology layer covers almost all details explained in \cref{chapter:protocol}.
+In order to make the simulation faster to run and easier to understand, we simplified some details of the protocol:
+\begin{itemize}
+	\item all nodes have a single IP address and are reachable from each other node;
+	\item all nodes follow the protocol, so there is no need to maintain a ban list or to implement the \texttt{Reject} control message;
+	\item all nodes are miners and run exactly the same version of the protocol, so the \texttt{Version} and \texttt{VerAck} messages are simplified;
+	\item nodes do not crash or leave the network; since we simulate large scale attacks over small periods of time, we do not expect a significant churn in nodes in the network.
+\end{itemize}
+
+\subsubsection{Metrics}
+Each node in the simulator records a number of metrics, which are periodically connected and aggregated by some observers:
+\begin{itemize}
+	\item number of messages sent to other peers, grouped by type;
+	\item number of nodes removed because of timeouts;
+	\item overall distribution of the number of connections established by each node (both incoming and outgoing).
+\end{itemize}
+The metrics are mainly to check if the implementation of the topology layer is correct, or, at least, its behavior is reasonable.
+
+\subsection{Core}
+\subsubsection{Code structure}
+\subsubsection{Simplifications}
+\subsubsection{Metrics}
+\subsection{Utilities}
+\subsection{Optimized data structures}
