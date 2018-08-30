@@ -7,13 +7,13 @@ Some unofficial documentation does exist, but it is often incomplete and outdate
 The single point of truth available is the open-source original Bitcoin client, \texttt{bitcoind} \cite{bitcoin_github}:
 at the time of writing, around \num{95}\% of nodes in the network run some version of this client \cite{bitnodes}.
 Unfortunately, the source code is quite hard to understand and contains almost no comment.
-The content of this chapter is thus primarily based on academical papers \cite{eclipse_attack_2015, deanonymization_2014}, on some online references \cite{bitcoin_reference, bitcoin_guide} and partially on the source code itself.
+The content of this chapter is thus primarily based on academic papers \cite{eclipse_attack_2015, deanonymization_2014}, on some online references \cite{bitcoin_reference, bitcoin_guide} and partially on the source code itself.
 Please note that the content of this chapter refers to \texttt{bitcoind}:
 other clients may choose different settings or strategies and behave slightly differently in some cases.
 
 \medskip
 Peers in the Bitcoin network are identified by their IP address.
-Each node can initiate up \num{8} outgoing connections with other nodes, and accept up to \num{117} incoming connections, for a total of \num{125} \footnote{With the default settings (it is possible to configure custom values if necessary). Measures show that the majority of nodes have at most \num{8} outgoing connections and never reach the maximum number of incoming ones \cite{discovering_influential_nodes_2014}.}.
+Each node can initiate up to \num{8} outgoing connections with other nodes, and accept up to \num{117} incoming connections, for a total of \num{125} \footnote{With the default settings (it is possible to configure custom values if necessary). Measures show that the majority of nodes have at most \num{8} outgoing connections and never reach the maximum number of incoming ones \cite{discovering_influential_nodes_2014}.}.
 All connections use unencrypted TCP channels.
 Nodes propagate and store only public IP addresses.
 At the moment of writing, there are about \num{9000} reachable server, while the number of clients is estimated to be between \num{100000} and \num{200000}.
@@ -26,7 +26,7 @@ Both layers use an epidemic (or gossip) paradigm \cite{gossip_1987} to achieve a
 
 \section{Topology}
 \label{sec:topology}
-The topology layer is responsible to create and maintain the a peer-to-peer overlay network between Bitcoin nodes.
+The topology layer is responsible to create and maintain the peer-to-peer overlay network between Bitcoin nodes.
 Its main functions are:
 \begin{itemize}
 	\item discover new peers in the Bitcoin network;
