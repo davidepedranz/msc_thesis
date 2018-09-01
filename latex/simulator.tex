@@ -231,7 +231,7 @@ Since the final aim is to evaluate the effect of large scale network attacks aga
 the core layer (\cref{sec:core}) is a bit simplified and does not cover the advanced features of Bitcoin transactions.
 
 \smallskip
-The code is divided into \num{4} main parts: topology, core, optimized data structures and utilities, and attacks.
+The code is divided into \num{4} main parts: topology, core, optimized data structures and utilities, and attack.
 Topology and core have their own Java packages, which contain events, messages, initializers, and observers specific to the PeerSim protocol.
 
 \subsection{Topology}
@@ -394,3 +394,22 @@ Discrete event driven simulations are very difficult to parallelize, since event
 in other words, they run on a single core do not exploit modern multi-core \ac{CPU}s.
 If the memory footprint is not the bottleneck, is is possible to reduce the total completion time of a simulation with range parameters by running them in parallel, one per available core:
 \texttt{ParallelSimulator} generates the list of jobs to execute, which are then run by GNU Parallel in parallel.
+
+\subsection{Attack}
+The attack simulates a Balance attack, described in \cref{sec:balance}.
+The balance attack was originally tested against Ethereum, but it is thought to work also against Bitcoin.
+The attacker tries to partition the nodes into \num{2} groups with the same computational power:
+nodes do not see the blockchain status of the other group and are likely to mine conflicting blocks.
+In other works, the network generates many forks that the attacker can exploit to perform double-spending attacks, as detailed in \cref{sec:double-spending}.
+
+\bigskip
+The implementation of the Balance attack in PeerSim is based on a custom \texttt{Transport} class named \texttt{BalanceAttackTransport}:
+the class partition the nodes based on their IDs in \num{2} groups and delays the propagation of \texttt{Block} messages between different groups.
+The custom transport is stacked on top of the other transport layers used in the normal simulation.
+There is no need to modify any other component of PeerSim:
+the attack can be activated or deactivated using the standard configuration mechanism.
+The same mechanism is used to specify the ``intensity'' of the attack in terms of \textit{delay} applied to \texttt{Block} messages.
+Finally, it is possible to specify a \textit{delay} drop probability.
+Please note that the original paper \cite{balance_attack_2017} does not talk about dropping messages;
+however, since the attacker has control of the network, it is able to selectively delay of drop any message between pair of nodes.
+We evaluate the effect of both factors in \cref{chapter:results}.
