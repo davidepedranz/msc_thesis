@@ -7,11 +7,11 @@ Some unofficial documentation does exist, but it is often incomplete and outdate
 The single point of truth available is the open-source original Bitcoin client, \texttt{bitcoind} \cite{bitcoin_github}:
 at the time of writing, around \num{95}\% of nodes in the network run some version of this client \cite{bitnodes}.
 Unfortunately, the source code is quite hard to understand and contains almost no comment.
-The content of this chapter is thus primarily based on academic papers \cite{eclipse_attack_2015, deanonymization_2014}, on some online references \cite{bitcoin_reference, bitcoin_guide} and partially on the source code itself.
-Please note that the content of this chapter refers to \texttt{bitcoind}:
+Thus, the content of this chapter is primarily based on academic papers \cite{eclipse_attack_2015, deanonymization_2014}, on some online references \cite{bitcoin_reference, bitcoin_guide} and partially on the source code itself.
+Please note that this chapter refers to \texttt{bitcoind}:
 other clients may choose different settings or strategies and behave slightly differently in some cases.
 
-\medskip
+\bigskip
 Peers in the Bitcoin network are identified by their IP address.
 Each node can initiate up to \num{8} outgoing connections with other nodes, and accept up to \num{117} incoming connections, for a total of \num{125} \footnote{With the default settings (it is possible to configure custom values if necessary). Measures show that the majority of nodes have at most \num{8} outgoing connections and never reach the maximum number of incoming ones \cite{discovering_influential_nodes_2014}.}.
 All connections use unencrypted TCP channels.
@@ -19,7 +19,7 @@ Nodes propagate and store only public IP addresses.
 At the moment of writing, there are about \num{9000} reachable server, while the number of clients is estimated to be between \num{100000} and \num{200000}.
 Nodes can also connect to the network via Tor \cite{bicoin_tor}.
 
-\medskip
+\bigskip
 We divide the description of the protocol in \num{2} layers: topology and core.
 Both layers use an epidemic (or gossip) paradigm \cite{gossip_1987} to achieve a fast information propagation and be tolerant to failures.
 
@@ -35,11 +35,26 @@ Its main functions are:
 	\item form an overlay network that can be used to efficiently broadcast blocks and transactions to all peers in the network (see \cref{sec:core});
 	\item detect misbehaving peers and ban them if necessary.
 \end{itemize}
+\cref{fig:topology} shows an example of overlay network with \num{5} nodes.
+We will use this small network to illustrate different message exchanges between nodes in the rest of the chapter.
+
+\begin{figure}[t]
+	\centering
+	\vspace*{0.25cm}
+	\includegraphics[scale=0.65]{figures/network}
+	\vspace*{0.25cm}
+	\caption[Example topology of an overlay network]{
+		Example topology of an overlay network.
+		The topology is represented as a graph:
+		nodes indicate peers, edges indicate connections between peers.
+	}
+	\label{fig:topology}
+\end{figure}
 
 \subsection{Peer discovery}
 \label{sub:discovery}
 The peer discovery phase is crucial for the bootstrap of the network:
-at the first startup, a Bitcoin node does not know anything about the other peers.
+at the first startup, a node does not know anything about the other peers.
 Bitcoin nodes use different strategies to discover the first peers to connect to:
 this allows to achieve a higher failure resistance and security, since an attacker might be able to interfere with some of the strategies, but it is less unlikely that it might interfere with all of them \cite{bitcoin_peer_discovery}.
 Once a node connects to the first peer, it can start to run the Bitcoin protocol to gather information about other connected peers.
@@ -57,8 +72,8 @@ When a node receives an incoming connection, the remote node sends a \texttt{Ver
 After sending its own address, it sends a \texttt{GetAddr} request message to the remote node to learn about more addresses.
 
 \subsubsection{DNS seeders}
-A DNS seeder is a server that responds to \ac{DNS} queries from Bitcoin nodes with a list of IP addresses of other nodes.
-The seeder obtains these addresses by periodically crawling the network, looking for active peers.
+A DNS seeder is a server that responds to \ac{DNS} queries from Bitcoin nodes with a list of IP addresses of other peers.
+The seeder obtains these addresses by periodically crawling the network, looking for active nodes.
 At the time of writing, the Bitcoin network has \num{7} seeder and their hosts are hard-coded in the client source code \cite{bitcoin_dns}:
 each server is maintained by members of the Bitcoin community.
 The number of addresses in the query response in limited by the \ac{DNS} constraints:
@@ -72,12 +87,14 @@ The DNS seeders are queried only in the following \num{2} cases:
 \end{enumerate}
 
 \subsubsection{Addr messagges}
-\texttt{Addr} messages are used to obtains network information from peers:
-they contain up to \num{1000} IP addresses each \footnote{One \texttt{Addr} message can theoretically contain any number of addresses, however it is rejected by peers running recent versions of \texttt{bitcoind} is it contains more than \num{1000} addresses.} and can be either sent unsolicited or as a response to a particular event.
-Addresses propagation using \texttt{Addr} message is discussed in details in \cref{sub:address-propagation}.
+\texttt{Addr} messages are used to obtains network information from peers.
+They can be sent either unsolicited or as a response to a particular event.
+Each message contains up to \num{1000} IP addresses each;
+a single \texttt{Addr} message can theoretically contain any number of addresses, however it is rejected by peers running recent versions of \texttt{bitcoind} is it contains more than \num{1000} addresses.
+Addresses propagation using \texttt{Addr} messages is discussed in details in \cref{sub:address-propagation}.
 
 \subsubsection{Database of known addresses}
-All peers discovered with various strategies are stored in a database of known IP addresses locally to the node.
+All peers discovered with the various strategies are stored in a database of known IP addresses locally to the node.
 When the node restarts, if can use the database to randomly select some nodes to connect to.
 The idea is behind this strategy is that Bitcoin nodes can change IP address over time, but it is unlikely that all of them change address at the same time:
 after a restart, the node is likely to be able to connect to some of the old peers.
@@ -92,6 +109,29 @@ These addresses are only used as a last resort, if no other method has produced 
 Finally, a user can specify peer addresses in the software configuration, either with command line options or providing a text file of addresses.
 These addresses are not advertized in response of a \texttt{GetAddr} message \cite{bitcoin_peer_discovery}.
 The user can also specify the first peer to connect to.
+
+\subsection{Connection establishment}
+Nodes connect to each other over TCP.
+Once the connection is established, the nodes start to exchange messages.
+The first one is a \texttt{Version}:
+its provides information about the Bitcoin client and protocol version running on the node.
+The receiver replies with a \texttt{VerAck} message for acknowledgement.
+At this point, the nodes can start to exchange any type of message.
+\cref{fig:connection} illustrate a typical exchange of messages after the establishment of a new connection.
+
+\begin{figure}[ht]
+	\centering
+	\vspace*{0.4cm}
+	\includegraphics[scale=1.04]{figures/connection}
+	\vspace*{0.25cm}
+	\caption[Connection establishment in Bitcoin]{
+		Connection establishment in Bitcoin.
+		\texttt{node-1} connects to \texttt{node-2}:
+		it sends a \texttt{Version} and gets as a reply a \texttt{VerAck} message;
+		then, it asks for a list of known peers with a \texttt{GetData} message, and \texttt{node-2} sends back the list inside an \texttt{Addr} one.
+	}
+	\label{fig:connection}
+\end{figure}
 
 \subsection{Address propagation}
 \label{sub:address-propagation}
@@ -108,9 +148,9 @@ this is usually done only when a new outgoing connection is established (the pro
 When a node receives a \texttt{GetAddr} message, it sends back \num{23}\% of the number of addresses stored in the database (chosen randomly), but no more than \num{2500} in total \cite{deanonymisation_2014}.
 If the number of addresses exceeds the limit of \num{2500}, multiple \texttt{Addr} messages are sent.
 
+\medskip
 Nodes periodically push \texttt{Addr} messages to its peers:
 each day, a node sends its own IP address in an \texttt{Addr} message to each peer it is connected to \cite{eclipse_attack_2015}.
-
 Whenever a node receives an \texttt{Addr} message, it decides whether to forward it to its neighbors;
 the decision is taken individually for each address in the messages.
 An address is forwarded only if:
@@ -118,7 +158,27 @@ An address is forwarded only if:
 	\item the total number of addresses in the corresponding \texttt{Addr} message does not exceed \num{10};
 	\item the timestamp attacked to the address is not older than \num{10} minutes.
 \end{itemize}
-If both checks pass, the node schedules a new \texttt{Addr} message containing the address to \num{2} randomly chosen nodes \footnote{Actually, if the address is non-reachable for the node (e.g. the node supports only IPv4 and the address is IPv6) it is forwarded to only \num{1} peer.}.
+If both checks pass, the node schedules a new \texttt{Addr} message containing the address to \num{2} randomly chosen nodes.
+If the address is non-reachable for the node (e.g. the node supports only IPv4 and the address is IPv6), it is forwarded to only \num{1} peer.
+\cref{fig:addr_propagation} illustrates a scenario where different techniques are combined to propagate \texttt{Addr} messages.
+
+\begin{figure}[ht]
+	\centering
+	\vspace*{0.4cm}
+	\includegraphics[scale=1.04]{figures/addr_propagation}
+	\vspace*{0.25cm}
+	\caption[Propagation of Addr messages in Bitcoin]{
+		Propagation of \texttt{Addr} messages in Bitcoin.
+		\texttt{node-1} sends an \texttt{Addr} message with its IP address unsolicited to its peer \texttt{node-2}.
+		\texttt{node-2} randomly chooses \texttt{node-3} and \texttt{node-4} among its neighbors and sends them a new \texttt{Addr} message containing the IP address of \texttt{node-1}.
+		\texttt{node-4} broadcasts the message to both its peers \texttt{node-3} and \texttt{node-5}.
+		\texttt{node-3} receives the \texttt{Addr} message from both \texttt{node-4} and \texttt{node-2}, so it forwards the message to the only missing peer \texttt{node-5}.
+		\texttt{node-5} sends the message to \texttt{node-2}, since it has no that \texttt{node-3} and \texttt{node-4} originally received the message from \texttt{node-2}.
+		\texttt{node-2} does not forward its message anymore, since all its peer have already received it.
+	}
+	\label{fig:addr_propagation}
+\end{figure}
+
 The actual transmission of the scheduled \texttt{Addr} messages does not happen immediately.
 The messages are divided in queues for different peers.
 Every \num{100} milliseconds, the node randomly selects one of the queues and flushes all the present messages.
@@ -127,9 +187,10 @@ To prevent stale \texttt{Addr} messages from endlessly propagating, each Bitcoin
 before forwarding an address, the node checks if the address was already sent over the same connection and avoids sending it again \cite{eclipse_attack_2015}.
 The lists of messages are flushed daily.
 
-\begin{figure}[ht!]
+\begin{figure}[ht]
+	\hspace*{0.2cm}
 	\begin{subfigure}{.42\textwidth}
-		\vspace*{0.25cm}
+		\vspace*{0.5cm}
 		\includegraphics[width=\columnwidth]{figures/trickling_1}
 		\vspace*{0.1cm}
 		\caption{
@@ -140,7 +201,7 @@ The lists of messages are flushed daily.
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}{.42\textwidth}
-		\vspace*{0.25cm}
+		\vspace*{0.5cm}
 		\includegraphics[width=\columnwidth]{figures/trickling_2}
 		\vspace*{0.1cm}
 		\caption{
@@ -149,6 +210,7 @@ The lists of messages are flushed daily.
 		}
 		\vspace*{0.2cm}
 	\end{subfigure}
+	\hspace*{0.2cm}
 	\caption[Illustration of the trickling procedure]{
 		Illustration of the trickling procedure of \texttt{Addr} messages.
 		\texttt{node-0} (in blue) gets an \texttt{Addr} message and select \texttt{node-3} and \texttt{node-2} for forwarding.
@@ -284,9 +346,39 @@ To avoid broadcasting the block too many times, nodes maintain a list of already
 each time they receive a block, they first check if that block was already forwarded;
 only if the answer is negative, the node sends it to its peers.
 
-\medskip
+\begin{figure}[ht]
+	\centering
+	\vspace*{0.4cm}
+	\includegraphics[scale=1.04]{figures/block_propagation}
+	\vspace*{0.25cm}
+	\caption[Blocks propagation in Bitcoin]{
+		Blocks propagation in Bitcoin.
+		\texttt{node-1} mines a new block and sends it inside a \texttt{Block} message to its peer \texttt{node-2}.
+		\texttt{node-2} forwards the block to all its neighbors \texttt{node-3}, \texttt{node-4} and \texttt{node-5}.
+		\texttt{node-5} receives the message before the others, so it sends it to both \texttt{node-3} and \texttt{node-4}.
+		\texttt{node-5} gets the block from \texttt{node-2} and sends it to \texttt{node-5}, since it does not know yet about the incoming message from the peer.
+	}
+	\label{fig:block-propagation}
+\end{figure}
+
+\bigskip
 Blocks can also be requested an need with a \texttt{GetBlock} message:
 this mechanism is used when a node receives a block with an unknown parent (in case \num{2} subsequent blocks are mined, it is possible for some nodes in the network to receives the second before the first one), or for the bootstrap of a new node, as explained in the next section.
+
+\begin{figure}[ht]
+	\centering
+	\vspace*{0.4cm}
+	\includegraphics[scale=1.04]{figures/block_download}
+	\vspace*{0.25cm}
+	\caption[Block request in Bitcoin]{
+		Block request in Bitcoin.
+		\texttt{node-1} mines a new block and sends it inside a \texttt{Block} message to its peer \texttt{node-2}.
+		\texttt{node-2} forwards the block to all its neighbors \texttt{node-3}, \texttt{node-4} and \texttt{node-5}.
+		\texttt{node-5} receives the message before the others, so it sends it to both \texttt{node-3} and \texttt{node-4}.
+		\texttt{node-5} gets the block from \texttt{node-2} and sends it to \texttt{node-5}, since it does not know yet about the incoming message from the peer.
+	}
+	\label{fig:block-download}
+\end{figure}
 
 \subsection{Initial block download}
 New miners do not have any information about the current status of the blockchain.
