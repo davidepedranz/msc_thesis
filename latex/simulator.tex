@@ -2,7 +2,7 @@
 \label{chapter:simulator}
 
 Testing and evaluating a peer-to-peer protocol with thousands of nodes in a real environment is very difficult, expensive and time consuming, especially if the goal is to evaluate the effects of large-scale network attacks.
-For this reason, we decided to implement a simulator to measure the performances of the Bitcoin protocol under the different situations, at rest and under attack.
+For this reason, we decided to implement a simulator that measures the performances of the Bitcoin protocol under the different situations, at rest and under attack.
 This allowed us to simulate up to \num{8000} Bitcoin nodes on a single general-purpose computer in a short time and evaluate the behavior of the protocol under different attack scenarios.
 
 \medskip
@@ -107,8 +107,8 @@ It is written in Java and aim is to help the research and evaluation of large pe
 It has been developed with high scalability in mind, in order to support simulations with up to \num{1} million nodes.
 It is released under the GPL open source license and is available for download on SourceForce \cite{peersim_site}.
 
-\smallskip
-PeerSim is composed of two simulation engines, a simplified (cycle-based) one and an event-driven one.
+\medskip
+PeerSim is composed of two simulation engines, a simplified cycle-based one and an event-driven one.
 The cycle-based engine uses some simplifying assumptions to achieve better performances and scalability, such as ignoring the details of the transport layer in the communication protocol stack;
 it has been tested up to \num{1} million nodes \cite{peersim_intro_2018}.
 The event-based engine is less efficient but more realistic and allows to easily simulate the entire network stack;
@@ -231,7 +231,7 @@ Since the final aim is to evaluate the effect of large scale network attacks aga
 the core layer (\cref{sec:core}) is a bit simplified and does not cover the advanced features of Bitcoin transactions.
 
 \smallskip
-The code is divided into \num{3} main parts: topology, core, optimized data structures and utilities.
+The code is divided into \num{4} main parts: topology, core, optimized data structures and utilities, and attacks.
 Topology and core have their own Java packages, which contain events, messages, initializers, and observers specific to the PeerSim protocol.
 
 \subsection{Topology}
