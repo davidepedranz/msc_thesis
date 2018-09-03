@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="bitcoin [plain]" type="Application" factoryName="Application" singleton="true">
+    <option name="MAIN_CLASS_NAME" value="peersim.rangesim.RangeSimulator" />
+    <module name="simulator_main" />
+    <option name="PROGRAM_PARAMETERS" value="src/main/resources/config/bitcoin_plain.txt" />
+    <option name="VM_PARAMETERS" value="-ea" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

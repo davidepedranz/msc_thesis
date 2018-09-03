@@ -15,25 +15,18 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package simulator.bitcoin.core.model;
+package simulator.bitcoin.topology.events;
+
+import peersim.core.Node;
 
 /**
- * Container of transactions that fit in one {@link Block}.
- * This class is used for performances reasons. It always allocate the maximum number of
- * transactions that can be contained in a single Block and keeps count of the real number.
+ * Event that represents a timeout of a peer on an opened connection.
  */
-public final class TransactionsWrapper {
+public final class ConnectionTimeoutEvent {
 
-    public final Transaction[] transactions;
-    public int transactionsNumber;
+    public final Node peer;
 
-    public TransactionsWrapper(int blockSize) {
-        this.transactions = new Transaction[blockSize];
-        this.transactionsNumber = 0;
-    }
-
-    TransactionsWrapper(Transaction[] transactions) {
-        this.transactions = transactions;
-        this.transactionsNumber = transactions.length;
+    public ConnectionTimeoutEvent(Node peer) {
+        this.peer = peer;
     }
 }

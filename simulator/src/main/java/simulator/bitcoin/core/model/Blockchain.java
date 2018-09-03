@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2018 Davide Pedranz. All rights reserved.
+ *
+ * This code is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package simulator.bitcoin.core.model;
 
 import java.util.Arrays;
@@ -11,331 +28,345 @@ import java.util.List;
  * could have a vision different from the other nodes.
  */
 public final class Blockchain {
-	private static final int DEFAULT_INITIAL_CAPACITY = 50;
 
-	// internal status
-	private Block[] forks;
-	private int[] forksDepths;
-	private int currentForks;
-	private int longestForkIndex;
-	private BitSet seenBlocks;
-	private BitSet processedTransactions;
+    /**
+     * Default initial capacity of the internal arrays
+     * that store _forks and their depths.
+     */
+    private static final int DEFAULT_INITIAL_CAPACITY = 50;
 
-	/**
-	 * Construct a new blockchain using the given block as genesis.
-	 *
-	 * @param genesis Genesis block.
-	 */
-	public Blockchain(Block genesis) {
-		this.forks = new Block[DEFAULT_INITIAL_CAPACITY];
-		this.forks[0] = genesis;
-		this.forksDepths = new int[DEFAULT_INITIAL_CAPACITY];
-		this.forksDepths[0] = 0;
-		this.currentForks = 1;
-		this.longestForkIndex = 0;
-		this.seenBlocks = new BitSet();
-		this.seenBlocks.set(genesis.id);
-		this.processedTransactions = new BitSet();
-	}
+    // internal status
+    private Block[] forks;
+    private int[] forksDepths;
+    private int currentForks;
+    private int longestForkIndex;
+    private BitSet seenBlocks;
+    private BitSet processedTransactions;
 
-	/**
-	 * Copy-constructor.
-	 *
-	 * @param original Original object to copy.
-	 */
-	public Blockchain(Blockchain original) {
-		this.forks = new Block[original.forks.length];
-		System.arraycopy(original.forks, 0, this.forks, 0, original.forks.length);
-		this.forksDepths = new int[original.forksDepths.length];
-		System.arraycopy(original.forksDepths, 0, this.forksDepths, 0, original.forksDepths.length);
-		this.currentForks = original.currentForks;
-		this.longestForkIndex = original.longestForkIndex;
-		this.seenBlocks = (BitSet) original.seenBlocks.clone();
-		this.processedTransactions = (BitSet) original.processedTransactions.clone();
-	}
+    /**
+     * Construct a new blockchain using the given block as genesis.
+     *
+     * @param genesis Genesis block.
+     */
+    public Blockchain(Block genesis) {
+        this.forks = new Block[DEFAULT_INITIAL_CAPACITY];
+        this.forks[0] = genesis;
+        this.forksDepths = new int[DEFAULT_INITIAL_CAPACITY];
+        this.forksDepths[0] = 0;
+        this.currentForks = 1;
+        this.longestForkIndex = 0;
+        this.seenBlocks = new BitSet();
+        this.seenBlocks.set(genesis.id);
+        this.processedTransactions = new BitSet();
+    }
 
-	/**
-	 * @return The last block of the longest branch.
-	 */
-	public Block longestFork() {
-		return forks[longestForkIndex];
-	}
+    /**
+     * Copy-constructor.
+     *
+     * @param original Original object to copy.
+     */
+    public Blockchain(Blockchain original) {
+        this.forks = new Block[original.forks.length];
+        System.arraycopy(original.forks, 0, this.forks, 0, original.forks.length);
+        this.forksDepths = new int[original.forksDepths.length];
+        System.arraycopy(original.forksDepths, 0, this.forksDepths, 0, original.forksDepths.length);
+        this.currentForks = original.currentForks;
+        this.longestForkIndex = original.longestForkIndex;
+        this.seenBlocks = (BitSet) original.seenBlocks.clone();
+        this.processedTransactions = (BitSet) original.processedTransactions.clone();
+    }
 
-	/**
-	 * @return Number of forks of the blockchain.
-	 */
-	long forksNumber() {
-		return currentForks;
-	}
+    /**
+     * @return The last block of the longest branch.
+     */
+    public Block longestFork() {
+        return forks[longestForkIndex];
+    }
 
-	/**
-	 * Check if the longest chain contains the transaction with the given ID.
-	 *
-	 * @param transactionId ID of the transaction to check.
-	 * @return True if the longest chain contains the given transaction, false otherwise.
-	 */
-	public boolean hasProcessedTransactions(int transactionId) {
-		return processedTransactions.get(transactionId);
-	}
+    /**
+     * @return Number of _forks of the blockchain.
+     */
+    long forksNumber() {
+        return currentForks;
+    }
 
-	/**
-	 * Check if the block with the given ID is present in the blockchain.
-	 *
-	 * @param blockId ID of the block.
-	 * @return True if the block is present in the blockchain, false otherwise.
-	 */
-	public boolean hasBlock(int blockId) {
-		return seenBlocks.get(blockId);
-	}
+    /**
+     * Check if the longest chain contains the transaction with the given ID.
+     *
+     * @param transactionId ID of the transaction to check.
+     * @return True if the longest chain contains the given transaction, false otherwise.
+     */
+    public boolean hasProcessedTransactions(int transactionId) {
+        return processedTransactions.get(transactionId);
+    }
 
-	/**
-	 * Get the block with the given ID if present, null otherwise.
-	 *
-	 * @param blockId ID of the block.
-	 * @return Block with the given ID if present, null otherwise.
-	 */
-	public Block getBlock(int blockId) {
-		if (seenBlocks.get(blockId)) {
-			return Blocks.getBlock(blockId);
-		} else {
-			return null;
-		}
-	}
+    /**
+     * Check if the block with the given ID is present in the blockchain.
+     *
+     * @param blockId ID of the block.
+     * @return True if the block is present in the blockchain, false otherwise.
+     */
+    public boolean hasBlock(int blockId) {
+        return seenBlocks.get(blockId);
+    }
 
-	/**
-	 * Add a new block to the blockchain. This method will recompute the forks
-	 * and processed transactions depending on the added block (continuation of
-	 * the longest chain, new fork, etc).
-	 *
-	 * @param block Block to add to the blockchain.
-	 * @return True if the block was added, false if the block could not be added
-	 * (eg. it was already present of one ancestor is missing).
-	 */
-	public boolean addBlock(Block block) {
+    /**
+     * Get the block with the given ID if present, null otherwise.
+     *
+     * @param blockId ID of the block.
+     * @return Block with the given ID if present, null otherwise.
+     */
+    public Block getBlock(int blockId) {
+        if (seenBlocks.get(blockId)) {
+            return Blocks.getBlock(blockId);
+        } else {
+            return null;
+        }
+    }
 
-		// check that I actually have seen the parent
-		if (!seenBlocks.get(block.previous.id)) {
-			return false;
-		}
+    /**
+     * Add a new block to the blockchain. This method will recompute the _forks
+     * and processed transactions depending on the added block (continuation of
+     * the longest chain, new fork, etc).
+     *
+     * @param block Block to add to the blockchain.
+     * @return True if the block was added, false if the block could not be added
+     * (eg. it was already present of one ancestor is missing).
+     */
+    public boolean addBlock(Block block) {
 
-		// if I have seen the parent, I also saw this block, so I can addBlock it
-		else {
-			seenBlocks.set(block.id);
-		}
+        // NB: we use '==' instead of '.equals()' for efficiency reasons
+        // this is safe since each block has a single global instance in the entire simulation
 
-		// try to find the parent of this node (this is not a new fork)
-		for (int i = 0; i < currentForks; i++) {
+        // check that I actually have seen the parent
+        if (!seenBlocks.get(block.previous.id)) {
+            return false;
+        }
 
-			// handle duplicates (I may receive the same message multiple times in a gossip protocol)
-			if (forks[i] == block) {
-				// duplicate, skip block!
-				return true;
-			}
+        // if I have seen the parent, I also saw this block, so I can add it
+        else {
+            seenBlocks.set(block.id);
+        }
 
-			// parent found
-			if (forks[i] == block.previous) {
+        // try to find the parent of this node (this is not a new fork)
+        for (int i = 0; i < currentForks; i++) {
 
-				// we addBlock a block on top of another one...
-				// ... so we remove the current one and replace it with the new block
-				// this is NOT a new fork!
-				forks[i] = block;
+            // handle duplicates (I may receive the same message multiple times in a gossip protocol)
+            if (forks[i] == block) {
+                // duplicate, skip block!
+                return true;
+            }
 
-				// maybe we need to recompute the distances from the longest chain...
-				final boolean extendingLongestChain = i == longestForkIndex;
-				if (extendingLongestChain) {
+            // parent found
+            if (forks[i] == block.previous) {
 
-					// do nothing, we replaced already the longest chain
-					// the distances of the forks from the common parent with the longest chain do not change
+                // we add a block on top of another one...
+                // ... so we remove the current one and replace it with the new block
+                // this is NOT a new fork!
+                forks[i] = block;
 
-					// since we are on the longest chain, we can mark the transactions as done
-					final TransactionsWrapper wrapper = block.transactions;
-					for (int t = 0; t < wrapper.transactionsNumber; t++) {
-						processedTransactions.set(wrapper.transactions[t].id, true);
-					}
+                // maybe we need to recompute the distances from the longest chain...
+                final boolean extendingLongestChain = i == longestForkIndex;
+                if (extendingLongestChain) {
 
-				} else {
+                    // do nothing, we replaced already the longest chain
+                    // the distances of the _forks from the common parent with the longest chain do not change
 
-					// this fork is now the longest chain!
-					if (block.height > longestFork().height) {
-						longestForkIndex = i;
-						recomputeDepths();
-						recomputeTransactions(longestFork(), block);
-					}
+                    // since we are on the longest chain, we can mark the transactions as done
+                    final TransactionsWrapper wrapper = block.transactions;
+                    for (int t = 0; t < wrapper.transactionsNumber; t++) {
+                        processedTransactions.set(wrapper.transactions[t].id, true);
+                    }
 
-					// this fork is not the longest chain
-					// we do NOT need to flag the transactions as done...
-					else {
-						// we are now a step further away from the longest chain
-						forksDepths[i]++;
-					}
-				}
+                } else {
 
-				// optimization: only one block can be the parent, exit the loop
-				return true;
-			}
-		}
+                    // this fork is now the longest chain!
+                    if (block.height > longestFork().height) {
+                        longestForkIndex = i;
+                        recomputeDepths();
+                        recomputeTransactions(longestFork(), block);
+                    }
 
-		// make sure we have enough space in the array
-		expandArrayIfNeeded();
+                    // this fork is not the longest chain
+                    // we do NOT need to flag the transactions as done...
+                    else {
+                        // we are now a step further away from the longest chain
+                        forksDepths[i]++;
+                    }
+                }
 
-		// if here, we have a new fork
-		final int newIndex = currentForks;
-		forks[currentForks] = block;
-		currentForks++;
+                // optimization: only one block can be the parent, exit the loop
+                return true;
+            }
+        }
 
-		// a new fork cannot be the longest chain, not yet!
-		assert block.height <= longestFork().height : "a new fork cannot be the longest chain";
-		forksDepths[newIndex] = computeDepth(block, longestFork());
+        // make sure we have enough space in the array
+        expandArrayIfNeeded();
 
-		// in both cases, the block was added successfully
-		return true;
-	}
+        // if here, we have a new fork
+        final int newIndex = currentForks;
+        forks[currentForks] = block;
+        currentForks++;
 
-	/**
-	 * Update the depths of all forks based on the new status of the blockchain (eg. new longest chain).
-	 */
-	private void recomputeDepths() {
-		final Block longestChain = forks[longestForkIndex];
-		for (int i = 0; i < currentForks; i++) {
-			forksDepths[i] = computeDepth(forks[i], longestChain);
-		}
-	}
+        // a new fork cannot be the longest chain, not yet!
+        assert block.height <= longestFork().height : "a new fork cannot be the longest chain";
+        forksDepths[newIndex] = computeDepth(block, longestFork());
 
-	/**
-	 * Recompute the depth of a given fork with respect to the longest chain.
-	 *
-	 * @param block        Block to calculate the depth of.
-	 * @param longestChain Last block of the longest chain in the blockchain.
-	 * @return Depth of the given fork wrt the longest chain.
-	 */
-	private int computeDepth(Block block, Block longestChain) {
-		int steps = 0;
+        // in both cases, the block was added successfully
+        return true;
+    }
 
-		// base case: we got to the same block
-		if (block == longestChain) {
-			return steps;
-		}
+    /**
+     * Update the depths of all _forks based on the new status of the blockchain (eg. new longest chain).
+     */
+    private void recomputeDepths() {
+        final Block longestChain = forks[longestForkIndex];
+        for (int i = 0; i < currentForks; i++) {
+            forksDepths[i] = computeDepth(forks[i], longestChain);
+        }
+    }
 
-		// getBlock to the parent of the longest longest chain at the same height of the other block
-		final int currentNodeDepth = block.height;
-		while (longestChain.height > currentNodeDepth) {
-			longestChain = longestChain.previous;
-		}
+    /**
+     * Recompute the depth of a given fork with respect to the longest chain.
+     *
+     * @param block        Block to calculate the depth of.
+     * @param longestChain Last block of the longest chain in the blockchain.
+     * @return Depth of the given fork wrt the longest chain.
+     */
+    private static int computeDepth(Block block, Block longestChain) {
+        int steps = 0;
 
-		// go on step by step, till a match is found
-		while (block != longestChain) {
-			block = block.previous;
-			longestChain = longestChain.previous;
-			steps++;
-		}
+        // base case: we got to the same block
+        if (block == longestChain) {
+            return steps;
+        }
 
-		return steps;
-	}
+        // getBlock to the parent of the longest longest chain at the same height of the other block
+        final int currentNodeDepth = block.height;
+        while (longestChain.height > currentNodeDepth) {
+            longestChain = longestChain.previous;
+        }
 
-	/**
-	 * Compute which transactions needs to be processed after that a new fork got longer
-	 * than the old longest one.
-	 *
-	 * @param oldLongest Old longest fork.
-	 * @param newLongest New longest fork.
-	 */
-	private void recomputeTransactions(Block oldLongest, Block newLongest) {
+        // go on step by step, till a match is found
+        while (block != longestChain) {
+            block = block.previous;
+            longestChain = longestChain.previous;
+            steps++;
+        }
 
-		// find the common ancestor, since it is the fork point
-		final Block commonAncestor = findCommonAncestor(oldLongest, newLongest);
+        return steps;
+    }
 
-		// un-flag transactions from the ex-longest chain
-		while (oldLongest != commonAncestor) {
-			final TransactionsWrapper wrapper = oldLongest.transactions;
-			for (int i = 0; i < wrapper.transactionsNumber; i++) {
-				final Transaction transaction = wrapper.transactions[i];
-				processedTransactions.set(transaction.id, false);
-			}
-		}
+    /**
+     * Compute which transactions needs to be processed after that a new fork got longer
+     * than the old longest one.
+     *
+     * @param oldLongest Old longest fork.
+     * @param newLongest New longest fork.
+     */
+    private void recomputeTransactions(Block oldLongest, Block newLongest) {
 
-		// flag transactions from the new longest chain
-		while (newLongest != commonAncestor) {
-			final TransactionsWrapper wrapper = newLongest.transactions;
-			for (int i = 0; i < wrapper.transactionsNumber; i++) {
-				final Transaction transaction = wrapper.transactions[i];
-				processedTransactions.set(transaction.id, true);
-			}
-		}
-	}
+        // find the common ancestor, since it is the fork point
+        final Block commonAncestor = findCommonAncestor(oldLongest, newLongest);
 
-	/**
-	 * Find the first common ancestor between two blocks in the blockchain.
-	 *
-	 * @param shortest Block on the shortest of the two chains.
-	 * @param longest  Block on the longest of the two chains.
-	 * @return The first common ancestor.
-	 */
-	Block findCommonAncestor(Block shortest, Block longest) {
-		assert longest.height >= shortest.height;
+        // un-flag transactions from the ex-longest chain
+        while (oldLongest != commonAncestor) {
+            final TransactionsWrapper wrapper = oldLongest.transactions;
+            for (int i = 0; i < wrapper.transactionsNumber; i++) {
+                final Transaction transaction = wrapper.transactions[i];
+                processedTransactions.set(transaction.id, false);
+            }
+            oldLongest = oldLongest.previous;
+        }
 
-		// getBlock the longest to the same level as the shortest
-		while (longest.height > shortest.height) {
-			longest = longest.previous;
-		}
+        // flag transactions from the new longest chain
+        while (newLongest != commonAncestor) {
+            final TransactionsWrapper wrapper = newLongest.transactions;
+            for (int i = 0; i < wrapper.transactionsNumber; i++) {
+                final Transaction transaction = wrapper.transactions[i];
+                processedTransactions.set(transaction.id, true);
+            }
+            newLongest = newLongest.previous;
+        }
+    }
 
-		// proceed one step at a time until we getBlock to the same block, i.e. the first common ancestor
-		while (shortest != longest) {
-			shortest = shortest.previous;
-			longest = longest.previous;
-		}
+    /**
+     * Find the first common ancestor between two blocks in the blockchain.
+     *
+     * @param shortest Block on the shortest of the two chains.
+     * @param longest  Block on the longest of the two chains.
+     * @return The first common ancestor.
+     */
+    Block findCommonAncestor(Block shortest, Block longest) {
+        assert longest.height >= shortest.height;
 
-		// return one of the two, they are the same
-		return shortest;
-	}
+        // getBlock the longest to the same level as the shortest
+        while (longest.height > shortest.height) {
+            longest = longest.previous;
+        }
 
-	/**
-	 * Find all blocks that are descendants of the given one.
-	 *
-	 * @param block Block.
-	 * @return Descendants of the given block.
-	 */
-	public List<Block> descendants(Block block) {
+        // proceed one step at a time until we getBlock to the same block, i.e. the first common ancestor
+        while (shortest != longest) {
+            shortest = shortest.previous;
+            longest = longest.previous;
+        }
 
-		// initialization
-		final LinkedList<Block> descendants = new LinkedList<>();
-		final LinkedList<Block> toVisit = new LinkedList<>();
-		toVisit.add(block);
+        // return one of the two, they are the same
+        return shortest;
+    }
 
-		// visit
-		Block current;
-		while ((current = toVisit.pollFirst()) != null) {
-			toVisit.addAll(Arrays.asList(current.children).subList(0, current.childrenNumber));
-			descendants.add(current);
-		}
+    /**
+     * Find all blocks that are descendants of the given one.
+     *
+     * @param block Block.
+     * @return Descendants of the given block.
+     */
+    public List<Block> descendants(Block block) {
 
-		return descendants;
-	}
+        // initialization
+        final LinkedList<Block> descendants = new LinkedList<>();
+        final LinkedList<Block> toVisit = new LinkedList<>();
+        toVisit.add(block);
 
+        // visit
+        Block current;
+        while ((current = toVisit.pollFirst()) != null) {
+            toVisit.addAll(Arrays.asList(current.children).subList(0, current.childrenNumber));
+            descendants.add(current);
+        }
 
-	// TODO: do I really need to copy this?
-	Block[] forks() {
-		final Block[] tmp = new Block[currentForks];
-		System.arraycopy(forks, 0, tmp, 0, currentForks);
-		return tmp;
-	}
+        return descendants;
+    }
 
-	// TODO: do I really need to copy this?
-	public int[] forksLengths() {
-		final int[] tmp = new int[currentForks];
-		System.arraycopy(forksDepths, 0, tmp, 0, currentForks);
-		return tmp;
-	}
+    /**
+     * @return Lengths of each fork in the blockchain.
+     */
+    public int[] forksLengths() {
+        final int[] copy = new int[currentForks];
+        System.arraycopy(forksDepths, 0, copy, 0, currentForks);
+        return copy;
+    }
 
-	private void expandArrayIfNeeded() {
-		if (currentForks == forks.length) {
-			final int oldSize = forks.length;
-			final int newSize = 3 * oldSize / 2;
-			final Block[] newBlocks = new Block[newSize];
-			final int[] newLengths = new int[newSize];
-			System.arraycopy(forks, 0, newBlocks, 0, oldSize);
-			System.arraycopy(forksDepths, 0, newLengths, 0, oldSize);
-			this.forks = newBlocks;
-			this.forksDepths = newLengths;
-		}
-	}
+    // test utility, please do NOT use for the real simulation
+    Block[] _forks() {
+        final Block[] tmp = new Block[currentForks];
+        System.arraycopy(forks, 0, tmp, 0, currentForks);
+        return tmp;
+    }
+
+    /**
+     * Increase the sizes of the internal arrays when they are full.
+     */
+    private void expandArrayIfNeeded() {
+        if (currentForks == forks.length) {
+            final int oldSize = forks.length;
+            final int newSize = 3 * oldSize / 2;
+            final Block[] newBlocks = new Block[newSize];
+            final int[] newLengths = new int[newSize];
+            System.arraycopy(forks, 0, newBlocks, 0, oldSize);
+            System.arraycopy(forksDepths, 0, newLengths, 0, oldSize);
+            this.forks = newBlocks;
+            this.forksDepths = newLengths;
+        }
+    }
 }

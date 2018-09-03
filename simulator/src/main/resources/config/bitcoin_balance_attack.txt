@@ -1,0 +1,114 @@
+# ------------------------------------------------------------------------
+#  Variables
+#  [time is measured in milliseconds]
+# ------------------------------------------------------------------------
+
+# time unit conversions
+SECONDS                                 1000
+MINUTES                                 SECONDS * 60
+HOURS                                   MINUTES * 60
+DAYS                                    HOURS * 24
+
+# simulation parameters
+END_TIME                                2 * HOURS
+LOG_STEP                                END_TIME / 10
+
+# networking settings
+NETWORK_MIN_DELAY                       DELAY
+NETWORK_MAX_DELAY                       5 * DELAY
+
+# changing parameters
+range.0 SEED;101:105
+range.1 NETWORK_SIZE;125,250,500,1000,2000,4000,8000
+range.2 DELAY;50,100,200,400,800,1600,3200,6400,12800
+
+########################################################
+# TODO!!!
+########################################################
+range.3 BALANCE_ATTACK_DELAY;3200,6400,12800
+range.4 BALANCE_ATTACK_DROP;0
+
+
+########################################################
+# TODO!!!
+########################################################
+# simulate users of the public ledger that submit transactions to the system
+BITCOIN_TRANSACTIONS_POISSON_MEAN       SECONDS / 10
+BITCOIN_INITIAL_PEERS                   25
+BITCOIN_PING_PONG                       true
+BITCOIN_SIMULATE_TRANSACTIONS           false
+
+
+# ------------------------------------------------------------------------
+#  PeerSim Components
+# ------------------------------------------------------------------------
+
+# simulation specific
+random.seed                             SEED
+network.size                            NETWORK_SIZE
+simulation.endtime                      END_TIME
+simulation.logtime                      LOG
+
+
+# --------------------------
+# initializers
+# --------------------------
+
+include.init                            wire transactions start_topology start_bitcoin
+
+init.transactions                       simulator.bitcoin.core.initializers.TransactionsInitializer
+init.transactions.protocol              bitcoin
+init.transactions.mean                  BITCOIN_TRANSACTIONS_POISSON_MEAN
+init.transactions.enable                BITCOIN_SIMULATE_TRANSACTIONS
+
+init.wire                               peersim.dynamics.WireKOut
+init.wire.protocol                      topology
+init.wire.k                             BITCOIN_INITIAL_PEERS
+
+init.start_topology                     simulator.bitcoin.initializers.ProtocolInitializer
+init.start_topology.protocol            topology
+
+init.start_bitcoin                      simulator.bitcoin.initializers.ProtocolInitializer
+init.start_bitcoin.protocol             bitcoin
+
+
+# --------------------------
+# protocols
+# --------------------------
+
+protocol.t1                             peersim.transport.UniformRandomTransport
+protocol.t1.mindelay                    NETWORK_MIN_DELAY
+protocol.t1.maxdelay                    NETWORK_MAX_DELAY
+
+protocol.t2                             simulator.attacks.BalanceAttackTransport
+protocol.t2.transport                   t1
+protocol.t2.delay                       BALANCE_ATTACK_DELAY
+protocol.t2.drop                        BALANCE_ATTACK_DROP
+
+protocol.topology                       simulator.bitcoin.topology.BitcoinTopology
+protocol.topology.transport             t2
+protocol.topology.ping_pong_enabled     BITCOIN_PING_PONG
+
+protocol.bitcoin                        simulator.bitcoin.core.BitcoinCore
+protocol.bitcoin.linkable               topology
+protocol.bitcoin.transport              t2
+
+
+# --------------------------
+# controls
+# --------------------------
+
+control.topology-messages               simulator.bitcoin.topology.observers.MessagesObserver
+control.topology-messages.protocol      topology
+control.topology-messages.step          LOG_STEP
+
+control.topology-removed                simulator.bitcoin.topology.observers.NodesRemovedObserver
+control.topology-removed.protocol       topology
+control.topology-removed.step           LOG_STEP
+
+control.core-global-blockchain          simulator.bitcoin.core.observers.GlobalBlockchainObserver
+control.core-global-blockchain.step     LOG_STEP
+
+control.core-transactions               simulator.bitcoin.core.observers.TransactionsObserver
+control.core-transactions.protocol      bitcoin
+control.core-transactions.step          LOG_STEP

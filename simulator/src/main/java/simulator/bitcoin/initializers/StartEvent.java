@@ -15,25 +15,18 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package simulator.bitcoin.core.model;
+package simulator.bitcoin.initializers;
 
 /**
- * Container of transactions that fit in one {@link Block}.
- * This class is used for performances reasons. It always allocate the maximum number of
- * transactions that can be contained in a single Block and keeps count of the real number.
+ * Event used to signal a protocol to start,
+ * eg. {@link simulator.bitcoin.initializers.ProtocolInitializer}.
  */
-public final class TransactionsWrapper {
+public final class StartEvent {
 
-    public final Transaction[] transactions;
-    public int transactionsNumber;
+    // singleton instance -> spare memory
+    static final StartEvent INSTANCE = new StartEvent();
 
-    public TransactionsWrapper(int blockSize) {
-        this.transactions = new Transaction[blockSize];
-        this.transactionsNumber = 0;
-    }
-
-    TransactionsWrapper(Transaction[] transactions) {
-        this.transactions = transactions;
-        this.transactionsNumber = transactions.length;
+    // prevent class construction from outside and force to use the singleton
+    private StartEvent() {
     }
 }
