@@ -1,39 +1,106 @@
-.PHONY: help compile simulate
+#
+# Copyright (c) 2018 Davide Pedranz. All rights reserved.
+#
+# This code is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+#
+
+.PHONY: help setup compile simulate
 .ONESHELL:
 
-SHELL=/bin/bash
+SHELL=/usr/local/bin/bash
 
 SIMULATOR_BIN = simulator/build/libs/simulator.jar
-SIMULALATOR_CONFIG = simulator/src/main/resources/config/bitcoin_all.txt
+SIMULATOR_CONFIG_BASE = simulator/src/main/resources/config
+CONFIG = bitcoin_balance_attack.txt
 
 help:
 	@echo ""
-	@echo "Usage: make [command]"
+	@echo "Usage: make [command] [CONFIG=bitcoin_balance_attack.txt]"
 	@echo ""
 	@echo "The commands are:"
 	@echo ""
+	@echo "       setup       install the Python dependencies for the analysis"
 	@echo "       compile     compile the Java simulator"
 	@echo "       simulate    run the simulations"
 	@echo "       help        prints this help message"
 	@echo ""
 
+setup:
+	@echo "Install analysis/requirements.txt"
+	@( \
+    	source analysis/venv/bin/activate; \
+    	pip install -r analysis/requirements.txt; \
+    )
+
 compile:
 	@echo "[task]: compile"
-	(cd simulator; ./gradlew shadowJar)
+	@(cd simulator; ./gradlew shadowJar)
 	@echo ""
 
 simulate: compile
-	@echo "[task]: simulate"
 	$(eval date := $(shell date '+%Y-%m-%d-%H:%M:%S'))
 	$(eval commit := $(shell git rev-parse HEAD))
 	$(eval status := $(shell [[ -n `git status --porcelain` ]] && echo "dirty" || echo ""))
 	$(eval logs_directory := $(shell expr `find logs/run-* -d | tail -1 | cut -d'-' -f2` + 1 | xargs printf 'logs/run-%03d'))
 	$(eval info := $(logs_directory)/info.txt)
-	$(eval config := $(logs_directory)/config.cfg)
+	$(eval config_src := $(SIMULATOR_CONFIG_BASE)/$(CONFIG))
+	$(eval config_dest := $(logs_directory)/config.cfg)
+	$(eval simulator := $(logs_directory)/simulator.jar)
+	@echo "[task]: simulate -> config_file = $(config_src)"
 	@mkdir -p $(logs_directory)
 	@echo "date=$(date)" >> $(info)
 	@echo "commit=$(commit)" >> $(info)
 	@echo "status=$(status)" >> $(info)
-	cp $(SIMULALATOR_CONFIG) $(config)
-	java -jar $(SIMULATOR_BIN) $(config) > $(logs_directory)/stdout.txt 2> >(tee -a $(logs_directory)/stderr.txt | grep 'Experiment' >&2) 
+	@cp $(config_src) $(config_dest)
+	@cp $(SIMULATOR_BIN) $(simulator)
+	@java -cp $(simulator) peersim.parallelsim.ParallelSimulator $(config_dest) 2> $(logs_directory)/parallel.txt | \
+		sed 's|.*|echo "[EXPERIMENT]: \0" 1>\&2 \&\& java -cp $(simulator) \0|g' | \
+		{ { parallel --will-cite -k | sed 's/.$$//g' > $(logs_directory)/stdout.txt; } 2>&1 1>&3 | tee -a $(logs_directory)/stderr.txt | grep --line-buffered 'EXPERIMENT' | sed "s/.*' //"; } 3>&1 1>&2
+	@echo "[task]: analyze the simulation results"
+	@( \
+    	source analysis/venv/bin/activate; \
+    	python analysis/main.py $(logs_directory)/; \
+    )
+	@echo ""
+	@echo "The results are available at: $(logs_directory)"
+	@echo "  > open $(logs_directory)"
+	@echo ""
+
+simulate-sequentially: compile
+	$(eval date := $(shell date '+%Y-%m-%d-%H:%M:%S'))
+	$(eval commit := $(shell git rev-parse HEAD))
+	$(eval status := $(shell [[ -n `git status --porcelain` ]] && echo "dirty" || echo ""))
+	$(eval logs_directory := $(shell expr `find logs/run-* -d | tail -1 | cut -d'-' -f2` + 1 | xargs printf 'logs/run-%03d'))
+	$(eval info := $(logs_directory)/info.txt)
+	$(eval config_src := $(SIMULATOR_CONFIG_BASE)/$(CONFIG))
+	$(eval config_dest := $(logs_directory)/config.cfg)
+	$(eval simulator := $(logs_directory)/simulator.jar)
+	@echo "[task]: simulate -> config_file = $(config_src)"
+	@mkdir -p $(logs_directory)
+	@echo "date=$(date)" >> $(info)
+	@echo "commit=$(commit)" >> $(info)
+	@echo "status=$(status)" >> $(info)
+	@cp $(config_src) $(config_dest)
+	@cp $(SIMULATOR_BIN) $(simulator)
+	@time java -jar $(simulator) $(config_dest) > $(logs_directory)/stdout.txt 2> >(tee -a $(logs_directory)/stderr.txt | grep 'Experiment' >&2) 
+	@echo ""
+	@echo "[task]: analyze the simulation results"
+	@( \
+    	source analysis/venv/bin/activate; \
+    	python analysis/main.py $(logs_directory)/; \
+    )
+	@echo ""
+	@echo "The results are available at: $(logs_directory)"
+	@echo "  > open $(logs_directory)"
 	@echo ""
