@@ -44,6 +44,19 @@ public final class ConfigurationHelper {
     }
 
     /**
+     * Read the configuration value with the given prefix and name as a boolean
+     * or return the default value if the key is not present.
+     *
+     * @param prefix       Prefix of the parameter.
+     * @param parameter    Parameter to read.
+     * @param defaultValue Default value for the parameter.
+     * @return Value of the parameter in the configuration or default value, if not set.
+     */
+    public static boolean readBoolean(String prefix, String parameter, boolean defaultValue) {
+        return Configuration.getBoolean(prefix + SEPARATOR + parameter, defaultValue);
+    }
+
+    /**
      * Read the configuration value with the given prefix and name as an integer
      * or return the default value if the key is not present.
      *
@@ -57,7 +70,7 @@ public final class ConfigurationHelper {
     }
 
     /**
-     * Read the configuration value with the given prefix and name as a boolean
+     * Read the configuration value with the given prefix and name as a long
      * or return the default value if the key is not present.
      *
      * @param prefix       Prefix of the parameter.
@@ -65,7 +78,7 @@ public final class ConfigurationHelper {
      * @param defaultValue Default value for the parameter.
      * @return Value of the parameter in the configuration or default value, if not set.
      */
-    public static boolean readBoolean(String prefix, String parameter, boolean defaultValue) {
-        return Configuration.getBoolean(prefix + SEPARATOR + parameter, defaultValue);
+    public static long readLong(String prefix, String parameter, long defaultValue) {
+        return Configuration.getLong(prefix + SEPARATOR + parameter, defaultValue);
     }
 }

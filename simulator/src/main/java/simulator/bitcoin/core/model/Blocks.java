@@ -136,4 +136,11 @@ public final class Blocks {
     public static Blockchain getGlobalBlockchain() {
         return globalBlockchain;
     }
+
+    /**
+     * @return The number of blocks generated during the simulation.
+     */
+    public static int getBlocksCount() {
+        return BLOCKS_LIST.size();
+    }
 }

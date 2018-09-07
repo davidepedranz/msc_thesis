@@ -27,15 +27,16 @@ import peersim.utilities.Distributions;
 import simulator.bitcoin.core.events.BlockFoundEvent;
 import simulator.bitcoin.core.messages.*;
 import simulator.bitcoin.core.model.*;
+import simulator.bitcoin.initializers.StartEvent;
 import simulator.collections.CircularQueue;
 import simulator.collections.IntList;
-import simulator.bitcoin.initializers.StartEvent;
 
 import java.util.BitSet;
 import java.util.LinkedList;
 import java.util.List;
 
 import static peersim.utilities.ConfigurationHelper.readInt;
+import static peersim.utilities.ConfigurationHelper.readLong;
 import static peersim.utilities.NetworkUtilities.broadcast;
 import static peersim.utilities.NetworkUtilities.send;
 import static peersim.utilities.TimeUnits.MINUTES;
@@ -50,11 +51,11 @@ public final class BitcoinCore implements EDProtocol {
     private static final String PARAM_BLOCK_SIZE = "block_size";
 
     // default configuration
-    private static final int DEFAULT_MEAN = 20 * MINUTES;
+    private static final long DEFAULT_MEAN = 10L * MINUTES;
     private static final int DEFAULT_BLOCK_SIZE = 20;
 
     // configuration actual values, extracted from configuration and defaults
-    private final int mean;
+    private final long mean;
     private final int maxBlockSize;
 
     // current status of the protocol
@@ -75,7 +76,7 @@ public final class BitcoinCore implements EDProtocol {
     public BitcoinCore(String prefix) {
 
         // read configuration
-        this.mean = readInt(prefix, PARAM_MEAN, DEFAULT_MEAN);
+        this.mean = readLong(prefix, PARAM_MEAN, DEFAULT_MEAN);
         this.maxBlockSize = readInt(prefix, PARAM_BLOCK_SIZE, DEFAULT_BLOCK_SIZE);
 
         // status
