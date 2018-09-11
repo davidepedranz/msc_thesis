@@ -1,5 +1,23 @@
-from collections import namedtuple
+#
+# Copyright (c) 2018 Davide Pedranz. All rights reserved.
+#
+# This code is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+#
+
+import sys
 import pandas as pd
+from collections import namedtuple
 
 common_attributes = [
     'protocol',
@@ -50,11 +68,13 @@ def parse_line(line):
 
 
 def is_stats_line(line):
-    first_item = line.split('] ', 1)[1].split(' ')[0]
     try:
+        first_item = line.split('] ', 1)[1].split(' ')[0]
         float(first_item)
         return True
     except ValueError:
+        return False
+    except IndexError:
         return False
 
 
@@ -77,7 +97,10 @@ def parse_stats_line(line):
 
 
 def is_freq_line(line):
-    return line.split('] ', 1)[1].strip()[0] == '('
+    try:
+        return line.split('] ', 1)[1].strip()[0] == '('
+    except IndexError:
+        return False
 
 
 def parse_tuple(t):
@@ -115,7 +138,7 @@ def parse_file(location):
                 freq = parse_freq_line(line)
                 freq_lines += freq
             else:
-                assert False, 'Got unknown line "' + line.replace('\n', '') + '"'
+                print('WARNING: Got unknown line "' + line.replace('\n', '') + '"', file=sys.stderr)
     raw_stats = pd.DataFrame(stats_lines, columns=stats_attributes)
     raw_freq = pd.DataFrame(freq_lines, columns=freq_attributes)
     stats, stats_params = expand_df_dictionary(raw_stats)
