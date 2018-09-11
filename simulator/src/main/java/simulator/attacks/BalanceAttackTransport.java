@@ -56,37 +56,42 @@ public final class BalanceAttackTransport implements Transport {
     @Override
     public void send(Node src, Node dest, Object message, int pid) {
 
+        // get the original underling transport
+        final Transport t;
+        try {
+            t = (Transport) src.getProtocol(transport);
+        } catch (ClassCastException e) {
+            final String msg = "Protocol " + Configuration.lookupPid(transport) + " does not implement Transport";
+            throw new IllegalArgumentException(msg, e);
+        }
+
         // this transport only modifies messages between nodes in different partitions
         final boolean samePartition = inSamePartition(src, dest);
 
-        // do nothing if same partition
+        // do nothing if the nodes are in the same partition
         if (samePartition) {
-            final Transport t;
-            try {
-                t = (Transport) src.getProtocol(transport);
-            } catch (ClassCastException e) {
-                final String msg = "Protocol " + Configuration.lookupPid(transport) + " does not implement Transport";
-                throw new IllegalArgumentException(msg, e);
-            }
-
-            // we delay only messages containing new blocks
-            if (message instanceof BlockMessage) {
-                t.send(src, dest, message, pid);
-            }
+            t.send(src, dest, message, pid);
         }
 
-        // if different partitions: delay + possibly drop the message
+        // if different partitions: delay + possibly drop the block messages
         else {
 
-            // check if the message is lost
-            final float random = CommonState.r.nextFloat();
+            // do nothing if the message is NOT a block
+            if (!(message instanceof BlockMessage)) {
+                t.send(src, dest, message, pid);
+            }
 
-            // send the message only if it is not lost
-            if (random >= drop) {
+            // delay blocks messages
+            else {
 
-                // schedule the delivery at a later time
-                final long latency = getLatency(src, dest);
-                EDSimulator.add(latency, message, dest, pid);
+                // send the message only if it is not lost
+                final float random = CommonState.r.nextFloat();
+                if (random >= drop) {
+
+                    // schedule the delivery at a later time
+                    final long latency = getLatency(src, dest);
+                    EDSimulator.add(latency, message, dest, pid);
+                }
             }
         }
     }
