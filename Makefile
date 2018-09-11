@@ -22,7 +22,7 @@ SHELL=/usr/local/bin/bash
 
 SIMULATOR_BIN = simulator/build/libs/simulator.jar
 SIMULATOR_CONFIG_BASE = simulator/src/main/resources/config
-CONFIG = bitcoin_balance_attack.txt
+CONFIG = bitcoin_balance_attack.cfg
 
 help:
 	@echo ""
@@ -61,7 +61,7 @@ simulate: compile
 	@mkdir -p $(logs_directory)
 	@echo "date=$(date)" >> $(info)
 	@echo "commit=$(commit)" >> $(info)
-	@echo "status=$(status)" >> $(info)
+	@echo "status=$(status)" >> $(info)	
 	@cp $(config_src) $(config_dest)
 	@cp $(SIMULATOR_BIN) $(simulator)
 	@java -cp $(simulator) peersim.parallelsim.ParallelSimulator $(config_dest) 2> $(logs_directory)/parallel.txt | \
@@ -70,7 +70,7 @@ simulate: compile
 	@echo "[task]: analyze the simulation results"
 	@( \
     	source analysis/venv/bin/activate; \
-    	python analysis/main.py $(logs_directory)/; \
+    	python analysis/all.py $(logs_directory)/; \
     )
 	@echo ""
 	@echo "The results are available at: $(logs_directory)"
@@ -98,7 +98,7 @@ simulate-sequentially: compile
 	@echo "[task]: analyze the simulation results"
 	@( \
     	source analysis/venv/bin/activate; \
-    	python analysis/main.py $(logs_directory)/; \
+    	python analysis/all.py $(logs_directory)/; \
     )
 	@echo ""
 	@echo "The results are available at: $(logs_directory)"
