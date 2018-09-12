@@ -19,11 +19,12 @@ package simulator.attacks;
 
 import peersim.config.Configuration;
 import peersim.core.CommonState;
-import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDSimulator;
 import peersim.transport.Transport;
 import simulator.bitcoin.core.messages.BlockMessage;
+
+import static peersim.utilities.ConfigurationHelper.readInt;
 
 /**
  * {@link Transport} used to simulate a Balance attack:
@@ -35,11 +36,16 @@ public final class BalanceAttackTransport implements Transport {
     private static final String PARAM_UNDERLING_TRANSPORT = "transport";
     private static final String PARAM_DELAY = "delay";
     private static final String PARAM_DROP_PROBABILITY = "drop";
+    private static final String PARAM_PARTITIONS = "partitions";
+
+    // default values
+    private static final int DEFAULT_PARTITIONS = 2;
 
     // configuration actual values
     private final int transport;
     private final long delay;
     private final float drop;
+    private final int partitions;
 
     /**
      * Default constructor, following the PeerSim conventions.
@@ -51,6 +57,12 @@ public final class BalanceAttackTransport implements Transport {
         this.transport = Configuration.getPid(name + "." + PARAM_UNDERLING_TRANSPORT);
         this.delay = Configuration.getLong(name + "." + PARAM_DELAY);
         this.drop = (float) Configuration.getDouble(name + "." + PARAM_DROP_PROBABILITY);
+        this.partitions = readInt(name, PARAM_PARTITIONS, DEFAULT_PARTITIONS);
+
+        // security check: it does not make sense to use less than 2 partitions
+        if (this.partitions < 2) {
+            throw new IllegalArgumentException("Parameter " + PARAM_PARTITIONS + " must be at least 2!");
+        }
     }
 
     @Override
@@ -118,20 +130,19 @@ public final class BalanceAttackTransport implements Transport {
      * @param b Second node.
      * @return True if the nodes are in the same partition, false otherwise.
      */
-    private static boolean inSamePartition(Node a, Node b) {
-        return inSamePartition(a.getID(), b.getID());
+    private boolean inSamePartition(Node a, Node b) {
+        final long aPartition = partition(a);
+        final long bPartition = partition(b);
+        return aPartition == bPartition;
     }
 
     /**
-     * Check if the nodes are in the same partition.
-     * Nodes are partitioned in groups of equal sizes, depending on their ID.
+     * Computes the partition number of a given node.
      *
-     * @param a First node.
-     * @param b Second node.
-     * @return True if the nodes are in the same partition, false otherwise.
+     * @param node Node.
+     * @return Partition to which the node belongs.
      */
-    private static boolean inSamePartition(long a, long b) {
-        final long middleElement = Network.size() / 2;
-        return (a <= middleElement && b <= middleElement) || (a > middleElement && b > middleElement);
+    private long partition(Node node) {
+        return node.getID() / partitions;
     }
 }
