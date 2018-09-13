@@ -35,22 +35,24 @@ FIGURE_DPI = 100
 X_TICK_STEP = 10
 
 
-def messages_line_chart(stats, agg_diff, agg_same, out_dir):
+def messages_line_chart(stats, agg_diff, agg_same, out_dir, _all=False):
     """
     Generate a plot for each metric collected for a given given protocol.
     :param stats: Pandas DataFrame that contains the simulator logs.
     :param agg_diff: Columns to use for the aggregation.
     :param agg_same: Column to use for the aggregation, generating multiple data series for the same plot.
     :param out_dir: Path of the directory where to store the generated plots.
+    :param _all: Consider all combination of parameters, even if agg_same has only one possible value.
     """
     protocols = stats['protocol'].unique()
     for protocol in protocols:
         metrics = stats.query('protocol == "%s"' % protocol)['metric'].unique()
         for metric in metrics:
-            message_line_chart(stats, protocol, metric, agg_diff=agg_diff, agg_same=agg_same, out_dir=out_dir)
+            message_line_chart(stats, protocol, metric, agg_diff=agg_diff, agg_same=agg_same, _all=_all,
+                               out_dir=out_dir)
 
 
-def message_line_chart(stats, protocol, metric, agg_diff, agg_same, out_dir):
+def message_line_chart(stats, protocol, metric, agg_diff, agg_same, out_dir, _all=False):
     """
     Generate a plot of the given metric of the given protocol.
     :param stats: Pandas DataFrame that contains the simulator logs.
@@ -59,6 +61,7 @@ def message_line_chart(stats, protocol, metric, agg_diff, agg_same, out_dir):
     :param agg_diff: Columns to use for the aggregation.
     :param agg_same: Column to use for the aggregation, generating multiple data series for the same plot.
     :param out_dir: Path of the directory where to store the generated plots.
+    :param _all: Consider all combination of parameters, even if agg_same has only one possible value.
     """
 
     # prepare the folders for the plots
@@ -76,16 +79,18 @@ def message_line_chart(stats, protocol, metric, agg_diff, agg_same, out_dir):
     df.columns = ['%s_%s' % (cols[0], cols[1]) if cols[1] != '' else cols[0] for cols in df.columns]
 
     # make the actual line charts
-    line_charts(df=df, protocol=protocol, metric=metric, agg_diff=agg_diff, agg_same=agg_same, output_dir=output_dir)
+    line_charts(df=df, protocol=protocol, metric=metric, agg_diff=agg_diff, agg_same=agg_same, _all=_all,
+                output_dir=output_dir)
 
 
-def forks_number_line_chart(freq, agg_diff, agg_same, out_dir):
+def forks_number_line_chart(freq, agg_diff, agg_same, out_dir, _all=False):
     """
     Generate a plot of the number of forks over time.
     :param freq: Pandas DataFrame that contains the simulator logs.
     :param agg_diff: Columns to use for the aggregation.
     :param agg_same: Column to use for the aggregation, generating multiple data series for the same plot.
     :param out_dir: Path of the directory where to store the generated plots.
+    :param _all: Consider all combination of parameters, even if agg_same has only one possible value.
     """
 
     # prepare the folders for the plots
@@ -106,10 +111,11 @@ def forks_number_line_chart(freq, agg_diff, agg_same, out_dir):
     df = df.rename(columns={'frequency_mean': 'mean_mean', 'frequency_std': 'mean_std'})
 
     # make the actual line charts
-    line_charts(df=df, protocol='core', metric='forks', agg_diff=agg_diff, agg_same=agg_same, output_dir=output_dir)
+    line_charts(df=df, protocol='core', metric='forks', agg_diff=agg_diff, agg_same=agg_same, _all=_all,
+                output_dir=output_dir)
 
 
-def forks_rate_line_chart(stats, freq, agg_diff, agg_same, out_dir):
+def forks_rate_line_chart(stats, freq, agg_diff, agg_same, out_dir, _all=False):
     """
     TODO!!!
     :param stats:
@@ -117,6 +123,7 @@ def forks_rate_line_chart(stats, freq, agg_diff, agg_same, out_dir):
     :param agg_diff: Columns to use for the aggregation.
     :param agg_same: Column to use for the aggregation, generating multiple data series for the same plot.
     :param out_dir: Path of the directory where to store the generated plots.
+    :param _all: Consider all combination of parameters, even if agg_same has only one possible value.
     """
 
     # prepare the folders for the plots
@@ -149,11 +156,11 @@ def forks_rate_line_chart(stats, freq, agg_diff, agg_same, out_dir):
     join['rate'] = join['forks'] / join['blocks']
 
     # make the actual line charts
-    line_charts(df=join, protocol='core', metric='forks-rate', agg_diff=agg_diff, agg_same=agg_same,
+    line_charts(df=join, protocol='core', metric='forks-rate', agg_diff=agg_diff, agg_same=agg_same, _all=_all,
                 output_dir=output_dir, y_field='rate', y_range=(0, 1))
 
 
-def line_charts(df, protocol, metric, agg_diff, agg_same, output_dir, y_field='mean_mean', y_range=None):
+def line_charts(df, protocol, metric, agg_diff, agg_same, _all, output_dir, y_field='mean_mean', y_range=None):
     """
     Generate line charts of the given protocol and metric for all parameters combination.
 
@@ -162,11 +169,16 @@ def line_charts(df, protocol, metric, agg_diff, agg_same, output_dir, y_field='m
     :param metric: Name of the PeerSim metric.
     :param agg_diff: Columns to use for the aggregation.
     :param agg_same: Column to use for the aggregation, generating multiple data series for the same plot.
+    :param _all: Consider all combination of parameters, even if agg_same has only one possible value.
     :param output_dir: Absolute path where to store the plots.
     :param y_field: Name of the DataFrame column to use for the y axis.
     :param y_range: Override the default range of values for the y axis.
     """
     y_err_field = 'mean_std'
+
+    # generate only plots that show at least 2 different traces!!!
+    if not _all and len(df[agg_same].unique()) <= 1:
+        return
 
     # extract the unique combinations of parameters to use for the plots
     params = df.drop_duplicates(subset=agg_diff)

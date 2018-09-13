@@ -49,13 +49,7 @@ def main():
 
     # [plots]: extract simulations parameters
     params_no_seed = filter_seed(parameters)
-    params_no_seed_with_time = params_no_seed + ['time']
-
-    # [plots]: filter out unwanted parameters (for now...)
     params_line_charts = params_no_seed
-    params_distributions = params_no_seed_with_time
-    # params_line_charts = filter_list(params_no_seed, 'balance_attack_drop')
-    # params_distributions = filter_list(params_no_seed_with_time, 'balance_attack_drop')
 
     # [plots]: forks rate
     print(' - Process Forks Rate')
@@ -84,19 +78,22 @@ def main():
             for param in params_line_charts
         )
 
+    # [plots]: filter out unwanted parameters (for now...)
+    # params_no_seed_with_time = params_no_seed + ['time']
+    # params_distributions = params_no_seed_with_time
     # [plots]: forks distribution
-    print(' - Process Forks Distribution')
-    with joblib.Parallel(n_jobs=joblib.cpu_count()) as parallel:
-        parallel(
-            joblib.delayed(plotter.forks_distribution_histogram)
-            (freq=freq, agg_diff=filter_list(params_distributions, param), agg_same=param, out_dir=plots_dir)
-            for param in params_distributions
-        )
-        parallel(
-            joblib.delayed(plotter.forks_distribution_line_chart)
-            (freq=freq, agg_diff=filter_list(params_distributions, param), agg_same=param, out_dir=plots_dir)
-            for param in params_distributions
-        )
+    # print(' - Process Forks Distribution')
+    # with joblib.Parallel(n_jobs=joblib.cpu_count()) as parallel:
+    #     parallel(
+    #         joblib.delayed(plotter.forks_distribution_histogram)
+    #         (freq=freq, agg_diff=filter_list(params_distributions, param), agg_same=param, out_dir=plots_dir)
+    #         for param in params_distributions
+    #     )
+    #     parallel(
+    #         joblib.delayed(plotter.forks_distribution_line_chart)
+    #         (freq=freq, agg_diff=filter_list(params_distributions, param), agg_same=param, out_dir=plots_dir)
+    #         for param in params_distributions
+    #     )
 
 
 def load_cache_or_parse_logs(run_dir):
