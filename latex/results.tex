@@ -1,3 +1,58 @@
-\chapter{Results}
+\chapter{Experiments \& Results}
 \label{chapter:results}
-TODO!
+Our simulator allows to simulate the Bitcoin protocol under different conditions:
+it is possible to choose the size of the network and the delay of messages between nodes.
+It is also easy to simulate network attacks by simply changing the transport layer used or by adding a new layer on top of the default one.
+
+\medskip
+This chapter covers our experiments with Bitcoin.
+First, we analyze the protocol at rest to obtain a baseline of its performances;
+then, we introduce delays on the communications between nodes to check if a degraded network infrastructure affects the protocol;
+finally we simulate different variants of the Balance attack (\cref{sec:balance}) and compare their effects on Bitcoin.
+
+
+\section{Settings}
+We run each simulation multiple times with different seeds for the random number generators to obtain higher statistical significance for the results.
+Each run simulates \num{3} hours of activity of the Bitcoin protocol.
+The parameter that regulates the blocks creation rate of the miners is tuned so that a new block is generated on average every \num{10} minutes.
+Since we do not simulate attacks that completely isolates nodes from each other or interfere with the control messages, we have disabled the ping-pong mechanism used by Bitcoin to verify that TCP connections are still alive:
+this allowed us to spare computational resources and run the same simulation multiple times with different seeds.
+
+
+\section{Parameters}
+The simulator accepts different parameters that allows to change the settings of the simulation.
+All parameters can be changed independently of each other and are specified in the configuration file.
+In particular, the simulator accepts the following \num{5} values:
+\begin{enumerate}
+	\item \texttt{network\_size};
+	\item \texttt{delay};
+	\item \texttt{balance\_attack\_delay};
+	\item \texttt{balance\_attack\_drop};
+	\item \texttt{balance\_attack\_partitions}.
+\end{enumerate}
+
+\paragraph{Network Size}
+The \texttt{network\_size} parameter controls the number of nodes simulated.
+It can vary from \num{1} to a potentially unlimited number, which is only bounded by the available computational resources.
+Since the Bitcoin network has about \num{9000} active node on average at the time of writing, we run simulations up to \num{10000} nodes.
+
+\paragraph{Delay}
+The \texttt{delay} parameter controls the delay of messages exchanged between Bitcoin nodes.
+The delay of each message is randomly chooses between \num{1} and \num{5} times the specified value.
+
+\paragraph{Balance Attack Delay}
+The \texttt{balance\_attack\_delay} parameter controls the magnitude of the simulated Balance attack:
+it adds an additional delay to all messages of type \texttt{Block} exchanged by nodes belonging to different partitions.
+The delay is added to the base network delay controlled by the \texttt{delay} parameter.
+
+\paragraph{Balance Attack Drop}
+The \texttt{balance\_attack\_drop} parameter controls the drop rate of \texttt{Block} messages exchanged by nodes belonging to different partitions.
+Please note that this is an extension to the Balance attack described in \cite{balance_attack_2017}, since the original paper does not consider dropping messages between nodes.
+
+\paragraph{Balance Attack Partitions}
+The \texttt{balance\_attack\_partitions} parameter controls the number of partitions of equal size in which the nodes of the network are divided by the Balance attack.
+The setting discussed in the original paper is to partition the network in \num{2} parts.
+
+
+\section{Protocol at rest}
+We start with a
