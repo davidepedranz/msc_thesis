@@ -3,7 +3,7 @@
 
 Testing and evaluating a peer-to-peer protocol with thousands of nodes in a real environment is very difficult, expensive and time consuming, especially if the goal is to evaluate the effects of large-scale network attacks.
 For this reason, we decided to implement a simulator that measures the performances of the Bitcoin protocol under the different situations, at rest and under attack.
-This allowed us to simulate up to \num{8000} Bitcoin nodes on a single general-purpose computer in a short time and evaluate the behavior of the protocol under different attack scenarios.
+This allowed us to simulate up to \num{10000} Bitcoin nodes on a single general-purpose computer in a short time and evaluate the behavior of the protocol under different attack scenarios.
 
 \medskip
 This chapter describes the implementation of the simulator.
@@ -315,7 +315,8 @@ Since the focus of the simulation is to evaluate the performances of the protoco
 \end{itemize}
 
 \subsubsection{Metrics}
-The main metric used to measure the performances of the core layer is the number and length of forks in the blockchain.
+The main metric used to measure the performances of the core layer is the number of forks in the blockchain:
+a fork is a branch of the chain different from the longest chain.
 The simulator knows the global state of the simulation:
 it is easy to compute the longest chain, observe forks and their lengths in a any given moment.
 The metric considers all blocks known to the simulator, even if they have been just discovered and not yet known to all peers in the network.
