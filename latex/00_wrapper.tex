@@ -46,9 +46,6 @@
 % custom spacings
 \usepackage{setspace}
 
-% TODO: use only for draft versions
-% \renewcommand{\baselinestretch}{1.5}
-
 % list of acronyms
 \RequirePackage[index=true]{acro}
 \NewDocumentCommand\acrodef{mO{#1}mG{}}{\DeclareAcronym{#1}{short={#2}, long={#3}, #4}}
@@ -69,23 +66,22 @@
 \begin{document}
 
 % TODO: remove this!
-\begin{titlepage}
-	\maketitle
-\end{titlepage}
+% \begin{titlepage}
+% 	\maketitle
+% \end{titlepage}
 
 % TODO: set good margins for real print!
 \input{frontpage.tex}
-
+\input{abstract.tex}
 \tableofcontents
 \listoffigures
-\listoftables
-
+\input{introduction.tex}
 \input{bitcoin.tex}
 \input{protocol.tex}
 \input{attacks.tex}
 \input{simulator.tex}
 \input{results.tex}
-
+\input{conclusions.tex}
 \printbibliography
 
 \end{document}
