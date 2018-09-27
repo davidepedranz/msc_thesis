@@ -4,7 +4,7 @@
 
 \chapter{Results}
 \label{chapter:results}
-Our simulator allows to simulate the Bitcoin protocol under different conditions:
+Our simulator allows to test the Bitcoin protocol under different conditions:
 it is possible to choose the size of the network and the delay of messages between nodes.
 It is also easy to simulate network attacks by simply changing the transport layer used or by adding a new layer on top of the default one.
 
@@ -20,7 +20,7 @@ We run each simulation multiple times with different seeds for the random number
 Each run simulates \num{3} hours of activity of the Bitcoin protocol.
 The parameter that regulates the blocks creation rate of the miners is tuned so that a new block is generated on average every \num{10} minutes.
 Since we do not simulate attacks that completely isolates nodes from each other or interfere with the control messages, we have disabled the ping-pong mechanism used by Bitcoin to verify that TCP connections are still alive:
-this allowed us to spare computational resources and run the same simulation multiple times with different seeds.
+this allowed us to spare computational resources and run the same simulation multiple times with more different seeds.
 
 
 \section{Parameters}
@@ -41,8 +41,8 @@ It can vary from \num{1} to a potentially unlimited number, which is only bounde
 Since the Bitcoin network has about \num{9000} active node on average at the time of writing, we run simulations up to \num{10000} nodes.
 
 \paragraph{Delay}
-The \texttt{delay} parameter controls the delay of messages exchanged between Bitcoin nodes.
-The delay of each message is randomly chooses between \num{1} and \num{5} times the specified value.
+The \texttt{delay} parameter controls the average delay of messages exchanged between Bitcoin nodes.
+The delay of each message is randomly chosen from a uniform distribution in $[-\texttt{delay}, +\texttt{delay}]$.
 
 \paragraph{Balance Attack Delay}
 The \texttt{balance\_attack\_delay} parameter controls the magnitude of the simulated Balance attack:
@@ -51,107 +51,201 @@ The delay is added to the base network delay controlled by the \texttt{delay} pa
 
 \paragraph{Balance Attack Drop}
 The \texttt{balance\_attack\_drop} parameter controls the drop rate of \texttt{Block} messages exchanged by nodes belonging to different partitions.
-Please note that this is an extension to the Balance attack described in \cite{balance_attack_2017}, since the original paper does not consider dropping messages between nodes.
+Please note that this is an extension to the Balance attack described in \cite{balance_attack_2017}, since the paper does not consider dropping messages between nodes.
 
 \paragraph{Balance Attack Partitions}
 The \texttt{balance\_attack\_partitions} parameter controls the number of partitions of equal size in which the nodes of the network are divided by the Balance attack.
-The setting discussed in the original paper is to partition the network in \num{2} parts.
-
-
-\section{Evaluation}
-Most attacks against Bitcoin aim at spending the double spending the money.
-Forks on the blockchain allows an attacker to easily achieve double spending attack.
-The main metric used to evaluate the performances of the protocol is thus the number of forks in the blockchain.
-Forks happen in Bitcoin with a non-zero probability even at rest due to some inevitable delays of the information propagation;
-degraded network conditions and a wide range of attacks can increase the probability of forks and open the possibility for easy double spend attempts.
+The setting discussed in the original paper is to partition the network in \num{2} parts only.
 
 
 \section{Experiments}
+Most attacks against Bitcoin aim at double spending the money.
+Forks on the blockchain allows an attacker to easily achieve double spending attack.
+The main metric used to evaluate the performances of the protocol is thus the number of forks in the blockchain.
+Forks happen in Bitcoin with a non-zero probability even at rest due to some inevitable delays of the information propagation;
+degraded network conditions and a wide range of attacks can increase the probability of forks and open the possibility for easy double-spend attempts.
 
 \subsection{Protocol at rest}
-We run the simulations for different network sizes and $\texttt{delay} = 50 ~ms$, similar to the delay of a normal TCP connection over the Internet.
+We run the simulations for different network sizes and $\texttt{delay} = \SI{50}{\milli\second}$, similar to the delay of a normal TCP connection over the Internet.
 Under these conditions, the Bitcoin nodes exchange $8$ \texttt{Version}, \texttt{VerAck}, \texttt{GetAddr} and \texttt{Addr} messages each:
-each node connects to exactly \num{8} peers and each connection generates an exchanges of the control messages.
-\cref{fig:blocks-at-rest} shows that the network generated on average \num{18} blocks during the simulation of \num{3} hours (\num{1} block every \num{10} minutes), independently on the size of the network.
-Under these conditions, the Bitcoin protocol does not produce any fork.
+each node connects to exactly \num{8} peers and each connection generates a single exchange of the above control messages.
 
-\begin{figure}[ht]
+\begin{figure}[h!]
 	\centering
+	% \vspace*{0.25}
 	\advance \leftskip \myextraleftmargin
-	\includegraphics[width=\myplotswitdth \columnwidth]{plots/blocks_at_rest}
+	\includegraphics[width=\myplotswitdth \columnwidth]{plots/blocks_rest_linechart}
 	\caption[Blocks generation for networks of different sizes]{
 		Blocks generation for networks of different sizes under normal conditions:
-		\num{50} ms delay on average and no attack in progress.
-		At time \num{0}, only the genesis block in present.
+		\SI{50}{\milli\second} delay on average and no attack in progress.
+		At time \num{0}, only the genesis block is present.
 		During the simulation, a new block is generated on average every \num{10} minutes, regardless of the network's size.
 	}
-	\label{fig:blocks-at-rest}
+	\label{fig:blocks-rest-linechart}
 \end{figure}
+
+\cref{fig:blocks-rest-linechart} shows that the network generated on average \num{18} blocks during the simulation of \num{3} hours (\num{1} block every \num{10} minutes), independently on the size of the network.
+The plot shows the results for networks of \num{1000}, \num{5000} and \num{9000} nodes, but the same behavior is valid for all sizes in between.
+Under these conditions, the Bitcoin protocol does not produce any fork in our simulations.
 
 \subsection{Generalized network delays}
-We run experiments for different network sizes and incremental delays from \num{0} to \num{30} seconds in the propagation of each message.
+We run experiments for different network sizes and incremental delays from \num{0} to \num{30} seconds with steps of \num{5} in the propagation of each message.
 Generalized network delays on the network does not influence the number of control messages exchanged.
 Similar to the previous experiment, the network generates \num{1} block every \num{10} minutes on average.
-\cref{fig:forks-with-delay} and \cref{fig:forks-distribution-with-delay} show the effect of delays on the forks generated by a network of \num{9000} nodes:
-with a \texttt{delay} of \num{0} seconds, the network never generates forks;
-with small delays, the network generates forks only in a small number of simulations;
-with longer delays, the network generates on average about \num{1} fork every \num{3} hours.
 
-\begin{figure}[ht]
-	\centering
-	\advance \leftskip \myextraleftmargin
-	\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_with_delay_9000}
-	\caption[Average forks number for a network of 9000 nodes with different delays]{
-		Average forks number for a network of 9000 nodes with different delays.
-		In perfect conditions of zero delay, Bitcoin nodes never generate forks.
-		With short delays, the average number of forks is small.
-		With longer delays, Bitcoin generates on average about \num{1} every \num{3} hours.
-	}
-	\label{fig:forks-with-delay}
-\end{figure}
+\medskip
+\cref{fig:forks-delay-1000} shows the number of forks generated a the network of \num{1000} nodes over time and their distribution at the end of the simulation.
+The effect of network delays is a general increase in the number of forks:
+with a delay of \SI{0}{\second}, the network never generates forks;
+small delays of \num{5} or \SI{10}{\second} seconds already cause the generation of \num{1} to \num{3} forks in some simulations;
+longer delays of \SI{15}{\second} to \SI{30}{\second} seconds produce forks in a significantly higher number of simulations.
 
-\begin{figure}[ht]
-	\centering
-	\advance \leftskip \myextraleftmargin
-	\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_with_delay_boxplot_9000}
-	\caption[Forks distribution for a network of 9000 nodes with different delays]{
-		Forks distribution for a network of 9000 nodes with different delays.
-		With zero delay, blocks are immediately distributed to all nodes and the network does not generate any fork.
-		Even a small delay of \num{5} s starts to create some forks.
-		Higher delays produce an higher number of forks.
-	}
-	\label{fig:forks-distribution-with-delay}
-\end{figure}
-
-Similar results yield for smaller networks:
-\cref{fig:forks-with-delay-small-network} and \cref{fig:forks-distribution-with-delay-small-network} show the forks number over time and their distribution at the end of the simulation for a network of \num{1000} nodes.
-
-\begin{figure}[ht]
-	\centering
-	\advance \leftskip \myextraleftmargin
-	\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_with_delay_1000}
-	\caption[Average forks number for a network of 1000 nodes with different delays]{
-		Average forks number for a network of \num{1000} nodes with different delays.
-		In perfect conditions of zero delay, Bitcoin nodes never generate forks.
-		With short delays, the average number of forks is small.
-		With longer delays, Bitcoin generates on average about \num{1} every \num{3} hours.
-	}
-	\label{fig:forks-with-delay-small-network}
-\end{figure}
-
-\begin{figure}[ht]
-	\centering
-	\advance \leftskip \myextraleftmargin
-	\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_with_delay_boxplot_1000}
+\begin{figure}[h]
+	\begin{subfigure}{\textwidth}
+		\centering
+		% \vspace*{0.25cm}
+		\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_delay_1000_linechart}
+		\vspace*{0.25cm}
+		\caption{
+			Average forks number for a network of \num{1000} nodes with different delays.
+			In perfect conditions of zero delay, Bitcoin nodes never generate forks.
+			Longer delays cause a faster increasing number of forks over time.
+		}
+		\vspace*{0.75cm}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\vspace*{0.25cm}
+		\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_delay_1000_boxplot}
+		\vspace*{0.25cm}
+		\caption{
+			Distribution of forks for a network of \num{1000} nodes with different delays.
+			With zero delay, blocks are immediately distributed to all nodes and no fork is generated.
+			Even with a small delay of \SI{5}{\second}, the network starts to create some forks.
+			Longer delays produce an higher number of forks.
+		}
+		\vspace*{0.25cm}
+	\end{subfigure}
 	\caption[Forks distribution for a network of 1000 nodes with different delays]{
 		Forks distribution for a network of \num{1000} nodes with different delays.
-		With zero delay, blocks are immediately distributed to all nodes and the network does not generate any fork.
-		Even a small delay of \num{5} s starts to create some forks.
-		Higher delays produce an higher number of forks.
 	}
-	\label{fig:forks-distribution-with-delay-small-network}
+	\label{fig:forks-delay-1000}
 \end{figure}
 
+\medskip
+Similar results yield for bigger networks.
+\cref{fig:forks-delay-9000} show the effect of delays on the forks generated by a network of \num{9000} nodes:
+the number of forks seems to be linearly correlated with the message's delay.
+The effect of the delays seems to be also related to the size of the network:
+the network with \num{9000} nodes produces on average \num{0.1} to \num{0.2} forks more that the one with \num{1000} nodes for each tested value of \texttt{delay} at the of the simulation.
 
-\subsection{Balance attack}
+\begin{figure}[h]
+	\begin{subfigure}{\textwidth}
+		\centering
+		% \vspace*{0.25cm}
+		\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_delay_9000_linechart}
+		\vspace*{0.25cm}
+		\caption{
+			Average forks number for a network of \num{9000} nodes with different delays.
+			With short delays, the average number of forks is small.
+			With longer delays, Bitcoin generates on average about \num{1} fork every \num{3} hours.
+		}
+		\vspace*{0.75cm}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\vspace*{0.25cm}
+		\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_delay_9000_boxplot}
+		\vspace*{0.25cm}
+		\caption{
+			Distribution of forks for a network of \num{9000} nodes with different delays.
+			With zero delay, blocks are immediately distributed to all nodes and no fork is generated.
+			As for smaller networks, even a small delay of \num{5} s starts to create some forks, and longer delays produce an higher number of forks.
+		}
+		\vspace*{0.25cm}
+	\end{subfigure}
+	\caption[Forks distribution for a network of 9000 nodes with different delays]{
+		Forks distribution for a network of \num{9000} nodes with different delays.
+	}
+	\label{fig:forks-delay-9000}
+\end{figure}
+
+\subsection{Balance Attack}
+
+\subsubsection{Delay}
+We first fix the size of the network and explore the effect of base Balance Attacks with different values of \texttt{balance\_attack\_delay}, then we fix a delay and explore its effect on networks with different sizes.
+For all experiments in this section, we fix a base network delay of \SI{50}{\milli\second}.
+
+\medskip
+\cref{fig:forks-attack-delay-1000} shows the effect of a Balance Attack on a network of \num{1000} nodes.
+The growth of forks over time seems to be linear for all tested delays.
+Even with a relatively small delay of \SI{30}{\second} on the propagation of \texttt{Block} messages, the network generates on average \num{2} forks (against a total of \num{18} blocks) in \num{3} hours of simulation;
+the number of forks is distributed around \num{2}, but reaches \num{4} or \num{5} in many simulations.
+The distribution of the number of forks for longer delays follows a similar behavior, but is is shifted towards higher numbers:
+with a delay of \SI{120}{\second}, the network generates up to \num{10} - \num{12} forks, more than half of the total \num{18} generated blocks.
+
+\begin{figure}[h]
+	\begin{subfigure}{\textwidth}
+		\centering
+		% \vspace*{0.25cm}
+		\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_attack_delay_1000_linechart}
+		\vspace*{0.25cm}
+		\caption{
+			Average forks number for a network of \num{1000} nodes under Balance Attack.
+			Relatively small delays of \SI{30}{\second} on the propagation of \texttt{Block} messages between nodes belonging to different partitions cause a \num{2} forks on average at the end of the \num{3} hours simulation.
+			With large delays of \SI{120}{\second}, the average number of forks raises to \num{6}.
+		}
+		\vspace*{0.75cm}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\vspace*{0.25cm}
+		\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_attack_delay_1000_boxplot}
+		\vspace*{0.25cm}
+		\caption{
+			Distribution of forks for a network of \num{1000} nodes under Balance Attack.
+			Most simulations with delay of \SI{30}{\second} have generated around \num{2} - \num{3} forks, while some reached \num{4} or \num{5} forks.
+			The distribution of forks shifts towards higher numbers with larger delays.
+			With a delay of \SI{120}{\second}, the network generates up to \num{10} - \num{12} forks.
+		}
+		\vspace*{0.25cm}
+	\end{subfigure}
+	\caption[Forks distribution for a network of 1000 nodes under Balance Attack]{
+		Forks distribution for a network of \num{1000} nodes under Balance Attack.
+	}
+	\label{fig:forks-attack-delay-1000}
+\end{figure}
+
+\medskip
+\cref{fig:forks-attack-sizes} shows the effect of the Balance Attack for a fixed delay of \texttt{Block} messages on network of different sizes.
+With both a delay of \num{30} and \SI{60}{\second}, there is no significant difference in the distribution of forks for the different networks.
+For all sizes, longer delays cause a higher number of forks on average.
+
+\begin{figure}[h]
+	\begin{subfigure}{\textwidth}
+		\centering
+		% \vspace*{0.25cm}
+		\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_attack_delay_30_network_sizes_boxplot}
+		\vspace*{0.25cm}
+		\caption{Forks distribution for different networks under a Balance Attack that delays all \texttt{Block} messages by \SI{30}{\second}.}
+		\vspace*{0.75cm}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\vspace*{0.25cm}
+		\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_attack_delay_60_network_sizes_boxplot}
+		\vspace*{0.25cm}
+		\caption{Distribution of forks for different networks under a Balance Attack that delays all \texttt{Block} messages by \SI{60}{\second}.}
+		\vspace*{0.25cm}
+	\end{subfigure}
+	\caption[Forks distribution for different networks under Balance Attack]{
+		Distribution of forks for different networks under a Balance Attack that delays all \texttt{Block} messages by \num{30} or \SI{60}{\second}.
+		The effect of the attack does not seem to be influences by the size of the network in case of delays of both \num{30} and \SI{60}{\second}.
+	}
+	\label{fig:forks-attack-sizes}
+\end{figure}
+
+\subsubsection{Drop}
+
+\subsubsection{Partitions}
 
