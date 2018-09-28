@@ -1,2 +1,34 @@
 \chapter{Introduction}
-TODO!
+Cryptocurrencies are getting more and more popular and gained the attention of the media in the last few years.
+They are used for multiple purposes, including online and in-shop payments, low-cost money transfer, and anonymous money spending.
+Among all digital currencies, Bitcoin is the first one who gained some real adoption and it is today the most used and valuable cryptocurrency available on the market, with a value of about \num{141} billion \$ \cite{bitcoin_usage_study_2017, stats_coinmarketcap}.
+
+Bitcoin is a complex technology that takes advantage of powerful cryptographic techniques and well studied ideas of distributed systems to solve the Byzantine Consensus problem and achieve an eventual consistency on the order of the transactions.
+It organizes transactions in sequential blocks, which form the so called \textit{blockchain}.
+The blockchain is distributed to all nodes in the network and form a public ledger of all transactions that can be used to deterministically compute the balances of all addresses of Bitcoin.
+Everybody can join the network and participate in the protocol, but a block needs to include the solution of a non-trivial computational puzzle to be considered valid.
+This idea is commonly known as \textit{Proof of Work} \cite{pow_2002} and it is one of the pillars of Bitcoin security:
+it guarantees that an attacker can not generate too many blocks and take control of the entire blockchain, since this would require a huge amount of computational power.
+Public-key digital signature guarantees the only the owner of a Bitcoin address can spend the money stored inside.
+
+Many attacks against Bitcoin have been proposed and analyzed in the literature.
+One of the main problems of Bitcoin is the possibility of forks, temporary inconsistencies in the blockchain.
+Under certain conditions, forks allows an attacker to spend its money twice \cite{double_spending_two_for_one}, for instance by including conflicting transactions in blocks belonging to different forks:
+the network will eventually choose one of the forks as main chain and discard all blocks in the other chain, including all the transactions stored inside.
+Most attacks try to take advantage of weaknesses in the protocol to increase the probability of forks and achieve double-spending.
+
+In this thesis, we analyze some of the attacks that focus on the network.
+We implement an event driven simulator to test the low-level Bitcoin protocol used to build and maintain the network topology and propagate information about transactions and blocks.
+We use the simulator to evaluate the performances of the Bitcoin protocol under different situations, both at rest and under attack.
+We focus on the Balance attack \cite{balance_attack_2017, balance_attack_report_2016}, a recent proposal where the attacker takes control of a significant portion of the network and tries to create \num{2} groups of nodes with about the same computational power:
+it delays messages between nodes in different partitions to create forks that can be exploited to spend the money twice.
+Our results show that, while Bitcoin behaves well under normal conditions, it can have serious problems with large scale network attacks.
+
+\bigskip
+The rest of this thesis is organized as follows:
+\cref{chapter:bitcoin} gives an overview of Bitcoin and explains its main concepts and ideas;
+\cref{chapter:protocol} describes the low-level protocol used by Bitcoin to construct an overlay network and propagate information on top of it;
+\cref{chapter:attacks} illustrated some of the most common attacks proposed against Bitcoin;
+\cref{chapter:simulator} explains the architecture and the implementation of our simulator;
+\cref{chapter:results} describes the most interesting experiments with the simulator and the obtained results;
+finally, \cref{chapter:conclusions} summarizes the most relevant results and gives the conclusions.
