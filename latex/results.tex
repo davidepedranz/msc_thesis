@@ -1,5 +1,4 @@
 % settings for the plots in this chapter
-\def \myextraleftmargin {-0.2cm}
 \def \myplotswitdth {0.95}
 
 \chapter{Results}
@@ -19,12 +18,12 @@ finally we simulate different variants of the Balance attack (\cref{sec:balance}
 We run each simulation multiple times with different seeds for the random number generators to obtain higher statistical significance for the results.
 Each run simulates \num{3} hours of activity of the Bitcoin protocol.
 The parameter that regulates the blocks creation rate of the miners is tuned so that a new block is generated on average every \num{10} minutes.
-Since we do not simulate attacks that completely isolates nodes from each other or interfere with the control messages, we have disabled the ping-pong mechanism used by Bitcoin to verify that TCP connections are still alive:
+Since we do not simulate attacks that completely isolate nodes from each other or interfere with the control messages, we have disabled the ping-pong mechanism used by Bitcoin to verify that TCP connections are still alive:
 this allowed us to spare computational resources and run the same simulation multiple times with more different seeds.
 
 
 \section{Parameters}
-The simulator accepts different parameters that allows to change the settings of the simulation.
+The simulator accepts different parameters that allow to change the settings of the simulation.
 All parameters can be changed independently of each other and are specified in the configuration file.
 In particular, the simulator accepts the following \num{5} values:
 \begin{enumerate}
@@ -60,10 +59,10 @@ The setting discussed in the original paper is to partition the network in \num{
 
 \section{Experiments}
 Most attacks against Bitcoin aim at double spending the money.
-Forks on the blockchain allows an attacker to easily achieve double spending attack.
+Forks on the blockchain allow an attacker to easily achieve double spending attack.
 The main metric used to evaluate the performances of the protocol is thus the number of forks in the blockchain.
-Forks happen in Bitcoin with a non-zero probability even at rest due to some inevitable delays of the information propagation;
-degraded network conditions and a wide range of attacks can increase the probability of forks and open the possibility for easy double-spend attempts.
+Forks happen with a non-zero probability even at rest in Bitcoin due to some inevitable delays on the information propagation;
+degraded network conditions and a wide range of attacks can increase the probability of forks and open the possibility for double-spend attempts.
 
 \subsection{Protocol at rest}
 We run the simulations for different network sizes and $\texttt{delay} = \SI{50}{\milli\second}$, similar to the delay of a normal TCP connection over the Internet.
@@ -73,7 +72,6 @@ each node connects to exactly \num{8} peers and each connection generates a sing
 \begin{figure}[h!]
 	\centering
 	% \vspace*{0.25}
-	\advance \leftskip \myextraleftmargin
 	\includegraphics[width=\myplotswitdth \columnwidth]{plots/blocks_rest_linechart}
 	\caption[Blocks generation for networks of different sizes]{
 		Blocks generation for networks of different sizes under normal conditions:
@@ -173,15 +171,15 @@ the network with \num{9000} nodes produces on average \num{0.1} to \num{0.2} for
 \subsection{Balance Attack}
 
 \subsubsection{Delay}
-We first fix the size of the network and explore the effect of base Balance Attacks with different values of \texttt{balance\_attack\_delay}, then we fix a delay and explore its effect on networks with different sizes.
+We first fix the size of the network and explore the effect of base Balance attacks with different values of \texttt{balance\_attack\_delay}, then we fix a delay and explore its effect on networks with different sizes.
 For all experiments in this section, we fix a base network delay of \SI{50}{\milli\second}.
 
 \medskip
-\cref{fig:forks-attack-delay-1000} shows the effect of a Balance Attack on a network of \num{1000} nodes.
+\cref{fig:forks-attack-delay-1000} shows the effect of a Balance attack on a network of \num{1000} nodes.
 The growth of forks over time seems to be linear for all tested delays.
 Even with a relatively small delay of \SI{30}{\second} on the propagation of \texttt{Block} messages, the network generates on average \num{2} forks (against a total of \num{18} blocks) in \num{3} hours of simulation;
 the number of forks is distributed around \num{2}, but reaches \num{4} or \num{5} in many simulations.
-The distribution of the number of forks for longer delays follows a similar behavior, but is is shifted towards higher numbers:
+The distribution of the number of forks for longer delays follows a similar behavior, but it is shifted towards higher numbers:
 with a delay of \SI{120}{\second}, the network generates up to \num{10} - \num{12} forks, more than half of the total \num{18} generated blocks.
 
 \begin{figure}[h]
@@ -191,7 +189,7 @@ with a delay of \SI{120}{\second}, the network generates up to \num{10} - \num{1
 		\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_attack_delay_1000_linechart}
 		\vspace*{0.25cm}
 		\caption{
-			Average forks number for a network of \num{1000} nodes under Balance Attack.
+			Average forks number for a network of \num{1000} nodes under Balance attack.
 			Relatively small delays of \SI{30}{\second} on the propagation of \texttt{Block} messages between nodes belonging to different partitions cause a \num{2} forks on average at the end of the \num{3} hours simulation.
 			With large delays of \SI{120}{\second}, the average number of forks raises to \num{6}.
 		}
@@ -203,21 +201,21 @@ with a delay of \SI{120}{\second}, the network generates up to \num{10} - \num{1
 		\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_attack_delay_1000_boxplot}
 		\vspace*{0.25cm}
 		\caption{
-			Distribution of forks for a network of \num{1000} nodes under Balance Attack.
+			Distribution of forks for a network of \num{1000} nodes under Balance attack.
 			Most simulations with delay of \SI{30}{\second} have generated around \num{2} - \num{3} forks, while some reached \num{4} or \num{5} forks.
 			The distribution of forks shifts towards higher numbers with larger delays.
 			With a delay of \SI{120}{\second}, the network generates up to \num{10} - \num{12} forks.
 		}
 		\vspace*{0.25cm}
 	\end{subfigure}
-	\caption[Forks distribution for a network of 1000 nodes under Balance Attack]{
-		Forks distribution for a network of \num{1000} nodes under Balance Attack.
+	\caption[Forks distribution for a network of 1000 nodes under Balance attack]{
+		Forks distribution for a network of \num{1000} nodes under Balance attack.
 	}
 	\label{fig:forks-attack-delay-1000}
 \end{figure}
 
 \medskip
-\cref{fig:forks-attack-sizes} shows the effect of the Balance Attack for a fixed delay of \texttt{Block} messages on network of different sizes.
+\cref{fig:forks-attack-sizes} shows the effect of the Balance attack for a fixed delay of \texttt{Block} messages on network of different sizes.
 With both a delay of \num{30} and \SI{60}{\second}, there is no significant difference in the distribution of forks for the different networks.
 For all sizes, longer delays cause a higher number of forks on average.
 
@@ -227,7 +225,7 @@ For all sizes, longer delays cause a higher number of forks on average.
 		% \vspace*{0.25cm}
 		\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_attack_delay_30_network_sizes_boxplot}
 		\vspace*{0.25cm}
-		\caption{Forks distribution for different networks under a Balance Attack that delays all \texttt{Block} messages by \SI{30}{\second}.}
+		\caption{Forks distribution for different networks under a Balance attack that delays all \texttt{Block} messages by \SI{30}{\second}.}
 		\vspace*{0.75cm}
 	\end{subfigure}
 	\begin{subfigure}{\textwidth}
@@ -235,17 +233,75 @@ For all sizes, longer delays cause a higher number of forks on average.
 		\vspace*{0.25cm}
 		\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_attack_delay_60_network_sizes_boxplot}
 		\vspace*{0.25cm}
-		\caption{Distribution of forks for different networks under a Balance Attack that delays all \texttt{Block} messages by \SI{60}{\second}.}
+		\caption{Distribution of forks for different networks under a Balance attack that delays all \texttt{Block} messages by \SI{60}{\second}.}
 		\vspace*{0.25cm}
 	\end{subfigure}
-	\caption[Forks distribution for different networks under Balance Attack]{
-		Distribution of forks for different networks under a Balance Attack that delays all \texttt{Block} messages by \num{30} or \SI{60}{\second}.
-		The effect of the attack does not seem to be influences by the size of the network in case of delays of both \num{30} and \SI{60}{\second}.
+	\caption[Forks distribution for different networks under Balance attack]{
+		Distribution of forks for different networks under a Balance attack that delays all \texttt{Block} messages by \num{30} or \SI{60}{\second}.
+		The size of the network does not seem to influence the effect of the attack for both the tested delays of \num{30} and \SI{60}{\second}.
 	}
 	\label{fig:forks-attack-sizes}
 \end{figure}
 
 \subsubsection{Drop}
+We evaluate the effect of dropping \texttt{Block} messages instead of simply delaying them.
+\cref{fig:forks-attack-drop} shows the effect of a Balance attack that drops the messages with different probabilities on a network of \num{1000} nodes.
+The effect of the attack is almost absent for $\texttt{balance\_attack\_drop} \leq 0.7$.
+The attack starts to work for $\texttt{balance\_attack\_drop} = 0.8$ and works very well for $\texttt{balance\_attack\_drop} \in \{0.9, 1\}$.
+In other words, the attack works only if most \texttt{Block} messages between nodes in different partitions are dropped.
+The gossip mechanism implemented in the Bitcoin protocol to tolerate loss of messages seems to work very well and makes this attack ineffective or impracticable in practice:
+if a \texttt{Block} message manages to reach a single node in the other partition, it is immediately gossiped to the entire partition.
+Delaying all messages instead of dropping some of them is a much better strategy for the attacker.
+
+\begin{figure}[h]
+	\begin{subfigure}{\textwidth}
+		\centering
+		% \vspace*{0.25cm}
+		\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_attack_drop_linechart}
+		\vspace*{0.25cm}
+		\caption{Average forks number for a network of \num{1000} nodes under a Balance attack with message different drops.}
+		\vspace*{0.75cm}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\vspace*{0.25cm}
+		\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_attack_drop_boxplot}
+		\vspace*{0.25cm}
+		\caption{Forks distribution for a network of \num{1000} nodes under a Balance attack with message different drops.}
+		\vspace*{0.25cm}
+	\end{subfigure}
+	\caption[Forks distribution for a network of \num{1000} nodes under a Balance attack with different message drops]{
+		Forks distribution for a network of \num{1000} nodes under a Balance attack with different message drops.
+		The attacks works well only for drop probabilities of \num{0.8} to \num{1}.
+	}
+	\label{fig:forks-attack-drop}
+\end{figure}
+
+% help putting the plots on the correct pages
+\clearpage
 
 \subsubsection{Partitions}
+We run some experiments to evaluate if the number of partitions created by the Balance attack influence its effectiveness.
+\cref{fig:forks-attack-partitions} shows the distribution of forks for a network of \num{1000} nodes during a Balance attack with \texttt{balance\_attack\_delay} of \SI{120}{\second} with different number of partitions.
+According to our experiment, there is no significant difference in the effect of the attack for a number of partitions between \num{2} and \num{10}:
+the forks are distributed around \num{6}, with most points concentrated around \num{4} and \num{8}.
+The results are in line with the previous experiments.
 
+\begin{figure}[t]
+	\centering
+	\vspace*{0.25cm}
+	\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_attack_partitions_boxplot}
+	\caption[Forks distribution for a network of 1000 nodes under Balance attack with different numbers of partitions]{
+		Forks distribution for a network of 1000 nodes under Balance attack with different numbers of partitions and \texttt{balance\_attack\_delay} of \SI{120}{s}.
+		There is not significant difference in the number of forks generated for the different number of partitions.
+	}
+	\label{fig:forks-attack-partitions}
+\end{figure}
+
+
+\section{Evaluation}
+The Balance attack is very effective in creating forks in the Bitcoin's blockchain.
+Delaying \texttt{Block} messages between different partitions of about the same size is much more effective than introducing random delays in the entire network.
+Dropping random packets between nodes of different partitions is ineffective, thanks to the gossip protocol implemented by Bitcoin to propagate blocks and transactions:
+as soon as a single \texttt{Block} message manages to reach the other partition, it is immediately broadcasted to the neighbors, which themselves propagate the information to their peers, until all nodes in the network have received the information.
+The attack seems to have the same effect for a different number of partitions (\num{2} to \num{10} at least), provided they all have about the same size (or better, the same computational power).
