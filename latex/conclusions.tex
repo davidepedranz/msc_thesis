@@ -1,0 +1,31 @@
+\chapter{Conclusions}
+\label{chapter:conclusions}
+In this work, we implemented an event driven simulator of the low-level Bitcoin protocol using the PeerSim framework.
+We used the simulator to run Bitcoin networks of different sizes under various network conditions: at rest, with generalized delays and under attack.
+In particular, we focused on the Balance attack, which consist in partitioning the nodes into \num{2} groups by delaying communications between peers in different partitions.
+Finally, we implemented some variants of the original attack and evaluated their performances.
+
+Our experiments show the Bitcoin protocol is robust under normal network conditions and in presence of random message losses, thanks to the gossip-style underlying protocol.
+However, the network produces a significant number of forks in presence of diffuse delays.
+The situation is even worse under a Balance attack:
+delays on blocks broadcast between nodes of different partitions higher the probability of forks in the network.
+
+The variants of the Balance attack we tested do not improve the attack's effect.
+Randomly message dropping is totally ineffective, unless the attacker drops at least \num{80}\% to \num{90}\% of all messages exchanged between nodes in different partitions:
+if such an attack was feasible, the attacker could simply drop all messages, isolating completely the \num{2} groups from each other.
+
+Higher number of partitions seems to have the same effect as the base attack:
+the forks distribution for a number of partitions up to \num{10} does not differ significantly from the one with just \num{2} of them.
+An attacker might consider to create more than \num{2} groups of nodes if this were easier in a particular context.
+
+Balance attacks are very effective, but difficult to achieve in practice, since an attacker needs to control a significant number of the links that connect Bitcoin nodes over the Internet.
+Still, similar attacks have been performed in the past against pools of miners:
+weaknesses in the \ac{BGP} allowed an attacker to hijack connections between miners and pool coordinators, taking control of the victims' mining power.
+Since all communications in Bitcoin are not encrypted and use a simple TCP connection, the same idea can be easily used by a powerful attacker to mount a Balance attack.
+
+
+\section{Future work}
+As stated in the original paper \cite{balance_attack_2017}, all \textit{forkable} blockchains are potentially vulnerable to a Balance attack.
+Some new cryptocurrencies try to solve most problems of Bitcoin and similar digital currencies by almost completely eliminating the possibility of forks.
+For example, Algorand \cite{algorand_2017} defines a new byzantine consensus algorithm based a novel cryptographic technique called Verifiable Random Functions to build a fast protocol that can confirm transactions with a small latency and avoid the generation of forks even under attack.
+Possible future works include extending our simulator to the Algorand protocol and experimentally verifying if the claimed properties yield in practice.
