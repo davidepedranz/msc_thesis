@@ -14,7 +14,8 @@
 \addbibresource{references.bib}
 
 % fix urls in bibliography
-\usepackage[hidelinks]{hyperref}
+% and include metadata in the PDF
+\usepackage[hidelinks, pdfusetitle]{hyperref}
 \renewcommand{\UrlFont}{\small\tt}
 
 % units and nice numbers
@@ -58,17 +59,12 @@
 \acrodef{AS}{autonomous systems}
 \acrodef{DNS}{Domain Name System}
 
-% TODO: remove DRAFT and change date
-\title{[DRAFT]\\Simulating large scale network attacks against Bitcoin}
+% thesis title
+\title{Simulating large scale network attacks against Bitcoin}
 \author{Davide Pedranz}
-\date{\today}
 
+% thesis content
 \begin{document}
-
-% TODO: remove this!
-\begin{titlepage}
-	\maketitle
-\end{titlepage}
 
 % TODO: set good margins for real print!
 \input{frontpage.tex}

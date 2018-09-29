@@ -28,3 +28,4 @@
 
 *.pdf
 !figures/*.pdf
+!plots/*.pdf

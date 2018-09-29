@@ -98,7 +98,7 @@ with a delay of \SI{0}{\second}, the network never generates forks;
 small delays of \num{5} or \SI{10}{\second} seconds already cause the generation of \num{1} to \num{3} forks in some simulations;
 longer delays of \SI{15}{\second} to \SI{30}{\second} seconds produce forks in a significantly higher number of simulations.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 	\begin{subfigure}{\textwidth}
 		\centering
 		% \vspace*{0.25cm}
@@ -137,7 +137,7 @@ the number of forks seems to be linearly correlated with the message's delay.
 The effect of the delays seems to be also related to the size of the network:
 the network with \num{9000} nodes produces on average \num{0.1} to \num{0.2} forks more that the one with \num{1000} nodes for each tested value of \texttt{delay} at the of the simulation.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 	\begin{subfigure}{\textwidth}
 		\centering
 		% \vspace*{0.25cm}
@@ -182,7 +182,7 @@ the number of forks is distributed around \num{2}, but reaches \num{4} or \num{5
 The distribution of the number of forks for longer delays follows a similar behavior, but it is shifted towards higher numbers:
 with a delay of \SI{120}{\second}, the network generates up to \num{10} - \num{12} forks, more than half of the total \num{18} generated blocks.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 	\begin{subfigure}{\textwidth}
 		\centering
 		% \vspace*{0.25cm}
@@ -219,7 +219,7 @@ with a delay of \SI{120}{\second}, the network generates up to \num{10} - \num{1
 With both a delay of \num{30} and \SI{60}{\second}, there is no significant difference in the distribution of forks for the different networks.
 For all sizes, longer delays cause a higher number of forks on average.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 	\begin{subfigure}{\textwidth}
 		\centering
 		% \vspace*{0.25cm}
@@ -253,7 +253,7 @@ The gossip mechanism implemented in the Bitcoin protocol to tolerate loss of mes
 if a \texttt{Block} message manages to reach a single node in the other partition, it is immediately gossiped to the entire partition.
 Delaying all messages instead of dropping some of them is a much better strategy for the attacker.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 	\begin{subfigure}{\textwidth}
 		\centering
 		% \vspace*{0.25cm}
