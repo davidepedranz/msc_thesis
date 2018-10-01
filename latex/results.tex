@@ -223,22 +223,22 @@ For all sizes, longer delays cause a higher number of forks on average.
 	\begin{subfigure}{\textwidth}
 		\centering
 		% \vspace*{0.25cm}
+		\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_attack_delay_15_network_sizes_boxplot}
+		\vspace*{0.25cm}
+		\caption{Distribution of forks for different networks under a Balance attack that delays all \texttt{Block} messages by \SI{15}{\second}.}
+		\vspace*{0.25cm}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\vspace*{0.25cm}
 		\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_attack_delay_30_network_sizes_boxplot}
 		\vspace*{0.25cm}
 		\caption{Forks distribution for different networks under a Balance attack that delays all \texttt{Block} messages by \SI{30}{\second}.}
 		\vspace*{0.75cm}
 	\end{subfigure}
-	\begin{subfigure}{\textwidth}
-		\centering
-		\vspace*{0.25cm}
-		\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_attack_delay_60_network_sizes_boxplot}
-		\vspace*{0.25cm}
-		\caption{Distribution of forks for different networks under a Balance attack that delays all \texttt{Block} messages by \SI{60}{\second}.}
-		\vspace*{0.25cm}
-	\end{subfigure}
 	\caption[Forks distribution for different networks under Balance attack]{
-		Distribution of forks for different networks under a Balance attack that delays all \texttt{Block} messages by \num{30} or \SI{60}{\second}.
-		The size of the network does not seem to influence the effect of the attack for both the tested delays of \num{30} and \SI{60}{\second}.
+		Distribution of forks for different networks under a Balance attack that delays all \texttt{Block} messages by \num{15} or \SI{30}{\second}.
+		The size of the network does not seem to influence the effect of the attack for both tested delays.
 	}
 	\label{fig:forks-attack-sizes}
 \end{figure}
@@ -282,7 +282,7 @@ Delaying all messages instead of dropping some of them is a much better strategy
 
 \subsubsection{Partitions}
 We run some experiments to evaluate if the number of partitions created by the Balance attack influence its effectiveness.
-\cref{fig:forks-attack-partitions} shows the distribution of forks for a network of \num{1000} nodes during a Balance attack with \texttt{balance\_attack\_delay} of \SI{120}{\second} with different number of partitions.
+\cref{fig:forks-attack-partitions} shows the distribution of forks for a network of \num{1000} nodes during a Balance attack with \texttt{balance\_attack\_delay} of \SI{30}{\second} with different number of partitions.
 According to our experiment, there is no significant difference in the effect of the attack for a number of partitions between \num{2} and \num{10}:
 the forks are distributed around \num{6}, with most points concentrated around \num{4} and \num{8}.
 The results are in line with the previous experiments.
@@ -292,7 +292,7 @@ The results are in line with the previous experiments.
 	\vspace*{0.25cm}
 	\includegraphics[width=\myplotswitdth \columnwidth]{plots/forks_attack_partitions_boxplot}
 	\caption[Forks distribution for a network of 1000 nodes under Balance attack with different numbers of partitions]{
-		Forks distribution for a network of 1000 nodes under Balance attack with different numbers of partitions and \texttt{balance\_attack\_delay} of \SI{120}{s}.
+		Forks distribution for a network of 1000 nodes under Balance attack with different numbers of partitions and \texttt{balance\_attack\_delay} of \SI{30}{s}.
 		There is not significant difference in the number of forks generated for the different number of partitions.
 	}
 	\label{fig:forks-attack-partitions}
@@ -304,4 +304,4 @@ The Balance attack is very effective in creating forks in the Bitcoin's blockcha
 Delaying \texttt{Block} messages between different partitions of about the same size is much more effective than introducing random delays in the entire network.
 Dropping random packets between nodes of different partitions is ineffective, thanks to the gossip protocol implemented by Bitcoin to propagate blocks and transactions:
 as soon as a single \texttt{Block} message manages to reach the other partition, it is immediately broadcasted to the neighbors, which themselves propagate the information to their peers, until all nodes in the network have received the information.
-The attack seems to have the same effect for a different number of partitions (\num{2} to \num{10}), provided they all have about the same size (or better, the same computational power).
+The attack seems to have the same effect for a different number of partitions (\num{2} to \num{10}), provided they all have about the same computational power.
