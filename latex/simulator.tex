@@ -33,7 +33,7 @@ We focus on discrete event simulation, used by our simulator.
 A discrete event simulation models the system behavior as a discrete sequence of events in time.
 An event can represent anything, for example the arrival of a message to a node in the system or a network timeout.
 Each event occurs at a particular instant of time and can cause changes in the state of the system.
-No event occurs between \num{2} consecutive events, so the simulation can simply jump from one event to the next.
+No event occurs between two consecutive events, so the simulation can simply jump from one event to the next.
 The results of the simulation can be evaluated with measurements:
 the metrics can be computed either online during the simulation run, or computed offline from the simulation logs.
 
@@ -95,7 +95,7 @@ All events are stored in a priority queue sorted by event time.
 The queue is initialized with some events.
 Events in the queue are processed one at a time:
 the first event is removed from the queue and processed by the simulator.
-An event can cause other events to occur in the future and change the current state if the system.
+An event can cause other events to occur in the future and change the current state of the system.
 Discrete event simulators take advantage of pseudorandom number generators to emulate random variables of the system \cite{wikipedia_des}:
 whenever an event is influenced by some random factor external to the system (e.g. latency of a TCP connection over the Internet), the simulator extracts a random variable from some distribution using the random number generators.
 The simulation stops when a certain condition is reached (for example, a target simulation time is reached), or when the queue of events is empty.
@@ -103,7 +103,7 @@ The simulation stops when a certain condition is reached (for example, a target 
 
 \section{PeerSim}
 PeerSim \cite{peersim_2009} is an open source peer-to-peer systems simulator engine developed at the University of Bologna and the University of Trento.
-It is written in Java and aim is to help the research and evaluation of large peer-to-peer.
+It is written in Java and its aim is to help the research and evaluation of large peer-to-peer.
 It has been developed with high scalability in mind, in order to support simulations with up to \num{1} million nodes.
 It is released under the GPL open source license and is available for download on SourceForce \cite{peersim_site}.
 
@@ -114,7 +114,7 @@ it has been tested up to \num{1} million nodes \cite{peersim_intro_2018}.
 The event-based engine is less efficient but more realistic and allows to easily simulate the entire network stack;
 it has been used for simulation of up to \num{250000} nodes \cite{peersim_intro_2018}.
 Both engines support many simple and extendable components, which are plugged together through a flexible configuration mechanism.
-Since our simulator is event driven, this chapter focuses on the event-based engine only.
+Since our simulator is event-driven, this chapter focuses on the event-based engine only.
 
 \subsection{Components}
 Each component in PeerSim is created as a simple Java object that implements some interfaces defined by the engine.
@@ -148,7 +148,7 @@ It is used by all components that need to access a specific node or iterate over
 
 \subsubsection{Node}
 The network is composed of nodes.
-A node is a container of protocols (each simulation can have \num{1} or more protocols).
+A node is a container of protocols (each simulation can have one or more protocols).
 The \texttt{Node} interface provides access to the protocols it holds, and to a fixed unique identifier of the node.
 The behavior of a node is defined in each of the attached protocols.
 
@@ -157,7 +157,7 @@ The \texttt{EDProtocol} interface defines a protocol that implements an event-dr
 Protocols define the actions each node will perform during the simulation.
 The interface has only the method \texttt{processEvent}, which is invoked by the scheduler to deliver events to the protocol.
 Each node stores an array or protocols;
-a class implementing this interface will have \num{1} instance for each node in the network.
+a class implementing this interface will have one instance for each node in the network.
 Protocols can be stacked on each other to build more and more complex behaviors:
 for example, an implementation of \texttt{EDProtocol} might be responsible to build and maintain a topology, while a second implementation may simulate some higher level functions, such as broadcasting some objects to the entire network in a gossip style using the underlying topology.
 The simulation settings are specified with a configuration file;
@@ -318,7 +318,7 @@ Since the focus of the simulation is to evaluate the performances of the protoco
 The main metric used to measure the performances of the core layer is the number of forks in the blockchain:
 a fork is a branch of the chain different from the longest chain.
 The simulator knows the global state of the simulation:
-it is easy to compute the longest chain, observe forks and their lengths in a any given moment.
+it is easy to compute the longest chain, observe forks and their lengths in any given moment.
 The metric considers all blocks known to the simulator, even if they have been just discovered and not yet known to all peers in the network.
 
 \subsection{Data structures and utilities}
@@ -330,7 +330,7 @@ Other utilities include a class to run range simulations in parallel and the imp
 It allows to add elements to the queue, read or remove the oldest element, check if the queue is empty.
 The elements are stored in the array, starting from left to right;
 new elements are always added to the right size, old elements are removed from left.
-\num{2} pointers keep track of the first and last element in the array.
+Two pointers keep track of the first and last element in the array.
 The queue is able to automatically resize in the underlying array is full:
 when a new element is added and the queue in full, an array with double capacity is allocated and all elements are moved there.
 The cost of the enqueue operation in this scenario is $\mathcal{O}(n)$, where $n$ is the original capacity of the queue;
@@ -391,21 +391,21 @@ The \texttt{ParallelSimulator} is a utility class able to handle ranges and gene
 parameters are read from the configuration file using the standard PeerSim mechanisms;
 the class computes their combination and prints them as a list of commands, ready to be executed from the command line.
 This class is particular useful when combined with the GNU Parallel, a shell tool for executing jobs in parallel using one or more computers \cite{gnu_parallel}.
-Discrete event driven simulations are very difficult to parallelize, since events have causal relationships which are usually not well known in advance and are influenced by random variables:
-in other words, they run on a single core do not exploit modern multi-core \ac{CPU}s.
-If the memory footprint is not the bottleneck, is is possible to reduce the total completion time of a simulation with range parameters by running them in parallel, one per available core:
+Discrete event-driven simulations are very difficult to parallelize, since events have causal relationships which are usually not well known in advance and are influenced by random variables:
+in other words, they run on a single core and do not exploit modern multi-core CPUs.
+If the memory footprint is not the bottleneck, it is possible to reduce the total completion time of a simulation with range parameters by running them in parallel, one per available core:
 \texttt{ParallelSimulator} generates the list of jobs to execute, which are then run by GNU Parallel in parallel.
 
 \subsection{Attack}
 The attack simulates a Balance attack, described in \cref{sec:balance}.
 The balance attack was originally tested against Ethereum, but it is thought to work also against Bitcoin.
-The attacker tries to partition the nodes into \num{2} groups with the same computational power:
+The attacker tries to partition the nodes into two groups with the same computational power:
 nodes do not see the blockchain status of the other group and are likely to mine conflicting blocks.
 In other works, the network generates many forks that the attacker can exploit to perform double-spending attacks, as detailed in \cref{sec:double-spending}.
 
 \bigskip
 The implementation of the Balance attack in PeerSim is based on a custom \texttt{Transport} class named \texttt{BalanceAttackTransport}:
-the class partition the nodes based on their IDs in \num{2} groups and delays the propagation of \texttt{Block} messages between different groups.
+the class partitions the nodes in two groups based on their IDs and delays the propagation of \texttt{Block} messages between different groups.
 The custom transport is stacked on top of the other transport layers used in the normal simulation.
 There is no need to modify any other component of PeerSim:
 the attack can be activated or deactivated using the standard configuration mechanism.
