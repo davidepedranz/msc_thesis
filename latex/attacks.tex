@@ -1,20 +1,20 @@
 \chapter{Attacks}
 \label{chapter:attacks}
 Various attacks has been performed against Bitcoin in the past.
-Attacks can be performed at different levels with very different approaches and can have a wide range of effects on Bitcoin users.
+Attacks can work at different levels with very different approaches and can have a wide range of effects on Bitcoin users.
 This chapter starts from an overview of the most relevant ones.
 At the end, it describes in details the Balance attack, whose analysis is the main object of the simulations.
 
 \section{Double Spending}
 \label{sec:double-spending}
-Double-spending is the result of successfully spending some money more than once.
+Double-spending is the result of successfully spending some digital currency more than once.
 The attack is the oldest known one against Bitcoin and it is even partially discussed in the original Bitcoin paper \cite{bitcoin_2009}.
 The attack has been analyzed many times in the literature \cite{double_spending_fast_payments, double_spending_two_for_one, double_spending_bitcoin_economics, double_spending_fast_analysis_2014} and has been reported to be quite easy to mount against fast payments \cite{double_spending_fast_payments}.
 Real episodes of the attack has been reported multiple times in the past \cite{double_spending_ghash, double_spending_stackexchange}.
 Double-spending breaks the most important guarantee that Bitcoin tries to give:
 transactions are irreversible and bitcoins can be spent only once.
 
-The attack works by creating \num{2} conflicting transactions (that spend all the bitcoins in the same address) and submitting them to different parties, for example \texttt{tx-1} to a merchant and \texttt{tx-2} to the Bitcoin network:
+The attack works by creating two conflicting transactions (that spend all the bitcoins in the same address) and submitting them to different parties, for example \texttt{tx-1} to a merchant and \texttt{tx-2} to the Bitcoin network:
 if the merchant accepts \texttt{tx-1} but the Bitcoin network receives \texttt{tx-2} before \texttt{tx-1}, it is likely that \texttt{tx-2} will be stored in the blockchain, while \texttt{tx-1} will be discarded, since not compatible with \texttt{tx-2}.
 The attacker only pretends to spend some bitcoins to pay the merchant, but it actually does not spend anything:
 it gets the purchase for free, while the merchant never receives the due bitcoins.
@@ -38,7 +38,7 @@ The attack is illustrated in \cref{fig:race-attack} and works as follows:
 \begin{figure}[t]
 	\centering
 	\vspace*{0.25cm}
-	\includegraphics[scale=0.75]{figures/race_attack}
+	\includegraphics[scale=0.75]{figures/race_attack_3}
 	\vspace*{0.25cm}
 	\caption[Illustration of the race attack]{
 		Illustration of the race attack, a variant of double-spending.
@@ -55,11 +55,11 @@ The attack is illustrated in \cref{fig:race-attack} and works as follows:
 A trivial defense for the merchant is to wait for the transaction \texttt{tx-1} to be stored in the blockchain:
 if it is rejected because of any conflicts, the merchant can simply refuse the payment and do not sell the good.
 Unfortunately, Bitcoin requires on average \SI{10}{minutes} to confirm a transaction, so this technique can not be always applied.
-Bitcoin's developers recommendation is also to wait for \num{6} confirmations, i.e. to wait for the block that stored the transaction to be in the longest chain and to have \num{6} following blocks \cite{confirmation}.
+Bitcoin's developers recommendation is to wait for \num{6} confirmations, i.e. to wait for the block that stored the transaction to be in the longest chain and to have \num{6} following blocks \cite{confirmation}.
 Some blocks can be conflicting with each other (if they have the same parent):
 only one of them can belong to the longest chain, while the others are said to be ``orphaned'' \cite{orphaned_block} and simply ignored, as illustrated in \cref{fig:orphaned-block}.
 Thus, a transaction can be rejected even if it manages to get part of a block, if that block is orphaned.
-Waiting for \num{6} confirmations gives a good tradeoff between the time to wait (on average \SI{1}{hour}) and statistical guarantee that the transaction is unlikely to be rejected later \cite{bitcoin_2009}.
+Waiting for \num{6} confirmations gives a good tradeoff between the time to wait (on average \SI{1}{hour}) and the statistical guarantee that the transaction is unlikely to be rejected later \cite{bitcoin_2009}.
 
 \begin{figure}[ht]
 	\centering
@@ -157,14 +157,14 @@ The majority attack allows an attacker to perform the following actions \cite{we
 
 A majority attack can completely destroy the working of Bitcoin and violate some of its main guarantees (e.g. spending the same bitcoins only once).
 Such an attack is thought to be very unlikely \cite{ghash_never_51_attack_cex, ghash_never_51_attack_coindesk}, because of its huge cost in terms of computing power and the risk for an attacker not to gain anything from it:
-even if it is theoretically possible to revert all blocks following the genesis, it is incredible expensive.
-The attack would immediately destroy the credibility of Bitcoin and lead to the following \num{2} possible effects:
+even if it is theoretically possible to revert all blocks following the genesis, it is incredibly expensive.
+The attack would immediately destroy the credibility of Bitcoin and lead to the following two possible effects:
 \begin{enumerate}
 	\item the value of bitcoins drops completely, and the attacker does not earn any real reward;
 	\item the rules of the Bitcoin software are changed by the community to revert the attack \cite{weaknesses_bitcoin_wiki}.
 \end{enumerate}
 
-% TODO: this makes formatting better...
+% this makes formatting better...
 \pagebreak
 
 In January 2014, the mining pool \texttt{GHash.IO} reached \num{42}\% of the total Bitcoin hash rate \cite{ghash_fears_51_attack, security_survey_2017}, and later in July 2014 it exceeded the threshold of \num{51}\% \cite{wikipedia_ghash, majority_investopedia, bitcoin_wiki_irreversible_transactions}.
@@ -267,12 +267,12 @@ In the specific case of Bitcoin, the attacker can mount many different attacks a
 \end{figure}
 
 \medskip
-Each Bitcoin node maintains \num{2} tables of addresses \cite{eclipse_attack_2015}:
+Each Bitcoin node maintains two tables of addresses \cite{eclipse_attack_2015}:
 the \texttt{tried} table contains addresses of peers that were successful connected with the current node at least one in the past;
 the \texttt{new} table contains addresses discovered through any of the peers-discovery strategies used by Bitcoin (see \cref{sub:discovery}) to whom the node has not yet initiated a successful connection.
 
 A Bitcoin running the original client \cite{bitcoin_github} with the default settings can have up to \num{8} outgoing and up to \num{117} unsolicited incoming connections, for a total of \num{125} \cite{deanonymisation_2014, eclipse_attack_2015} (see \cref{chapter:protocol} for the details).
-Connections are long-lived, i.e. they are interrupted only if either one of the \num{2} nodes goes down or in case of networking problems.
+Connections are long-lived, i.e. they are interrupted only if either one of the two nodes goes down or in case of networking problems.
 Each Bitcoin node always tries to have exactly \num{8} outgoing connections, in order to maintain a solid network topology.
 If the number of outgoing connections gets less than \num{8}, the node randomly chooses a new IP address from the \texttt{new} table and tries to connect to the corresponding node:
 if the connection is not successful, the node tries with the next address.
@@ -284,11 +284,11 @@ An Eclipse Attack against Bitcoin \cite{eclipse_attack_2015} is illustrated in \
 	\item if the attack succeeds, the victim will eventually replace all addresses stored in both the \texttt{tried} and the \texttt{new} tables with the IP addresses of the malicious nodes;
 	\item the attacker forces the victim to restart \cite{cve_bloom_filter_2013, bitcoin_common_vulnerabilities} or simply waits for it to restart naturally, for example after a software update or after some failure;
 	\item when the victim restarts, it will connect to \num{8} malicious nodes randomly chooses from the \texttt{tried} and the \texttt{new} tables;
-	\item the attacker effectively isolates the victim from the honest nodes in the network and can control which messages, block and transactions to relay, delay or drop.
+	\item the attacker effectively isolates the victim from the honest nodes in the network and controls which messages, block and transactions to relay, delay or drop.
 \end{itemize}
 
 The attacker can mount many different attacks against eclipsed nodes.
-If the victim is a miner (or a mining pool), the attacker can adopts strategies similar to the Selfish Mining to waste the computing power of the eclipsed nodes:
+If the victim is a miner (or a mining pool), the attacker can adopt strategies similar to the Selfish Mining to waste the computing power of the eclipsed nodes:
 the attacker can drop \texttt{Block} messages containing blocks discovered by the victim and forward blocks from the network that conflict with the ones found by the victim.
 If the victim is a merchant, the attacker can easily mount double-spending attacks.
 It can send a transaction \texttt{tx-1} to the merchant, and a conflicting one \texttt{tx-2} to the Bitcoin network:
@@ -297,18 +297,18 @@ since the attacker controls all of merchant's connections, the merchant might no
 
 \section{BGP Hijacking}
 \ac{BGP} is a standardized network protocol used to exchange routing information between \ac{AS} \cite{autonomous_systems_wikipedia} of different \ac{ISP} and organizations on the Internet \cite{rfc4271, bgp_wikipedia}.
-The primary function of \ac{BGP} is to exchanges information about network reachability with other \ac{BGP} systems.
+The primary function of \ac{BGP} is to exchange information about network reachability with other \ac{BGP} systems.
 The information collected and distributed by the protocol are used to construct a graph of connectivity between different \ac{AS}, which can be used to make optimal routing decisions among the networks of different parties.
 \ac{BGP} routing also depends on policies and rules configured by network administrators.
 
 \medskip
 While not directly related to Bitcoin, \ac{BGP} is fundamental for the working of Internet, and thus for each distributed systems build on top of that.
-Under some conditions, attacks against \ac{BGP} can affect Bitcoin and mine some of the guarantees given by the protocol.
+Under certain conditions, attacks against \ac{BGP} can affect Bitcoin and some of the guarantees given by the protocol.
 Researchers at Dell SecureWorks Counter Threat Unit discovered an attacker that repeatedly hijacked traffic destined to networks belonging to Amazon, Digital Ocean, OVH, and other large hosting companies between February and May 2014 \cite{bgp_hijacking_secureworks}:
 they registered \num{51} compromised networks from \num{19} different \ac{ISP}.
 Attacks with a similar scale were also reported between October 2015 and April 2016 \cite{hijacking_bitcoin_2017, bgpstream}.
 
-% TODO: this makes formatting better...
+% this makes formatting better...
 \pagebreak
 
 \begin{figure}[h!]
@@ -366,7 +366,7 @@ The attack works as follows:
 \end{itemize}
 
 \medskip
-In the paper ``Hijacking Bitcoin: Routing Attacks on Cryptocurrencies'', Maria Apostolaki et at. show that large scale networks attack against Bitcoin are possible and have been already done in the past.
+In the paper ``Hijacking Bitcoin: Routing Attacks on Cryptocurrencies'', Maria Apostolaki et Al. show that large scale networks attack against Bitcoin are possible and have been already done in the past.
 They claim that anyone with access to a BGP-enabled network and able to hijack less than \num{900} prefixes (about \num{0.15}\% of the total) can perform attacks commonly believed to be hard, such as isolating \num{50}\% of the mining power.
 Attackers controlling some networks can potentially:
 \begin{itemize}
@@ -420,7 +420,7 @@ Multiple results recently demonstrated how simply a motivated attacker can perfo
 In details, the attack works as follows:
 \begin{itemize}
 	\item the attacker identifies subgroups of miners with a similar mining power; different works in the literature \cite{deanonymization_2014, discovering_influential_nodes_2014} describe techniques to learn the network topology and identify influential nodes;
-	\item the attacker identifies the routes of Bitcoin messages between different subgroups over Internet; let us assume the miner finds a partitions of nodes into \num{2} groups \texttt{G1} and \texttt{G2};
+	\item the attacker identifies the routes of Bitcoin messages between different subgroups over Internet; let us assume the miner finds a partitions of nodes into two groups \texttt{G1} and \texttt{G2};
 	\item the attacker runs some networking attack (man-in-the-middle, BGP hijacking \cite{bgp_hijacking_secureworks}) to take control of the communications links between groups and delays the Bitcoin traffic;
 	\item because of the delay, transactions and blocks are not immediately propagated to the entire network, so \texttt{G1} and \texttt{G2} are very likely to have different views of the blockchain and to mine conflicting blocks;
 	\item the attacker takes advantage of these inconsistencies and performs double-spending attacks.
