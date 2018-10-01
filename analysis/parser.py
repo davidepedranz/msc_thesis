@@ -135,8 +135,11 @@ def parse_file(location):
                 stats = parse_stats_line(line)
                 stats_lines.append(stats)
             elif is_freq_line(line):
-                freq = parse_freq_line(line)
-                freq_lines += freq
+                try:
+                    freq = parse_freq_line(line)
+                    freq_lines += freq
+                except IndexError:
+                    print('WARNING: Got unknown line "' + line.replace('\n', '') + '"', file=sys.stderr)
             else:
                 print('WARNING: Got unknown line "' + line.replace('\n', '') + '"', file=sys.stderr)
     raw_stats = pd.DataFrame(stats_lines, columns=stats_attributes)
