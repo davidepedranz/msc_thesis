@@ -54,12 +54,12 @@ Please note that this is an extension to the Balance attack described in \cite{b
 
 \paragraph{Balance Attack Partitions}
 The \texttt{balance\_attack\_partitions} parameter controls the number of partitions of equal size in which the nodes of the network are divided by the Balance attack.
-The setting discussed in the original paper is to partition the network in \num{2} parts only.
+The setting discussed in the original paper is to partition the network in two parts only.
 
 
 \section{Experiments}
 Most attacks against Bitcoin aim at double spending the money.
-Forks on the blockchain allow an attacker to easily achieve double spending attack.
+Forks on the blockchain allow an attacker to easily achieve double spending attacks.
 The main metric used to evaluate the performances of the protocol is thus the number of forks in the blockchain.
 Forks happen with a non-zero probability even at rest in Bitcoin due to some inevitable delays on the information propagation;
 degraded network conditions and a wide range of attacks can increase the probability of forks and open the possibility for double-spend attempts.
@@ -87,7 +87,7 @@ The plot shows the results for networks of \num{1000}, \num{5000} and \num{9000}
 Under these conditions, the Bitcoin protocol does not produce any fork in our simulations.
 
 \subsection{Generalized network delays}
-We run experiments for different network sizes and incremental delays from \num{0} to \num{30} seconds with steps of \num{5} in the propagation of each message.
+We run experiments for different network sizes and incremental delays from \num{0} to \SI{30}{\second} with steps of \SI{5}{\second} in the propagation of each message.
 Generalized network delays on the network does not influence the number of control messages exchanged.
 Similar to the previous experiment, the network generates \num{1} block every \num{10} minutes on average.
 
@@ -95,8 +95,8 @@ Similar to the previous experiment, the network generates \num{1} block every \n
 \cref{fig:forks-delay-1000} shows the number of forks generated a the network of \num{1000} nodes over time and their distribution at the end of the simulation.
 The effect of network delays is a general increase in the number of forks:
 with a delay of \SI{0}{\second}, the network never generates forks;
-small delays of \num{5} or \SI{10}{\second} seconds already cause the generation of \num{1} to \num{3} forks in some simulations;
-longer delays of \SI{15}{\second} to \SI{30}{\second} seconds produce forks in a significantly higher number of simulations.
+small delays of \num{5} or \SI{10}{\second} already cause the generation of \num{1} to \num{3} forks in some simulations;
+longer delays of \num{15} to \SI{30}{\second} produce forks in a significantly higher number of simulations.
 
 \begin{figure}[ht]
 	\begin{subfigure}{\textwidth}
@@ -177,10 +177,10 @@ For all experiments in this section, we fix a base network delay of \SI{50}{\mil
 \medskip
 \cref{fig:forks-attack-delay-1000} shows the effect of a Balance attack on a network of \num{1000} nodes.
 The growth of forks over time seems to be linear for all tested delays.
-Even with a relatively small delay of \SI{30}{\second} on the propagation of \texttt{Block} messages, the network generates on average \num{2} forks (against a total of \num{18} blocks) in \num{3} hours of simulation;
-the number of forks is distributed around \num{2}, but reaches \num{4} or \num{5} in many simulations.
+Even with a small delay of \SI{10}{\second} on the propagation of \texttt{Block} messages, the network generates on average about \num{0.7} forks in \num{3} hours of simulation;
+the number of forks is distributed around \num{1}, but reaches \num{2} or \num{3} in many simulations.
 The distribution of the number of forks for longer delays follows a similar behavior, but it is shifted towards higher numbers:
-with a delay of \SI{120}{\second}, the network generates up to \num{10} - \num{12} forks, more than half of the total \num{18} generated blocks.
+with a delay of \SI{30}{\second}, the network generates up to \num{4} - \num{6} forks, a very high number if compared with the \num{18} expected blocks.
 
 \begin{figure}[ht]
 	\begin{subfigure}{\textwidth}
@@ -190,8 +190,8 @@ with a delay of \SI{120}{\second}, the network generates up to \num{10} - \num{1
 		\vspace*{0.25cm}
 		\caption{
 			Average forks number for a network of \num{1000} nodes under Balance attack.
-			Relatively small delays of \SI{30}{\second} on the propagation of \texttt{Block} messages between nodes belonging to different partitions cause a \num{2} forks on average at the end of the \num{3} hours simulation.
-			With large delays of \SI{120}{\second}, the average number of forks raises to \num{6}.
+			Relatively small delays of \SI{10}{\second} on the propagation of \texttt{Block} messages between nodes belonging to different partitions cause \num{0.7} fork on average at the end of the \num{3} hours simulation.
+			With a larger delay of \SI{30}{\second}, the average number of forks raises to \num{2}.
 		}
 		\vspace*{0.75cm}
 	\end{subfigure}
@@ -202,9 +202,9 @@ with a delay of \SI{120}{\second}, the network generates up to \num{10} - \num{1
 		\vspace*{0.25cm}
 		\caption{
 			Distribution of forks for a network of \num{1000} nodes under Balance attack.
-			Most simulations with delay of \SI{30}{\second} have generated around \num{2} - \num{3} forks, while some reached \num{4} or \num{5} forks.
+			Many simulations with delay of \SI{10}{\second} generate \num{1} fork, while some have reached \num{2} or \num{3} forks.
 			The distribution of forks shifts towards higher numbers with larger delays.
-			With a delay of \SI{120}{\second}, the network generates up to \num{10} - \num{12} forks.
+			With a delay of \SI{30}{\second}, the network generates up to \num{4} - \num{6} forks.
 		}
 		\vspace*{0.25cm}
 	\end{subfigure}
@@ -304,4 +304,4 @@ The Balance attack is very effective in creating forks in the Bitcoin's blockcha
 Delaying \texttt{Block} messages between different partitions of about the same size is much more effective than introducing random delays in the entire network.
 Dropping random packets between nodes of different partitions is ineffective, thanks to the gossip protocol implemented by Bitcoin to propagate blocks and transactions:
 as soon as a single \texttt{Block} message manages to reach the other partition, it is immediately broadcasted to the neighbors, which themselves propagate the information to their peers, until all nodes in the network have received the information.
-The attack seems to have the same effect for a different number of partitions (\num{2} to \num{10} at least), provided they all have about the same size (or better, the same computational power).
+The attack seems to have the same effect for a different number of partitions (\num{2} to \num{10}), provided they all have about the same size (or better, the same computational power).
