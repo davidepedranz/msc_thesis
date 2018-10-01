@@ -25,6 +25,7 @@
 *.synctex.gz
 *.synctex.gz(busy)
 *.toc
+*.xmpi
 
 *.pdf
 !figures/*.pdf

@@ -1,0 +1,12 @@
+% !TeX root = ./thesis_pdfa.tex
+\documentclass[11pt, a4paper]{report}
+
+% produce a PDF/A compliant file
+% see https://cs.overleaf.com/latex/examples/creating-pdf-slash-a-and-pdf-slash-x-files/bbbycnbyqhnm
+\usepackage[a-1b]{pdfx}
+
+% custom margins, required by UniTN
+\usepackage[a4paper, left=2cm, right=2cm, top=2cm, bottom=2cm, footskip=1cm]{geometry}
+
+% import all content, common for both the PDF and printed version
+\input{content.tex}

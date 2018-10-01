@@ -10,7 +10,9 @@
 
 % fix urls in bibliography
 % and include metadata in the PDF
-\usepackage[hidelinks, pdfusetitle]{hyperref}
+\RequirePackage{hyperref}
+\hypersetup{hidelinks}
+\hypersetup{pdfusetitle}
 \renewcommand{\UrlFont}{\small\tt}
 
 % units and nice numbers
@@ -65,8 +67,6 @@
 \tableofcontents
 \listoffigures
 \input{introduction.tex}
-% \cleardoublepage
-% \clearpage\null\newpage
 \input{bitcoin.tex}
 \input{protocol.tex}
 \input{attacks.tex}
