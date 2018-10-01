@@ -20,7 +20,7 @@ At the moment of writing, there are about \num{9000} reachable server, while the
 Nodes can also connect to the network via Tor \cite{bicoin_tor}.
 
 \bigskip
-We divide the description of the protocol in \num{2} layers: topology and core.
+We divide the description of the protocol in two layers: topology and core.
 Both layers use an epidemic (or gossip) paradigm \cite{gossip_1987} to achieve a fast information propagation and be tolerant to failures.
 
 
@@ -61,7 +61,7 @@ Once a node connects to the first peer, it can start to run the Bitcoin protocol
 
 \subsubsection{IP discovery}
 The first step in peer discovery is to get its own IP address.
-After the startup, a Bitcoin node issues a HTTP GET request to \num{2} hard-coded websites, which reply with the IP address assigned by the \ac{ISP}:
+After the startup, a Bitcoin node issues a HTTP GET request to two hard-coded websites, which reply with the IP address assigned by the \ac{ISP}:
 the client reads the HTTP response and parses the IP address \cite{bitcoin_peer_discovery}.
 It is possible that the node discovers more than one IP address:
 in that case, public IP addresses are preferred over private ones \cite{deanonymisation_2014}.
@@ -80,10 +80,10 @@ The number of addresses in the query response in limited by the \ac{DNS} constra
 a typical \ac{DNS} packet over UDP contains up to \num{25} addresses \cite{dns_stackoverflow};
 if used over TCP, a \ac{DNS} answer can contain up to \num{4000} addresses \cite{dns_4000}.
 Please note that the list of addresses is not cryptographically-authenticated and could be easily compromised by an attacker with control of the victim's network (for example, mounting a man-in-the-middle attack) \cite{bitcoin_guide}.
-The DNS seeders are queried only in the following \num{2} cases:
+The DNS seeders are queried only in the following two cases:
 \begin{enumerate}
 	\item a new node joins the network for the first time;
-	\item an existing node restarts and fails to reconnect to the old peers; the seeders are queried only if the node has less than \num{2} outgoing connections and after \num{11} seconds since the initial connection attempt.
+	\item an existing node restarts and fails to reconnect to the old peers; the seeders are queried only if the node has less than two outgoing connections and after \num{11} seconds since the initial connection attempt.
 \end{enumerate}
 
 \subsubsection{Addr messagges}
@@ -95,12 +95,12 @@ Addresses propagation using \texttt{Addr} messages is discussed in details in \c
 
 \subsubsection{Database of known addresses}
 All peers discovered with the various strategies are stored in a database of known IP addresses locally to the node.
-When the node restarts, if can use the database to randomly select some nodes to connect to.
-The idea is behind this strategy is that Bitcoin nodes can change IP address over time, but it is unlikely that all of them change address at the same time:
+When the node restarts, it can use the database to randomly select some nodes to connect to.
+The idea is behind this strategy is that Bitcoin nodes can change IP address over time, but it is unlikely that all of them change address at the same moment:
 after a restart, the node is likely to be able to connect to some of the old peers.
 
 \subsubsection{Hard-coded seed addresses}
-The client contains hard coded IP addresses that represent bitcoin nodes:
+The client contains hard coded IP addresses that represent Bitcoin nodes:
 at the moment, the list contains about \num{1250} IP addresses \cite{bitcoin_seeds}.
 The list is regularly updated by the Bitcoin contributors, so that clients running the latest versions of \texttt{bitcoind} have good chances to find some Bitcoin nodes willing to accept incoming connections.
 These addresses are only used as a last resort, if no other method has produced any address at all.
@@ -114,7 +114,7 @@ The user can also specify the first peer to connect to.
 Nodes connect to each other over TCP.
 Once the connection is established, the nodes start to exchange messages.
 The first one is a \texttt{Version}:
-its provides information about the Bitcoin client and protocol version running on the node.
+it provides information about the Bitcoin client and protocol version running on the node.
 The receiver replies with a \texttt{VerAck} message for acknowledgement.
 At this point, the nodes can start to exchange any type of message.
 \cref{fig:connection} illustrate a typical exchange of messages after the establishment of a new connection.
@@ -158,9 +158,9 @@ An address is forwarded only if:
 	\item the total number of addresses in the corresponding \texttt{Addr} message does not exceed \num{10};
 	\item the timestamp attacked to the address is not older than \num{10} minutes.
 \end{itemize}
-If both checks pass, the node schedules a new \texttt{Addr} message containing the address to \num{2} randomly chosen nodes.
-If the address is non-reachable for the node (e.g. the node supports only IPv4 and the address is IPv6), it is forwarded to only \num{1} peer.
-\cref{fig:addr_propagation} illustrates a scenario where different techniques are combined to propagate \texttt{Addr} messages.
+If both checks pass, the node schedules a new \texttt{Addr} message containing the address to two randomly chosen nodes.
+If the address is non-reachable for the node (e.g. the node supports only IPv4 and the address is IPv6), it is forwarded to only one peer.
+\cref{fig:addr_propagation} illustrates an example of propagation of \texttt{Addr} messages.
 
 \begin{figure}[ht]
 	\centering
@@ -267,7 +267,7 @@ this section gives an overview of the main ones.
 \label{par:version}
 The \texttt{Version} message provides information to the receiving node about the node that initialized an outgoing connection.
 If the incoming connection is accepted, the receiving node should reply with a \texttt{VerAck} message before sending any other message through that channel.
-Until both peers have exchanged the \texttt{Version} and \texttt{VerAck} messages, no other messages will be accepted.
+Until both peers have exchanged the \texttt{Version} and \texttt{VerAck} messages, no other message will be accepted.
 The \texttt{Version} message also contains information about the client version, user-agent, configuration, sender and receiver IP addresses.
 
 \subsubsection{VerAck}
@@ -284,7 +284,7 @@ The \texttt{GetAddr} message has no payload.
 \subsubsection{Addr}
 The \texttt{Addr} messages relays information about other known peers in the network (IP address and TCP port).
 The message can contain up to \num{1000} items:
-if a node wants to transmit information about more than \num{1000} peers, it need to send multiple \texttt{Addr} messages.
+if a node wants to transmit information about more than \num{1000} peers, it needs to send multiple \texttt{Addr} messages.
 An \texttt{Addr} can be sent in reply to a \texttt{GetAddr} message or unsolicited (daily to broadcast the node's self IP address, or to forward a newly received address):
 details about the situations in which an \texttt{Addr} message is sent are discussed in \cref{sub:address-propagation}.
 
@@ -363,7 +363,7 @@ only if the answer is negative, the node sends it to its peers.
 
 \bigskip
 Blocks can also be requested an need with a \texttt{GetBlocks} message:
-this mechanism is used when a node receives a block with an unknown parent (in case \num{2} subsequent blocks are mined, it is possible for some nodes in the network to receives the second before the first one), or for the bootstrap of a new node, as explained in the next section.
+this mechanism is used when a node receives a block with an unknown parent (in case two subsequent blocks are mined, it is possible for some nodes in the network to receives the second before the first one), or for the bootstrap of a new node, as explained in the next section.
 
 \begin{figure}[ht]
 	\centering
@@ -410,13 +410,13 @@ each message in explained in detail in a dedicated section.
 	\vspace*{0.25cm}
 	\caption[Overview of the Bitcoin data messages]{
 		Overview of the Bitcoin data messages:
-		lines between boxes indicate that the corresponding messages are correlated.
+		lines between boxes indicate correlated messages.
 	}
 	\label{fig:data-messages}
 \end{figure}
 
 \subsubsection{GetBlocks}
-The \texttt{GetBlocks} message requests an \texttt{Inv} message that provides the hashes of blocks starting from a particular point in the block chain.
+The \texttt{GetBlocks} message requests an \texttt{Inv} message that provides the hashes of blocks starting from a particular point in the blockchain.
 It allows a peer which has just joined the network for the first time or has been disconnected or started for a while to get information about the current state of the blockchain and later request unseen blocks.
 Note that the receiving peer may respond with an \texttt{Inv} message containing hashed of orphaned blocks:
 it is responsibility of the requesting node to poll all its peers to find the longest chain.
@@ -447,7 +447,7 @@ The body of a \texttt{Tx} message contains a single serialized transaction.
 
 \subsubsection{Block}
 The \texttt{Block} message transmits a single block.
-It can be sent for \num{2} different reasons:
+It can be sent for two different reasons:
 \begin{enumerate}
 	\item solicited, in response to a \texttt{GetData} message that requests block objects;
 	\item unsolicited, broadcasting a newly-mined blocks to all of nodes in the network.
