@@ -2,7 +2,7 @@
 \label{chapter:conclusions}
 In this work, we implemented an event driven simulator of the low-level Bitcoin protocol using the PeerSim framework.
 We used the simulator to run Bitcoin networks of different sizes under various network conditions: at rest, with generalized delays and under attack.
-In particular, we focused on the Balance attack, which consist in partitioning the nodes into \num{2} groups by delaying communications between peers in different partitions.
+In particular, we focused on the Balance attack, which consists in partitioning the nodes into \num{2} groups by delaying communications between peers in different partitions.
 Finally, we implemented some variants of the original attack and evaluated their performances.
 
 Our experiments show the Bitcoin protocol is robust under normal network conditions and in presence of random message losses, thanks to the gossip-style underlying protocol.
@@ -11,8 +11,8 @@ The situation is even worse under a Balance attack:
 delays on blocks broadcast between nodes of different partitions higher the probability of forks in the network.
 
 The variants of the Balance attack we tested do not improve the attack's effect.
-Randomly message dropping is totally ineffective, unless the attacker drops at least \num{80}\% to \num{90}\% of all messages exchanged between nodes in different partitions:
-if such an attack was feasible, the attacker could simply drop all messages, isolating completely the \num{2} groups from each other.
+Random message dropping is totally ineffective, unless the attacker drops at least \num{80}\% to \num{90}\% of all messages exchanged between nodes in different partitions.
+If such an attack was feasible, the attacker could simply drop all messages, isolating completely the \num{2} groups from each other.
 
 Higher number of partitions seems to have the same effect as the base attack:
 the forks distribution for a number of partitions up to \num{10} does not differ significantly from the one with just \num{2} of them.
