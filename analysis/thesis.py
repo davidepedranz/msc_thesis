@@ -1,3 +1,22 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (c) 2018 Davide Pedranz. All rights reserved.
+#
+# This code is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+#
+
 from all import load_cache_or_parse_logs, filter_seed
 from utils import mkdir
 import itertools
@@ -44,14 +63,14 @@ def main():
     # change default colors to a darker version, better for printing
     mpl.rcParams['axes.prop_cycle'] = plt.cycler(color=plt.cm.get_cmap('tab10').colors)
 
-    # hashrates()
-    # blocks_at_rest()
-    # forks_with_delay()
-    # forks_balance_delay_small()
-    # forks_balance_delay_big()
+    hashrates()
+    blocks_at_rest()
+    forks_with_delay()
+    forks_balance_delay_small()
+    forks_balance_delay_big()
     forks_balance_delay_size()
-    # forks_balance_drop()
-    # forks_balance_partitions()
+    forks_balance_drop()
+    forks_balance_partitions()
 
 
 # noinspection SpellCheckingInspection
