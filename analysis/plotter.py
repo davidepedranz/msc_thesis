@@ -115,16 +115,170 @@ def forks_number_line_chart(freq, agg_diff, agg_same, out_dir, _all=False):
                 output_dir=output_dir)
 
 
+def forks_nice(freq, agg_diff, agg_same, out_dir):
+    """"""
+
+    if len(freq[agg_same].unique()) <= 1:
+        return
+
+    # prepare the folders for the plots
+    output_dir = out_dir + '/core/forks/nice'
+    utils.mkdir(output_dir)
+
+    # select the end of the simulation
+    final_time = freq['time'].max()
+
+    # compute forks, ignore the depth
+    agg = list(agg_diff) + ([agg_same] if agg_same is not None else []) + ['time']
+    df = freq \
+        .query('time == ' + str(final_time)) \
+        .query('protocol == "core" and metric == "global-blockchain"') \
+        .groupby(['seed'] + agg, as_index=False) \
+        .agg({'frequency': 'sum'})
+
+    # extract the unique combinations of parameters to use for the plots
+    params = df.drop_duplicates(subset=agg_diff)
+
+    # make one plot for each combination of parameters
+    for _, row in params.iterrows():
+        query = make_query(agg_diff, row)
+        match = df.query(query)
+
+        group = agg_same
+        column = 'frequency'
+        grouped = match.groupby(group)
+
+        labels, ys, xs = [], [], []
+
+        for i, (label, subdf) in enumerate(grouped):
+            labels.append(label)
+
+            n = len(subdf)
+            x = i + 1 + (np.random.rand(n) * 0.4 - 0.2)
+            xs.append(x)
+
+            y_original = subdf[column].values
+            y_shift = np.random.rand(y_original.shape[0]) * 0.1 - 0.05
+            ys.append(y_original + y_shift)
+
+        figure = plt.figure(figsize=FIGURE_SIZE)
+        ax = figure.add_subplot(111)
+        for x, y in zip(xs, ys):
+            ax.scatter(x, y, marker='.', s=30, alpha=0.5)
+        ax.boxplot(ys, labels=labels, showfliers=False, whis='range', medianprops={'color': 'black'})
+
+        ax.set_xlabel(agg_same)
+        ax.set_ylabel('Forks')
+        ax.set_title('Forks' + ': ' + make_title(agg_diff, row))
+        ax.grid(True)
+
+        path = '%s/%s__%s.png' % (output_dir, agg_same, make_filename(agg_diff, row))
+        figure.savefig(path, bbox_inches='tight', dpi=FIGURE_DPI)
+        plt.close(figure)
+
+
+def forks_final(freq, agg_diff, agg_same, out_dir):
+    """"""
+
+    if len(freq[agg_same].unique()) <= 1:
+        return
+
+    step = np.diff(sorted(freq[agg_same].unique())).mean()
+    step_4 = step / 2.5
+
+    # prepare the folders for the plots
+    output_dir = out_dir + '/core/forks/final'
+    utils.mkdir(output_dir)
+
+    # select the end of the simulation
+    final_time = freq['time'].max()
+
+    # compute forks, ignore the depth
+    agg = list(agg_diff) + ([agg_same] if agg_same is not None else []) + ['time']
+    df = freq \
+        .query('time == ' + str(final_time)) \
+        .query('protocol == "core" and metric == "global-blockchain"') \
+        .groupby(['seed'] + agg, as_index=False) \
+        .agg({'frequency': 'sum'})
+
+    # extract the unique combinations of parameters to use for the plots
+    params = df.drop_duplicates(subset=agg_diff)
+
+    # make one plot for each combination of parameters
+    for _, row in params.iterrows():
+        query = make_query(agg_diff, row)
+        match = df.query(query)
+
+        figure = plt.figure(figsize=FIGURE_SIZE)
+        ax = figure.add_subplot(111)
+
+        x_original = match[agg_same].values
+        x_shift = np.random.rand(x_original.shape[0]) * step_4 - (step_4 / 2.0)
+        x = x_original + x_shift
+
+        y_original = match['frequency']
+        y_shift = np.random.rand(y_original.shape[0]) * 0.2 - 0.1
+        y = y_original + y_shift
+
+        ax.scatter(x, y, marker='.', s=20, alpha=0.5)
+
+        ax.set_xlabel(agg_same)
+        ax.set_ylabel('Forks')
+        ax.set_title('Forks' + ': ' + make_title(agg_diff, row))
+        ax.grid(True)
+
+        __, end = ax.get_xlim()
+        ax.xaxis.set_ticks(np.arange(0, end, step))
+
+        path = '%s/%s__%s.png' % (output_dir, agg_same, make_filename(agg_diff, row))
+        figure.savefig(path, bbox_inches='tight', dpi=FIGURE_DPI)
+        plt.close(figure)
+
+
+def forks_boxplot(freq, agg_diff, agg_same, out_dir):
+    """"""
+
+    if len(freq[agg_same].unique()) <= 1:
+        return
+
+    # prepare the folders for the plots
+    output_dir = out_dir + '/core/forks/box'
+    utils.mkdir(output_dir)
+
+    # select the end of the simulation
+    final_time = freq['time'].max()
+
+    # compute forks, ignore the depth
+    agg = list(agg_diff) + ([agg_same] if agg_same is not None else []) + ['time']
+    df = freq \
+        .query('time == ' + str(final_time)) \
+        .query('protocol == "core" and metric == "global-blockchain"') \
+        .groupby(['seed'] + agg, as_index=False) \
+        .agg({'frequency': 'sum'})
+
+    # extract the unique combinations of parameters to use for the plots
+    params = df.drop_duplicates(subset=agg_diff)
+
+    # make one plot for each combination of parameters
+    for _, row in params.iterrows():
+        query = make_query(agg_diff, row)
+        match = df.query(query)
+
+        figure = plt.figure(figsize=FIGURE_SIZE)
+        ax = figure.add_subplot(111)
+        match.boxplot(column='frequency', by=agg_same, ax=ax)
+        ax.set_xlabel(agg_same)
+        ax.set_ylabel('Forks')
+        ax.set_title('Forks' + ': ' + make_title(agg_diff, row))
+        figure.suptitle('')
+
+        path = '%s/%s__%s.png' % (output_dir, agg_same, make_filename(agg_diff, row))
+        figure.savefig(path, bbox_inches='tight', dpi=FIGURE_DPI)
+        plt.close(figure)
+
+
 def forks_rate_line_chart(stats, freq, agg_diff, agg_same, out_dir, _all=False):
-    """
-    TODO!!!
-    :param stats:
-    :param freq: 
-    :param agg_diff: Columns to use for the aggregation.
-    :param agg_same: Column to use for the aggregation, generating multiple data series for the same plot.
-    :param out_dir: Path of the directory where to store the generated plots.
-    :param _all: Consider all combination of parameters, even if agg_same has only one possible value.
-    """
+    """"""
 
     # prepare the folders for the plots
     output_dir = out_dir + '/core/forks-rate'

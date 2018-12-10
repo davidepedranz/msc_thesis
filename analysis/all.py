@@ -51,9 +51,19 @@ def main():
     params_no_seed = filter_seed(parameters)
     params_line_charts = params_no_seed
 
+    plotter.delay_size(freq=freq, parameters=parameters, out_dir=plots_dir)
+
+    for param in params_line_charts:
+        diff = filter_list(params_line_charts, param)
+        plotter.forks_nice(freq=freq, agg_diff=diff, agg_same=param, out_dir=plots_dir)
+        plotter.forks_final(freq=freq, agg_diff=diff, agg_same=param, out_dir=plots_dir)
+        plotter.forks_boxplot(freq=freq, agg_diff=diff, agg_same=param, out_dir=plots_dir)
+
+    cores = min(joblib.cpu_count() - 2, 1)
+
     # [plots]: forks rate
     print(' - Process Forks Rate')
-    with joblib.Parallel(n_jobs=joblib.cpu_count()) as parallel:
+    with joblib.Parallel(n_jobs=cores) as parallel:
         parallel(
             joblib.delayed(plotter.forks_rate_line_chart)
             (stats=stats, freq=freq, agg_diff=filter_list(params_line_charts, param), agg_same=param, out_dir=plots_dir)
@@ -62,7 +72,7 @@ def main():
 
     # [plots]: forks number
     print(' - Process Forks Number')
-    with joblib.Parallel(n_jobs=joblib.cpu_count()) as parallel:
+    with joblib.Parallel(n_jobs=cores) as parallel:
         parallel(
             joblib.delayed(plotter.forks_number_line_chart)
             (freq=freq, agg_diff=filter_list(params_line_charts, param), agg_same=param, out_dir=plots_dir)
@@ -71,7 +81,7 @@ def main():
 
     # [plots]: messages
     print(' - Process Protocols Metrics')
-    with joblib.Parallel(n_jobs=joblib.cpu_count()) as parallel:
+    with joblib.Parallel(n_jobs=cores) as parallel:
         parallel(
             joblib.delayed(plotter.messages_line_chart)
             (stats=stats, agg_diff=filter_list(params_line_charts, param), agg_same=param, out_dir=plots_dir)
@@ -83,7 +93,7 @@ def main():
     # params_distributions = params_no_seed_with_time
     # [plots]: forks distribution
     # print(' - Process Forks Distribution')
-    # with joblib.Parallel(n_jobs=joblib.cpu_count()) as parallel:
+    # with joblib.Parallel(n_jobs=cpus) as parallel:
     #     parallel(
     #         joblib.delayed(plotter.forks_distribution_histogram)
     #         (freq=freq, agg_diff=filter_list(params_distributions, param), agg_same=param, out_dir=plots_dir)
