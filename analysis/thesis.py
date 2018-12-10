@@ -190,7 +190,7 @@ def forks_with_delay():
         nice_box_plot(
             df=forks_end_time,
             agg_same='delay',
-            title='Forks distribution for a network of %s nodes with different delays' % size,
+            titles=['Forks distribution for a network of %s nodes with different delays' % size],
             x_label='Delay (s)',
             y_label='Forks',
             x_spread=0.5,
@@ -206,14 +206,11 @@ def forks_balance_delay_small():
     """"""
 
     size = 1000
-
     simulation_rest = 'run-024-attack-delay-0-to-2-size-1000-2000/'
     query_rest = 'balance_attack_delay_minutes == 0 and network_size == %s' % size
     forks_aggregated_rest, forks_end_time_rest = compute_forks(simulation_rest, query=query_rest)
-
     simulation_delays = 'run-034-attack-delays-size-1000/'
     forks_aggregated_delays, forks_end_time_delays = compute_forks(simulation_delays, query='seed != 3208')
-
     forks_aggregated = forks_aggregated_rest.append(forks_aggregated_delays)
     forks_end_time = forks_end_time_rest.append(forks_end_time_delays)
 
@@ -232,7 +229,10 @@ def forks_balance_delay_small():
     nice_box_plot(
         df=forks_end_time,
         agg_same='balance_attack_delay_minutes',
-        title='Forks distribution for a network of %s nodes under Balance attack' % size,
+        titles=[
+            'Forks distribution for a network of %s nodes under Balance attack' % size,
+            'Forks distribution (network size = %s)' % size
+        ],
         x_label='Delay (s)',
         y_label='Forks',
         x_spread=0.5,
@@ -269,7 +269,7 @@ def forks_balance_delay_big():
         nice_box_plot(
             df=forks_end_time,
             agg_same='balance_attack_delay_minutes',
-            title='Forks distribution for a network of %s nodes under Balance attack' % size,
+            titles=['Forks distribution for a network of %s nodes under Balance attack' % size],
             x_label='Delay (s)',
             y_label='Forks',
             x_spread=0.5,
@@ -302,7 +302,10 @@ def forks_balance_delay_size():
         nice_box_plot(
             df=forks_end_time,
             agg_same='network_size',
-            title='Forks distribution for different networks under Balance attack (delay = %s s)' % delay_seconds,
+            titles=[
+                'Forks distribution for different networks under Balance attack (delay = %s s)' % delay_seconds,
+                'Forks distribution (delay = %s s)' % delay_seconds
+            ],
             x_scaler=lambda x: int(x),
             x_label='Network Size',
             y_label='Forks',
@@ -317,6 +320,7 @@ def forks_balance_delay_size():
 def forks_balance_drop():
     """"""
 
+    size = 1000
     simulation = 'run-026-attack-drop-1000/'
     forks_aggregated, forks_end_time = compute_forks(simulation, query='balance_attack_drop >= 0.5')
 
@@ -324,7 +328,7 @@ def forks_balance_drop():
     line_chart(
         df=forks_aggregated,
         agg_same='balance_attack_drop',
-        title='Forks number for a network of %s nodes under Balance attack with messages drop' % '1000',
+        title='Forks number for a network of %s nodes under Balance attack with messages drop' % size,
         y_label='Average forks number',
         y_step=2,
         legend_formatter=lambda x: 'drop = {:g}'.format(x),
@@ -335,7 +339,10 @@ def forks_balance_drop():
     nice_box_plot(
         df=forks_end_time,
         agg_same='balance_attack_drop',
-        title='Forks distribution for a network of %s nodes under Balance attack with messages drop' % '1000',
+        titles=[
+            'Forks distribution for a network of %s nodes under Balance attack with messages drop' % size,
+            'Forks distribution (network size = %s, delay = 0 s)' % size
+        ],
         x_label='Drop probability',
         y_label='Forks',
         x_spread=0.5,
@@ -356,7 +363,10 @@ def forks_balance_partitions():
     nice_box_plot(
         df=forks_end_time,
         agg_same='balance_attack_partitions',
-        title='Forks distribution for different networks under Balance attack for different partitions',
+        titles=[
+            'Forks distribution for different networks under Balance attack for different partitions',
+            'Forks distribution (network size = 1000, delay = 30 s)'
+        ],
         x_scaler=lambda x: int(x),
         x_label='Number of partitions',
         y_label='Forks',
@@ -436,7 +446,7 @@ def line_chart(df, agg_same, title, y_label, y_step, file, y_lim=None, legend_fo
     plt.close(figure)
 
 
-def nice_box_plot(df, agg_same, title, x_label, y_label, x_spread, y_spread, size, alpha, file, x_scaler=None,
+def nice_box_plot(df, agg_same, titles, x_label, y_label, x_spread, y_spread, size, alpha, file, x_scaler=None,
                   y_scale=0.65):
     """"""
 
@@ -476,15 +486,20 @@ def nice_box_plot(df, agg_same, title, x_label, y_label, x_spread, y_spread, siz
     for x, y in zip(xs, ys):
         ax.scatter(x, y, marker='.', s=size, alpha=alpha)
 
-    # title, axes, legend, etc
-    ax.set_title(title, fontsize=TITLE_FONT_SIZE, y=TITLE_Y_OFFSET)
+    # axes, legend, etc
+    ax.set_title(titles, fontsize=TITLE_FONT_SIZE, y=TITLE_Y_OFFSET)
     ax.set_xlabel(x_label, fontsize=LABEL_FONT_SIZE, labelpad=LABEL_PAD)
     ax.set_ylabel(y_label, fontsize=LABEL_FONT_SIZE, labelpad=LABEL_PAD)
     ax.grid(True, linestyle='dashed')
 
-    # save the figure
-    path = '%s%s.%s' % (PLOTS_DESTINATION_DIR, file, EXTENSION)
-    figure.savefig(path, bbox_inches='tight')
+    # handle different titles
+    for (i, titles) in enumerate(titles):
+        ax.set_title(titles, fontsize=TITLE_FONT_SIZE, y=TITLE_Y_OFFSET)
+
+        # save the figure
+        suffix = '' if i == 0 else '_' + str(i)
+        path = '%s%s%s.%s' % (PLOTS_DESTINATION_DIR, file, suffix, EXTENSION)
+        figure.savefig(path, bbox_inches='tight')
     plt.close(figure)
 
 
